@@ -818,7 +818,14 @@ html.js [data-r].is-in { opacity: 1; transform: none; }
 .viewall { margin-top: 2.4rem; text-align: center; }
 
 /* script signature, like the mock */
-.about-sig { font-family: "Great Vibes", "Cormorant Garamond", cursive; font-style: normal; font-size: 2.6rem; }
+.about-lines p.about-sig, .about-sig {
+  font-family: "Great Vibes", "Cormorant Garamond", cursive;
+  font-style: normal;
+  font-size: clamp(3.4rem, 5.5vw, 4.4rem);
+  line-height: 1.15;
+  color: var(--red-display);
+  margin-top: 1.1rem;
+}
 
 /* ============================================================
    LANDING — graded like the reference: dark frame, luminous center
@@ -865,7 +872,7 @@ html.js [data-r].is-in { opacity: 1; transform: none; }
   /* the fade to bg is the TOPMOST layer so the hero's last pixel
      is exactly the page ground — no warm/cool seam at the handoff */
   background:
-    linear-gradient(180deg, transparent 54%, rgba(22, 14, 8, 0.5) 76%, var(--bg) 100%),
+    linear-gradient(180deg, transparent 50%, rgba(22, 14, 8, 0.5) 72%, var(--bg) 93%),
     linear-gradient(180deg, rgba(26, 15, 8, 0.58), rgba(26, 15, 8, 0.16) 22%, transparent 36%),
     radial-gradient(ellipse 88% 72% at 50% 38%, transparent 24%, rgba(24, 13, 6, 0.4) 60%, rgba(13, 7, 3, 0.86) 100%);
 }
@@ -1713,9 +1720,10 @@ body[data-persona="dn"] .mist--cherry {
    three currents of light, merging mid-stream
    ============================================================ */
 .dstage--hero {
+  /* the bed itself lands on the page ground — no foreign color at the floor */
   background:
     radial-gradient(ellipse 90% 50% at 50% 0%, #10161a 0%, transparent 65%),
-    linear-gradient(180deg, #0e1315 0%, #0c1012 100%);
+    linear-gradient(180deg, #0e1315 0%, #0c1214 68%, var(--bg) 94%);
 }
 .dstage--hero .dstage__half--cherry,
 .dstage--hero .dstage__half--dn {
@@ -1907,9 +1915,15 @@ body[data-persona="dn"] .dstage__half--cherry .dstage__name::after {
   /* eased S-curve: the rivers keep their color, then commit to dark quickly.
      z-index 0 — the veil dissolves the water, never the words: it paints
      after the mist in tree order but under the halves' text (z-index 1). */
-  background: linear-gradient(to bottom, transparent, rgba(12, 23, 24, 0.10) 24%, rgba(12, 23, 24, 0.32) 46%, rgba(12, 23, 24, 0.62) 66%, rgba(12, 23, 24, 0.86) 82%, var(--bg) 96%);
+  background: linear-gradient(to bottom, transparent, rgba(12, 23, 24, 0.10) 24%, rgba(12, 23, 24, 0.32) 46%, rgba(12, 23, 24, 0.62) 64%, rgba(12, 23, 24, 0.88) 78%, var(--bg) 90%);
   z-index: 0;
   pointer-events: none;
+}
+/* the water itself thins to nothing before the floor — no clipped mist
+   edge for the scrim to hide, so no line can survive at the boundary */
+.dstage--hero .dstage__mist {
+  -webkit-mask-image: linear-gradient(to bottom, #000 64%, transparent 87%);
+          mask-image: linear-gradient(to bottom, #000 64%, transparent 87%);
 }
 .dstage--hero { margin-bottom: 0; }
 
@@ -1948,3 +1962,9 @@ body[data-persona="dn"] .dstage__half--cherry .dstage__name::after {
 }
 /* when her cover art arrives, the grid returns — but composed, not floating */
 .stage-page .melodies:has(img) { text-align: left; }
+
+/* ============================================================
+   THE ARCHIVE ARRIVES — text-only written pieces, full-width
+   ============================================================ */
+.wl--text { grid-template-columns: 1fr; }
+.wl--text .wl__body { max-width: 62ch; }

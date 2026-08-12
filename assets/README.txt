@@ -5,10 +5,10 @@ portal-word.jpg       landing portal — written word (e.g. Head of Sunshine)
 portal-music.jpg      landing portal — music (e.g. the teal smoke piece)
 portal-visuals.jpg    landing portal — visuals (e.g. The Locked Door)
 portrait.jpg          about page photo (the stone-wall portrait she approved)
-music.jpg             music page — haunted melodies image
+music.webp            music page, haunted melodies image (teal smoke repeats here until her cover art replaces it)
 film-poster.jpg       film page poster frame
 word-1.jpg word-2.jpg word-3.jpg   written-word thumbnails
-visuals/v1.jpg ... v9.jpg          gallery (order matches titles on the page)
+visuals/da/<title>.jpg              gallery, all 24 pieces pulled from her DeviantArt (replace any file to update)
 audio/cherry-01.mp3 ... cherry-03.mp3   CHERRY's songs (Sweet Slow Poison / Pretty Thing / Undone)
 audio/dn-01.mp3 dn-02.mp3               DN's songs (Blackwater Highway / Finally Unbound)
 audio/spoken-01.mp3 ... spoken-05.mp3 audiobook chapters

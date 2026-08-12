@@ -94,7 +94,7 @@
     btn.addEventListener("click", function () {
       var wl = btn.closest(".wl");
       var open = wl.classList.toggle("is-open");
-      btn.textContent = open ? "close —" : "read —";
+      btn.textContent = open ? "close" : "read \u2192";
     });
   });
 
