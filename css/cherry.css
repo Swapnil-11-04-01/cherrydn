@@ -858,13 +858,20 @@ html.js [data-r].is-in { opacity: 1; transform: none; }
   align-items: center;
   justify-content: center;
 }
-.landing .hero__img { filter: brightness(0.92) contrast(1.06) saturate(1.02); }
-.landing .hero__veil {
-  background:
-    linear-gradient(180deg, rgba(8, 11, 11, 0.52), rgba(8, 11, 11, 0.12) 20%, transparent 34%),
-    radial-gradient(ellipse 105% 85% at 50% 36%, transparent 32%, rgba(8, 11, 11, 0.66) 100%),
-    linear-gradient(180deg, transparent 58%, rgba(12, 23, 24, 0.72) 86%, var(--bg) 100%);
+.landing .hero__img {
+  filter: brightness(0.85) contrast(1.1) saturate(0.86) sepia(0.32) hue-rotate(-8deg);
 }
+.landing .hero__veil {
+  /* the fade to bg is the TOPMOST layer so the hero's last pixel
+     is exactly the page ground — no warm/cool seam at the handoff */
+  background:
+    linear-gradient(180deg, transparent 54%, rgba(22, 14, 8, 0.5) 76%, var(--bg) 100%),
+    linear-gradient(180deg, rgba(26, 15, 8, 0.58), rgba(26, 15, 8, 0.16) 22%, transparent 36%),
+    radial-gradient(ellipse 88% 72% at 50% 38%, transparent 24%, rgba(24, 13, 6, 0.4) 60%, rgba(13, 7, 3, 0.86) 100%);
+}
+.landing .hero__title { text-shadow: 0 2px 34px rgba(15, 8, 3, 0.75); }
+.landing .hero__roles { text-shadow: 0 1px 14px rgba(15, 8, 3, 0.7); }
+.landing .hero__welcome { text-shadow: 0 1px 14px rgba(15, 8, 3, 0.7); }
 .landing .hero__body {
   width: 100%;
   padding: 8.5rem 1.5rem 3.4rem;
@@ -1592,7 +1599,7 @@ body[data-persona="dn"] .dstage__half--cherry {
 .crown__line::after {
   content: "";
   display: block;
-  width: 1px; height: 2.2rem;
+  width: 1px; height: 2.6rem;
   margin: 1rem auto 0;
   background: linear-gradient(to bottom, var(--line), transparent);
 }
@@ -1886,3 +1893,58 @@ body[data-persona="dn"] .dstage__half--cherry .dstage__name::after {
 @media (prefers-reduced-motion: reduce) {
   .dstage__eyebrow, .dstage__desc, .dstage__half .dlist, .dstage__name { transition: none; }
 }
+
+/* ============================================================
+   THE ESTUARY — where the rivers settle into one channel.
+   The stage dissolves into the page; the coda below is one
+   centered composition, not floating fragments.
+   ============================================================ */
+.dstage--hero::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 24svh;
+  /* eased S-curve: the rivers keep their color, then commit to dark quickly.
+     z-index 0 — the veil dissolves the water, never the words: it paints
+     after the mist in tree order but under the halves' text (z-index 1). */
+  background: linear-gradient(to bottom, transparent, rgba(12, 23, 24, 0.10) 24%, rgba(12, 23, 24, 0.32) 46%, rgba(12, 23, 24, 0.62) 66%, rgba(12, 23, 24, 0.86) 82%, var(--bg) 96%);
+  z-index: 0;
+  pointer-events: none;
+}
+.dstage--hero { margin-bottom: 0; }
+
+.stage-page .page {
+  max-width: 860px;
+  padding-top: 0;
+  padding-bottom: 4.5rem;
+  text-align: center;
+}
+/* the thread returns — the crown's line descends into the shared throat */
+.stage-page .page::before {
+  content: "";
+  display: block;
+  width: 1px; height: 2.6rem;
+  margin: 0 auto 2.6rem;
+  background: linear-gradient(to bottom, transparent, var(--line));
+}
+.stage-page .player { text-align: left; }
+.stage-page .media-note { margin-top: 1.4rem; }
+
+.stage-page .melodies {
+  margin-top: 4.5rem;
+}
+/* no cover art yet → the coda reads as one centered poem, no empty frame */
+.stage-page .melodies:not(:has(img)) {
+  display: block;
+}
+.stage-page .melodies:not(:has(img)) .melodies__art { display: none; }
+.stage-page .melodies:not(:has(img)) .melodies__title { margin-bottom: 1.4rem; }
+.stage-page .melodies:not(:has(img)) .melodies__text {
+  /* Cormorant's small x-height needs ~1.3x the rem to hold focal weight */
+  font-size: clamp(1.28rem, 1.1rem + 0.5vw, 1.45rem);
+  line-height: 1.6;
+  color: var(--ink);
+  margin-bottom: 1.6rem;
+}
+/* when her cover art arrives, the grid returns — but composed, not floating */
+.stage-page .melodies:has(img) { text-align: left; }
