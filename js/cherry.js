@@ -6,6 +6,33 @@
 (function () {
   "use strict";
 
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- page breath ---------- */
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () {
+      document.documentElement.classList.add("ready");
+    });
+  });
+  var hasVT = "onpagereveal" in window; // cross-document view transitions
+  if (!hasVT && !reduced) {
+    document.addEventListener("click", function (e) {
+      if (document.documentElement.classList.contains("leaving")) { e.preventDefault(); return; }
+      var a = e.target.closest("a[href]");
+      if (!a) return;
+      var href = a.getAttribute("href");
+      if (!href || href.charAt(0) === "#" || a.target === "_blank" ||
+          /^(https?:|mailto:|tel:)/.test(href) ||
+          e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault();
+      document.documentElement.classList.add("leaving");
+      setTimeout(function () { location.href = href; }, 200);
+    });
+    window.addEventListener("pageshow", function (e) {
+      if (e.persisted) document.documentElement.classList.remove("leaving");
+    });
+  }
+
   /* ---------- nav ---------- */
   var nav = document.querySelector(".nav");
   var onScroll = function () { nav.classList.toggle("is-scrolled", window.scrollY > 24); };
@@ -30,7 +57,7 @@
   }
 
   /* ---------- reveals ---------- */
-  var revealEls = document.querySelectorAll("[data-r]");
+  var revealEls = document.querySelectorAll("[data-r], .page__head");
   if ("IntersectionObserver" in window &&
       !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     var io = new IntersectionObserver(function (entries) {
@@ -101,6 +128,22 @@
   });
 
   var rows = document.querySelectorAll("[data-src]");
+  var liveCount = 0, checked = 0;
+  rows.forEach(function (row) {
+    fetch(row.dataset.src, { method: "HEAD" }).then(function (r) {
+      if (!r.ok) { row.classList.add("is-ghost"); row.classList.remove("is-current"); }
+      else { liveCount++; }
+    }).catch(function () {
+      row.classList.add("is-ghost");
+      row.classList.remove("is-current");
+    }).finally(function () {
+      checked++;
+      if (checked === rows.length && liveCount === 0) {
+        document.querySelectorAll("[data-media-note]").forEach(function (n) { n.hidden = false; });
+        if (playerBtn) playerBtn.setAttribute("aria-disabled", "true");
+      }
+    });
+  });
   rows.forEach(function (row) {
     row.addEventListener("click", function () {
       if (row.classList.contains("is-ghost")) return;
@@ -112,17 +155,50 @@
         row.classList.add("is-current");
         if (playerBtn) playerBtn.classList.add("is-playing");
         if (playerNow) playerNow.textContent = row.dataset.title || row.textContent.trim();
-      }).catch(function () {
+      }).catch(function (err) {
+        if (err && err.name === "AbortError") return;
         row.classList.add("is-ghost");
       });
     });
   });
   if (playerBtn) {
     playerBtn.addEventListener("click", function () {
-      if (currentRow) { stopAll(); }
-      else if (rows.length) { rows[0].click(); }
+      if (currentRow) { stopAll(); return; }
+      if (rows.length && !rows[0].classList.contains("is-ghost")) { rows[0].click(); return; }
+      document.querySelectorAll("[data-media-note]").forEach(function (n) {
+        n.hidden = false;
+      });
     });
   }
+
+  /* ---------- film box: answer the click ---------- */
+  var fb = document.querySelector(".filmbox");
+  if (fb) {
+    fb.addEventListener("click", function () {
+      fb.classList.add("show-note");
+      clearTimeout(fb._t);
+      fb._t = setTimeout(function () { fb.classList.remove("show-note"); }, 3200);
+    });
+  }
+
+  /* ---------- restore sanity on back/forward ---------- */
+  window.addEventListener("pageshow", function (e) {
+    if (!e.persisted) return;
+    document.documentElement.classList.remove("leaving");
+    if (menu && burger) {
+      menu.classList.remove("is-open");
+      burger.classList.remove("is-open");
+      burger.setAttribute("aria-expanded", "false");
+    }
+    document.body.style.overflow = "";
+    stopAll();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && menu && menu.classList.contains("is-open")) {
+      burger.click();
+      burger.focus();
+    }
+  });
 
   /* ---------- contact → opens a written letter ---------- */
   var cform = document.getElementById("cform");

@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Inter:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Great+Vibes&display=swap" rel="stylesheet" />
-  <script>document.documentElement.classList.add("js");</script>
+  <script>document.documentElement.classList.add("js");if(!("onpagereveal" in window))document.documentElement.classList.add("fade");</script>
   <link rel="stylesheet" href="css/cherry.css" />
 </head>
 <body>
@@ -53,11 +53,11 @@
         <p class="player__now">Sweet, Slow, Poison</p>
         <div class="player__wave" aria-hidden="true"></div>
       </div>
-      <span class="player__time">00:00 / 03:45</span>
+      <span class="player__time">&mdash;:&mdash; / &mdash;:&mdash;</span>
     </div>
 
     <ul class="tracklist" data-r>
-        <li class="trk is-current" data-src="assets/audio/track-01.mp3" data-title="Sweet, Slow, Poison">
+        <li class="trk" data-src="assets/audio/track-01.mp3" data-title="Sweet, Slow, Poison">
           <span class="trk__no">01</span><span class="trk__name">Sweet, Slow, Poison</span><span class="trk__len">3:45</span>
         </li>
         <li class="trk" data-src="assets/audio/track-02.mp3" data-title="Undone">
@@ -73,6 +73,8 @@
           <span class="trk__no">05</span><span class="trk__name">Pretty Thing</span><span class="trk__len">3:18</span>
         </li>
     </ul>
+
+    <p class="media-note" data-media-note hidden>The songs are being mastered &mdash; the titles are real, the audio arrives soon.</p>
 
     <div class="melodies" data-r>
       <div class="melodies__art">

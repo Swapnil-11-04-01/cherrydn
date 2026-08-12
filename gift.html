@@ -1,121 +1,80 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="fire">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The Hidden Gift — Cherry DN</title>
+  <meta name="description" content="You found the ember key." />
   <meta name="robots" content="noindex" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%8D%92%3C/text%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Italiana&family=Archivo:wght@300;400&display=swap" rel="stylesheet" />
-  <script>document.documentElement.classList.add("js");</script>
-  <link rel="stylesheet" href="css/style.css?v=6" />
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Inter:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Great+Vibes&display=swap" rel="stylesheet" />
+  <script>document.documentElement.classList.add("js");if(!("onpagereveal" in window))document.documentElement.classList.add("fade");</script>
+  <link rel="stylesheet" href="css/cherry.css" />
 </head>
 <body>
 
-  <div class="atmosphere" aria-hidden="true">
-    <div class="aurora aurora--cherry"></div>
-    <div class="aurora aurora--blue"></div>
-    <div class="grain"></div>
+  <header class="nav">
+    <a class="nav__logo" href="index.html">CHERRY&nbsp;DN</a>
+    <nav class="nav__links" aria-label="Primary">
+      <a href="music.html">Music</a>
+      <a href="written-word.html">Written Word</a>
+      <a href="spoken-word.html">Spoken Word</a>
+      <a href="visuals.html">Visuals</a>
+      <a href="film.html">Film</a>
+      <a href="about.html">About</a>
+    </nav>
+    <span class="nav__cherry" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12.6 2.2c-.3 2.8-1.7 5.2-3.9 7.1l.9 1c1.4-1.2 2.5-2.6 3.3-4.2.6 1.7 1.6 3.2 3 4.4l.9-1c-2-1.8-3.1-4.3-2.9-7.1l-1.3-.2z"/><circle cx="7.6" cy="15.6" r="4.4"/><circle cx="16.4" cy="16.6" r="3.7"/></svg></span>
+    <a class="nav__cta" href="contact.html">Contact</a>
+    <button class="nav__burger" id="burger" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span></button>
+  </header>
+
+  <div class="menu" id="menu">
+    <a href="music.html">Music</a>
+    <a href="written-word.html">Written Word</a>
+    <a href="spoken-word.html">Spoken Word</a>
+    <a href="visuals.html">Visuals</a>
+    <a href="film.html">Film</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
   </div>
 
   <main>
-    <section class="gift-page">
-      <p class="gift-page__kicker">you found the ember key</p>
-      <h1 class="gift-page__title">The Hidden<br/>Gift</h1>
-      <p class="gift-page__sub">
-        You are holding the book. This is its voice —
-        <em>Underwater Fire</em>, read by Cherry, for you. Free, always.
-      </p>
+    <div class="page gift-hub">
+    <header class="page__head" data-r>
+      <p class="page__num">the ember key</p>
+      <h1 class="page__title">THE HIDDEN GIFT</h1>
+      <p class="page__tag">For the ones holding the printed book.</p>
+    </header>
 
-      <div class="gift-page__player" id="player">
-        <p id="playerMsg">The recording is still being made.<br/>Come back when the book reaches your hands.</p>
+    <p class="spoken-intro" data-r>You are holding the book. This is its voice &mdash;
+    <em>Underwater Fire</em>, read by Cherry, for you. Free, always.</p>
+
+    <div class="giftpanel giftpanel--tall" data-r>
+      <div class="giftpanel__qr giftpanel__qr--big" aria-hidden="true"><svg viewBox="0 0 21 21"><path d="M0 0h7v7H0zM2 2h3v3H2zM14 0h7v7h-7zM16 2h3v3h-3zM0 14h7v7H0zM2 16h3v3H2zM9 0h1v2H9zM11 1h2v1h-2zM9 3h2v2H9zM12 4h1v3h-1zM9 6h2v1H9zM0 9h2v1H0zM3 9h2v2H3zM6 9h1v1H6zM8 9h2v2H8zM11 9h1v1h-1zM13 8h1v2h-1zM15 9h2v1h-2zM18 9h1v2h-1zM20 8h1v3h-1zM1 11h1v2H1zM4 12h2v1H4zM7 11h1v2H7zM10 12h2v2h-2zM14 11h2v2h-2zM17 12h2v1h-2zM9 14h1v3H9zM11 15h2v1h-2zM14 14h1v2h-1zM16 15h2v2h-2zM19 14h2v1h-2zM9 18h2v2H9zM12 17h1v2h-1zM14 18h3v1h-3zM18 17h1v2h-1zM20 16h1v2h-1zM12 20h2v1h-2zM16 20h2v1h-2zM19 20h2v1h-2z"/></svg></div>
+      <div>
+        <h2 class="giftpanel__title">Chapter one arrives with the first printing</h2>
+        <p class="giftpanel__text">The recordings are being made in Cherry&rsquo;s own voice.
+        When the book reaches your hands, this page will already be listening.</p>
+        <ul class="tracklist gift-list">
+          <li class="trk" data-src="assets/audio/spoken-01.mp3" data-title="Prologue — The Ember Key">
+            <span class="trk__no">01</span><span class="trk__name">Prologue &mdash; The Ember Key</span><span class="trk__len">&mdash;:&mdash;</span>
+          </li>
+        </ul>
       </div>
+    </div>
 
-      <a class="gift-page__back" href="index.html">← back to the surface</a>
-    </section>
+    <p class="endline" data-r>Some things are meant to find you.</p>
+    </div>
   </main>
 
-  <script>
-    (function () {
-      "use strict";
-      var root = document.documentElement;
-      try {
-        var saved = localStorage.getItem("cdn-theme");
-        if (saved === "fire" || saved === "noir") root.dataset.theme = saved;
-      } catch (e) {}
+  <footer class="foot">
+    <p class="foot__line">Beauty is a wound that blooms anyway. <em class="foot__sig">cd.</em></p>
+    <div class="foot__cherry"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.6 2.2c-.3 2.8-1.7 5.2-3.9 7.1l.9 1c1.4-1.2 2.5-2.6 3.3-4.2.6 1.7 1.6 3.2 3 4.4l.9-1c-2-1.8-3.1-4.3-2.9-7.1l-1.3-.2z"/><circle cx="7.6" cy="15.6" r="4.4"/><circle cx="16.4" cy="16.6" r="3.7"/></svg></div>
+    <p class="foot__meta">© 2026 Cherry DN &nbsp;·&nbsp; <a href="mailto:cherrydn.contact@gmail.com">cherrydn.contact@gmail.com</a> &nbsp;·&nbsp; <a href="https://instagram.com/cherry.dn" rel="noopener">@cherry.dn</a></p>
+  </footer>
 
-      var player = document.getElementById("player");
-      var msg = document.getElementById("playerMsg");
-      var curate = new URLSearchParams(location.search).has("curate");
-
-      function openDB() {
-        return new Promise(function (resolve, reject) {
-          try {
-            var req = indexedDB.open("cdn-site", 1);
-            req.onupgradeneeded = function () { req.result.createObjectStore("media"); };
-            req.onsuccess = function () { resolve(req.result); };
-            req.onerror = function () { reject(req.error); };
-          } catch (e) { reject(e); }
-        });
-      }
-      function get(key) {
-        return openDB().then(function (db) {
-          return new Promise(function (resolve, reject) {
-            var tx = db.transaction("media", "readonly");
-            var rq = tx.objectStore("media").get(key);
-            tx.oncomplete = function () { resolve(rq.result); };
-            tx.onerror = function () { reject(tx.error); };
-          });
-        });
-      }
-      function put(key, val) {
-        return openDB().then(function (db) {
-          return new Promise(function (resolve, reject) {
-            var tx = db.transaction("media", "readwrite");
-            tx.objectStore("media").put(val, key);
-            tx.oncomplete = resolve;
-            tx.onerror = function () { reject(tx.error); };
-          });
-        });
-      }
-
-      function showAudio(rec) {
-        msg.innerHTML = "<em>Underwater Fire</em> — the audiobook.";
-        var old = player.querySelector("audio");
-        if (old) old.remove();
-        var a = document.createElement("audio");
-        a.controls = true;
-        a.src = URL.createObjectURL(rec.blob);
-        player.appendChild(a);
-      }
-
-      get("gift:audio").then(function (rec) {
-        if (rec) showAudio(rec);
-      }).catch(function () {});
-
-      if (curate) {
-        var up = document.createElement("button");
-        up.type = "button";
-        up.className = "gift-page__upload";
-        up.textContent = "upload the audiobook";
-        var input = document.createElement("input");
-        input.type = "file";
-        input.accept = "audio/*";
-        input.hidden = true;
-        up.addEventListener("click", function () { input.click(); });
-        input.addEventListener("change", function () {
-          var file = input.files[0];
-          if (!file) return;
-          var rec = { blob: file, type: file.type };
-          put("gift:audio", rec).catch(function () {});
-          showAudio(rec);
-        });
-        player.appendChild(up);
-        player.appendChild(input);
-      }
-    })();
-  </script>
+  <script src="js/cherry.js"></script>
 </body>
 </html>
