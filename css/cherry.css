@@ -1968,3 +1968,38 @@ body[data-persona="dn"] .dstage__half--cherry .dstage__name::after {
    ============================================================ */
 .wl--text { grid-template-columns: 1fr; }
 .wl--text .wl__body { max-width: 62ch; }
+
+/* ============================================================
+   THE REFERENCE CUT — landing matched to the approved frame:
+   serif nav, one-breath hero, near-square smoldering portals
+   ============================================================ */
+.landing .nav__links a {
+  font-family: var(--display);
+  font-size: 0.82rem;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.landing .hero { min-height: max(58svh, 470px); }
+.landing .hero__body { padding: 7.5rem 1.5rem 2.6rem; }
+.landing .hero__title { font-size: clamp(2.8rem, 7.5vw, 5.6rem); letter-spacing: 0.12em; }
+.landing .hero__roles { font-size: 0.95rem; margin-top: 1rem; }
+.landing .hero__roles i { color: var(--red-display); font-style: normal; }
+.landing .hero__welcome { font-size: 1.15rem; }
+.landing .hero__row { margin-top: 1.9rem; }
+/* deeper corners, exactly the mock's dark frame; fade layer stays topmost */
+.landing .hero__veil {
+  background:
+    linear-gradient(180deg, transparent 50%, rgba(22, 14, 8, 0.5) 72%, var(--bg) 93%),
+    linear-gradient(180deg, rgba(24, 14, 7, 0.74), rgba(26, 15, 8, 0.22) 24%, transparent 38%),
+    radial-gradient(ellipse 86% 70% at 50% 38%, transparent 22%, rgba(24, 13, 6, 0.46) 58%, rgba(13, 7, 3, 0.92) 100%);
+}
+.landing .portal {
+  aspect-ratio: 6 / 5;
+  border: 1px solid rgba(231, 222, 212, 0.14);
+}
+.landing .portal img { filter: saturate(0.72) brightness(0.5) contrast(1.08); }
+.landing .portal:hover img { filter: saturate(0.9) brightness(0.66) contrast(1.08); }
+.landing .portal__desc { font-family: var(--poetic); font-style: italic; font-size: 1.06rem; }
+/* the frame hands the portals straight to the closing line */
+.landing .strip { display: none; }
