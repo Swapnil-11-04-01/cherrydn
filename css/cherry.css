@@ -1700,3 +1700,52 @@ body[data-persona="dn"] .mist--cherry {
   .mist--cherry { left: -10%; top: 0; }
   .mist--dn { right: -10%; bottom: 0; }
 }
+
+/* ============================================================
+   TWO RIVERS — the halves paint nothing; one continuous bed,
+   three currents of light, merging mid-stream
+   ============================================================ */
+.dstage--hero {
+  background:
+    radial-gradient(ellipse 90% 50% at 50% 0%, #10161a 0%, transparent 65%),
+    linear-gradient(180deg, #0e1315 0%, #0c1012 100%);
+}
+.dstage--hero .dstage__half--cherry,
+.dstage--hero .dstage__half--dn {
+  background: none;
+}
+
+/* wider, stronger currents whose tails cross the middle */
+.mist { width: 66%; opacity: 0.72; }
+.mist--cherry { left: -6%; }
+.mist--dn { right: -6%; }
+
+/* the confluence: where the two waters try to fill each other */
+.mist--merge {
+  left: 26%; right: 26%;
+  top: -12%; bottom: -12%;
+  width: auto;
+  opacity: 0.6;
+}
+.mist--merge::before {
+  background:
+    radial-gradient(40% 32% at 36% 28%, rgba(142, 31, 45, 0.2), transparent 70%),
+    radial-gradient(44% 36% at 64% 66%, rgba(74, 118, 124, 0.24), transparent 70%),
+    radial-gradient(30% 24% at 50% 46%, rgba(150, 110, 105, 0.1), transparent 68%);
+  filter: blur(84px);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mist--merge::before { animation: merge-swirl 23s ease-in-out infinite alternate; }
+  @keyframes merge-swirl {
+    0%   { transform: translateY(-4%) scale(1) rotate(0deg); }
+    50%  { transform: translateY(3.5%) scale(1.1) rotate(2.2deg); }
+    100% { transform: translateY(-2%) scale(1.05) rotate(-1.8deg); }
+  }
+}
+
+/* floods deepen the confluence rather than erasing it */
+.dstage:has(.dstage__half--cherry:hover) .mist--merge,
+.dstage:has(.dstage__half--dn:hover) .mist--merge,
+body[data-persona] .mist--merge {
+  opacity: 0.78;
+}
