@@ -146,6 +146,11 @@
     });
   });
   rows.forEach(function (row) {
+    row.tabIndex = 0;
+    row.setAttribute("role", "button");
+    row.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); row.click(); }
+    });
     row.addEventListener("click", function () {
       if (row.classList.contains("is-ghost")) return;
       if (currentRow === row) { stopAll(); return; }

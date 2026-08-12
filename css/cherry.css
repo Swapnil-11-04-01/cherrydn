@@ -1539,14 +1539,20 @@ body[data-persona="dn"] .dstage__half--cherry {
    two atmospheres breathing into each other
    ============================================================ */
 .stage-page .nav {
-  position: absolute;
+  position: fixed;
   top: 0; left: 0; right: 0;
   background: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   border-bottom: 0;
 }
-.stage-page .nav.is-scrolled { border-bottom-color: transparent; }
+/* after 24px of scroll the veiled bar returns — wayfinding never leaves */
+.stage-page .nav.is-scrolled {
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
 
 .dstage--hero {
   margin: 0 0 0.5rem;
@@ -1582,11 +1588,11 @@ body[data-persona="dn"] .dstage__half--cherry {
   pointer-events: none;
 }
 .crown__num {
-  font-size: 0.62rem;
+  font-size: 0.68rem;
   font-weight: 400;
   letter-spacing: 0.44em;
   text-transform: uppercase;
-  color: var(--red-t);
+  color: color-mix(in srgb, var(--red-t) 72%, var(--ink));
 }
 .crown__tag {
   margin-top: 0.7rem;
@@ -1927,14 +1933,14 @@ body[data-persona="dn"] .dstage__half--cherry .dstage__name::after {
 }
 .dstage--hero { margin-bottom: 0; }
 
-.stage-page .page {
+.stage-page--music .page {
   max-width: 860px;
   padding-top: 0;
   padding-bottom: 4.5rem;
   text-align: center;
 }
 /* the thread returns — the crown's line descends into the shared throat */
-.stage-page .page::before {
+.stage-page--music .page::before {
   content: "";
   display: block;
   width: 1px; height: 2.6rem;
@@ -2001,5 +2007,266 @@ body[data-persona="dn"] .dstage__half--cherry .dstage__name::after {
 .landing .portal img { filter: saturate(0.72) brightness(0.5) contrast(1.08); }
 .landing .portal:hover img { filter: saturate(0.9) brightness(0.66) contrast(1.08); }
 .landing .portal__desc { font-family: var(--poetic); font-style: italic; font-size: 1.06rem; }
-/* the frame hands the portals straight to the closing line */
-.landing .strip { display: none; }
+/* the quiet strip stays: without it, spoken word, film and contact
+   are unreachable from the front door on desktop */
+
+/* ============================================================
+   EVERY WORLD GETS ITS WEATHER — one stage system, six climates.
+   Atmosphere never blocks UX: pointer-events none, motion gated,
+   content peeks above the fold, functional page follows a thread.
+   ============================================================ */
+.astage {
+  position: relative;
+  overflow: hidden;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 92svh;
+  min-height: 92svh;
+  display: grid;
+  place-items: center;
+  padding: 10rem 1.5rem 7rem;
+  text-align: center;
+  background:
+    radial-gradient(ellipse 90% 50% at 50% 0%, #10161a 0%, transparent 65%),
+    linear-gradient(180deg, #0e1315 0%, #0c1214 68%, var(--bg) 94%);
+}
+/* the same estuary that closes the music stage */
+.astage::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 22svh;
+  background: linear-gradient(to bottom, transparent, rgba(12, 23, 24, 0.12) 26%, rgba(12, 23, 24, 0.34) 48%, rgba(12, 23, 24, 0.64) 66%, rgba(12, 23, 24, 0.88) 80%, var(--bg) 92%);
+  z-index: 2;
+  pointer-events: none;
+}
+.astage__body { position: relative; z-index: 1; max-width: 900px; }
+.astage__display {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(2.5rem, 6.4vw, 4.8rem);
+  letter-spacing: 0.1em;
+  line-height: 1.06;
+  color: var(--ink);
+}
+.astage__sub {
+  margin-top: 1.3rem;
+  font-family: var(--poetic);
+  font-style: italic;
+  font-size: 1.15rem;
+  color: var(--muted);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .astage .dstage__crown { animation: soft-in 1.2s ease 0.15s both; }
+  .astage__body { animation: soft-in 1.3s ease 0.45s both; }
+}
+/* the thread carries every world down into its page */
+.astage + .page { padding-top: 0.6rem; }
+.astage + .page::before {
+  content: "";
+  display: block;
+  width: 1px; height: 2.6rem;
+  margin: 0 auto 2.6rem;
+  background: linear-gradient(to bottom, transparent, var(--line));
+}
+@media (max-width: 720px) {
+  .astage { min-height: 86svh; padding: 8.5rem 1.2rem 5.5rem; }
+}
+
+/* --- 02 · written word: her lines surface and sink like memory --- */
+.astage--words {
+  background:
+    radial-gradient(46% 38% at 22% 30%, rgba(142, 31, 45, 0.15), transparent 70%),
+    radial-gradient(42% 36% at 78% 66%, rgba(86, 122, 128, 0.13), transparent 70%),
+    radial-gradient(ellipse 90% 50% at 50% 0%, #10161a 0%, transparent 65%),
+    linear-gradient(180deg, #0e1315 0%, #0c1214 68%, var(--bg) 94%);
+}
+.astage__drift { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.astage__drift span {
+  position: absolute;
+  max-width: 38ch;
+  font-family: var(--poetic);
+  font-style: italic;
+  font-size: clamp(0.95rem, 1.5vw, 1.25rem);
+  color: var(--muted);
+  opacity: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .astage__drift span { animation: line-surface 27s ease-in-out infinite; }
+  .astage__drift span:nth-child(2) { animation-delay: 4.5s; }
+  .astage__drift span:nth-child(3) { animation-delay: 9s; }
+  .astage__drift span:nth-child(4) { animation-delay: 13.5s; }
+  .astage__drift span:nth-child(5) { animation-delay: 18s; }
+  .astage__drift span:nth-child(6) { animation-delay: 22.5s; }
+  @keyframes line-surface {
+    0% { opacity: 0; transform: translateY(14px); }
+    6% { opacity: 0.5; }
+    16% { opacity: 0.5; transform: translateY(-6px); }
+    24% { opacity: 0; transform: translateY(-18px); }
+    100% { opacity: 0; }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .astage__drift span { opacity: 0.26; }
+}
+
+/* --- 03 · spoken word: a voice rings out from one warm ember --- */
+.astage__rings { position: absolute; inset: 0; z-index: 0; display: grid; place-items: center; pointer-events: none; }
+.astage__rings::before {
+  content: "";
+  position: absolute;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--red-display);
+  box-shadow: 0 0 42px 14px rgba(142, 31, 45, 0.5);
+}
+/* the voice rises from beneath the words, not through them */
+.astage--voice .astage__rings { inset: 18% 0 -18% 0; }
+.astage__rings i {
+  position: absolute;
+  width: 26vmin; height: 26vmin;
+  border-radius: 50%;
+  border: 1px solid rgba(192, 82, 99, 0.32);
+  transform: scale(0.7);
+  opacity: 0.16;
+}
+.astage__rings i:nth-child(2) { transform: scale(1.5); opacity: 0.11; }
+.astage__rings i:nth-child(3) { transform: scale(2.3); opacity: 0.07; }
+@media (prefers-reduced-motion: no-preference) {
+  .astage__rings::before { animation: ember-breathe 6s ease-in-out infinite alternate; }
+  .astage__rings i { animation: ring-out 10s cubic-bezier(0.16, 1, 0.3, 1) infinite; opacity: 0; transform: none; }
+  .astage__rings i:nth-child(2) { animation-delay: 3.3s; }
+  .astage__rings i:nth-child(3) { animation-delay: 6.6s; }
+  @keyframes ring-out {
+    0% { transform: scale(0.24); opacity: 0; }
+    10% { opacity: 0.45; }
+    100% { transform: scale(3.2); opacity: 0; }
+  }
+  @keyframes ember-breathe {
+    from { transform: scale(1); }
+    to { transform: scale(1.3); }
+  }
+}
+
+/* --- 04 · visuals: her works projected on the dark, one by one --- */
+.astage__proj { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.astage__proj img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  filter: saturate(0.75) brightness(0.52) contrast(1.05);
+}
+.astage__proj::after {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, rgba(12, 23, 24, 0.66), transparent 32%),
+    radial-gradient(ellipse 74% 62% at 50% 46%, rgba(12, 23, 24, 0.22), rgba(12, 23, 24, 0.78) 96%);
+}
+.astage__proj img:first-child { opacity: 0.85; }
+@media (prefers-reduced-motion: no-preference) {
+  .astage__proj img, .astage__proj img:first-child { opacity: 0; animation: proj-cycle 36s linear infinite; }
+  .astage__proj img:nth-child(2) { animation-delay: 9s; }
+  .astage__proj img:nth-child(3) { animation-delay: 18s; }
+  .astage__proj img:nth-child(4) { animation-delay: 27s; }
+  @keyframes proj-cycle {
+    0% { opacity: 0; }
+    5% { opacity: 0.85; }
+    25% { opacity: 0.85; }
+    32% { opacity: 0; }
+    100% { opacity: 0; }
+  }
+}
+
+/* --- 05 · film: an empty luminous screen, waiting in the dark --- */
+.astage__beam {
+  position: absolute;
+  left: 50%; top: 0;
+  width: 120vmin; height: 76%;
+  transform: translateX(-50%);
+  clip-path: polygon(46.5% 0, 53.5% 0, 97% 100%, 3% 100%);
+  background: linear-gradient(180deg, rgba(231, 222, 212, 0.11), rgba(231, 222, 212, 0.04) 55%, transparent 92%);
+  filter: blur(7px);
+  z-index: 0;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .astage__beam { animation: beam-breathe 6.5s ease-in-out infinite alternate; }
+  @keyframes beam-breathe { from { opacity: 0.75; } to { opacity: 1; } }
+}
+.astage__screenlum {
+  width: min(74vw, 880px);
+  aspect-ratio: 2.39 / 1;
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(ellipse 80% 95% at 50% 46%, rgba(231, 222, 212, 0.085), rgba(12, 23, 24, 0.35) 80%),
+    linear-gradient(160deg, #101718, #0b0f10);
+  box-shadow: 0 34px 90px rgba(0, 0, 0, 0.55);
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+}
+.astage__screenlum .astage__display { font-size: clamp(1.7rem, 4vw, 3.1rem); }
+.astage__screenlum .astage__sub { margin-top: 0.8rem; }
+
+/* --- 06 · about: she is the whole weather --- */
+.astage__her { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.astage__her img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: 50% 28%;
+  filter: brightness(0.6) saturate(0.82) contrast(1.07);
+}
+.astage__her::after {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, rgba(12, 23, 24, 0.78), rgba(12, 23, 24, 0.3) 22%, transparent 40%),
+    radial-gradient(ellipse 82% 72% at 50% 40%, transparent 30%, rgba(10, 16, 17, 0.82) 100%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .astage__her img { animation: her-drift 34s ease-in-out infinite alternate; }
+  @keyframes her-drift { from { transform: scale(1); } to { transform: scale(1.06); } }
+}
+.stage-page .about-grid { grid-template-columns: 1fr; text-align: center; }
+.stage-page .about-lines { max-width: 46ch; margin: 0 auto; }
+
+/* --- 07 · contact: a wax seal breathing in the dark --- */
+.astage--letter { min-height: 74svh; }
+.astage--letter::before {
+  content: "";
+  position: absolute;
+  left: 50%; top: 58%;
+  width: 46vmin; height: 46vmin;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(142, 31, 45, 0.32), rgba(142, 31, 45, 0.08) 46%, transparent 70%);
+  filter: blur(22px);
+  z-index: 0;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .astage--letter::before { animation: seal-breathe 7s ease-in-out infinite alternate; }
+  @keyframes seal-breathe {
+    from { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+    to { transform: translate(-50%, -50%) scale(1.16); opacity: 1; }
+  }
+}
+@media (max-width: 720px) {
+  /* narrow screens: the top-zone fragments crowd the crown */
+  .astage__drift span:nth-child(2), .astage__drift span:nth-child(5) { display: none; }
+}
+
+/* panel-confirmed guards: type must survive any ground */
+.dstage__crown { text-shadow: 0 1px 12px rgba(12, 23, 24, 0.75), 0 0 30px rgba(12, 23, 24, 0.5); }
+.astage--her .astage__display, .astage--her .astage__sub,
+.astage--gaze .astage__display, .astage--gaze .astage__sub {
+  text-shadow: 0 2px 30px rgba(10, 16, 17, 0.95), 0 1px 6px rgba(10, 16, 17, 0.65);
+}
+@media (max-width: 720px) {
+  /* phones: one still projection (no four resident GPU layers),
+     and the cinema screen keeps its 2.39:1 identity */
+  .astage__proj img, .astage__proj img:first-child { animation: none; opacity: 0; }
+  .astage__proj img:first-child { opacity: 0.85; }
+  .astage__screenlum { width: 92vw; padding: 1rem 1.1rem; }
+}

@@ -10,9 +10,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Inter:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Great+Vibes&display=swap" rel="stylesheet" />
   <script>document.documentElement.classList.add("js");if(!("onpagereveal" in window))document.documentElement.classList.add("fade");</script>
-  <link rel="stylesheet" href="css/cherry.css?v=14" />
+  <link rel="stylesheet" href="css/cherry.css?v=16" />
 </head>
-<body>
+<body class="stage-page">
 
   <header class="nav">
     <a class="nav__logo" href="index.html">CHERRY&nbsp;DN</a>
@@ -40,13 +40,22 @@
   </div>
 
   <main>
-    <div class="page">
-    <header class="page__head" data-r>
-      <p class="page__num">05</p>
-      <h1 class="page__title">FILM / MOVING IMAGE</h1>
-      <p class="page__tag">Fragments of dreams that refuse to be still.</p>
-    </header>
 
+  <section class="astage astage--screen">
+      <header class="dstage__crown">
+        <p class="crown__num">05 &middot; film</p>
+        <p class="crown__tag">fragments of dreams that refuse to be still.</p>
+      </header>
+      <i class="astage__beam" aria-hidden="true"></i>
+      <div class="astage__body astage__screenlum">
+        <div>
+          <h1 class="astage__display">MOVING IMAGE</h1>
+          <p class="astage__sub">the films are being cut. first screening soon.</p>
+        </div>
+      </div>
+  </section>
+
+    <div class="page">
     <div class="filmbox" data-r>
       <img src="assets/film-poster.webp" alt="" onerror="this.remove()" />
       <div class="filmbox__play" aria-hidden="true"></div>
@@ -79,6 +88,6 @@
     <p class="foot__meta">© 2026 Cherry DN &nbsp;·&nbsp; <a href="mailto:cherrydn.contact@gmail.com">cherrydn.contact@gmail.com</a> &nbsp;·&nbsp; <a href="https://instagram.com/cherry.dn" rel="noopener">@cherry.dn</a></p>
   </footer>
 
-  <script src="js/cherry.js?v=14"></script>
+  <script src="js/cherry.js?v=16"></script>
 </body>
 </html>
