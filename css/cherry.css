@@ -955,23 +955,7 @@ html.js.fade.leaving body { opacity: 0; transition: opacity 0.2s ease; }
   html.js.fade body { opacity: 1 !important; transition: none !important; }
 }
 
-/* ambient life: one slow-breathing ember behind everything */
-body::before {
-  content: "";
-  position: fixed;
-  width: 70vmax; height: 70vmax;
-  left: -20vmax; top: 12vh;
-  background: radial-gradient(circle, rgba(142, 31, 45, 0.075), transparent 62%);
-  pointer-events: none;
-  z-index: 0;
-  animation: ember-drift 44s ease-in-out infinite alternate;
-}
-@keyframes ember-drift {
-  from { transform: translate3d(0, 0, 0) scale(1); }
-  to   { transform: translate3d(28vmax, -10vh, 0) scale(1.18); }
-}
 main, .foot { position: relative; z-index: 1; }
-@media (prefers-reduced-motion: reduce) { body::before { animation: none; } }
 
 /* landing hero: ken burns + staged entrance */
 @media (prefers-reduced-motion: no-preference) {
@@ -1340,8 +1324,6 @@ body[data-persona="dn"] .player__btn.is-playing { animation: pulse-steel 2.2s ea
   0%, 100% { box-shadow: 0 0 0 0 rgba(94, 116, 118, 0.4); }
   50%      { box-shadow: 0 0 0 9px rgba(94, 116, 118, 0); }
 }
-body::before { transition: opacity 2.5s ease; }
-body[data-persona="dn"]::before { opacity: 0.3; }
 
 /* the intro carries the spine down into the split */
 .duality-intro { position: relative; padding-bottom: 1.6rem; margin-bottom: 0.4rem; }
