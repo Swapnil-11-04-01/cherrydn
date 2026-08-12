@@ -1146,3 +1146,112 @@ html.js .page__head[data-r] { opacity: 1; transform: none; transition: none; }
 @media (prefers-reduced-motion: reduce) {
   html.js [data-r] { opacity: 1; transform: none; transition: none; }
 }
+
+/* ============================================================
+   THE DUALITY — Cherry & DN, one voice with two names
+   ============================================================ */
+.duality-intro { text-align: center; margin: 2.8rem 0 2rem; }
+.duality-intro__caps {
+  font-size: 0.6rem;
+  font-weight: 400;
+  letter-spacing: 0.44em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.duality-intro__line {
+  margin-top: 0.5rem;
+  font-family: var(--poetic);
+  font-style: italic;
+  font-size: 1.1rem;
+  color: var(--red-t);
+}
+
+.duality {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 2.4rem;
+  align-items: start;
+}
+.duality__half {
+  padding: 2rem 1.7rem;
+  border: 1px solid var(--line);
+  transition: background 0.7s;
+}
+.duality__half--cherry {
+  background:
+    radial-gradient(ellipse at 30% 0%, rgba(203, 178, 140, 0.07), transparent 55%),
+    var(--bg2);
+}
+.duality__half--dn {
+  background:
+    radial-gradient(ellipse at 70% 0%, rgba(46, 90, 96, 0.1), transparent 55%),
+    var(--bg2);
+}
+.duality__half--cherry:hover { background: radial-gradient(ellipse at 30% 0%, rgba(203, 178, 140, 0.11), transparent 60%), var(--bg2); }
+.duality__half--dn:hover { background: radial-gradient(ellipse at 70% 0%, rgba(46, 90, 96, 0.15), transparent 60%), var(--bg2); }
+
+.duality__eyebrow {
+  font-family: var(--poetic);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+.duality__name {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(1.9rem, 4.2vw, 2.8rem);
+  letter-spacing: 0.14em;
+  margin: 0.3rem 0 0.7rem;
+}
+.duality__name--cherry { color: var(--red-display); }
+.duality__name--dn { color: #A9B7B7; }
+.duality__name::after {
+  content: "";
+  display: block;
+  width: 30px; height: 2px;
+  margin-top: 0.6rem;
+  transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.duality__name--cherry::after { background: var(--red); }
+.duality__name--dn::after { background: #5E7476; }
+.duality__half:hover .duality__name::after { width: 52px; }
+.duality__desc {
+  font-family: var(--poetic);
+  font-style: italic;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--muted);
+  margin-bottom: 1.4rem;
+}
+.duality__half .tracklist { border: 0; border-top: 1px solid var(--line); }
+.duality__half .trk { padding-left: 0.4rem; }
+.duality__half .trk:hover { padding-left: 0.8rem; }
+
+.duality__divider {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+}
+.duality__divider::before, .duality__divider::after {
+  content: "";
+  width: 1px;
+  flex: 1;
+  background: linear-gradient(to bottom, transparent, var(--line) 30%, var(--line) 70%, transparent);
+}
+.duality__divider span {
+  font-family: var(--poetic);
+  font-style: italic;
+  font-size: 1.3rem;
+  color: var(--red-t);
+}
+
+@media (max-width: 860px) {
+  .duality { grid-template-columns: 1fr; gap: 1.6rem; }
+  .duality__divider { flex-direction: row; width: 100%; }
+  .duality__divider::before, .duality__divider::after {
+    width: auto; height: 1px; flex: 1;
+    background: linear-gradient(to right, transparent, var(--line) 30%, var(--line) 70%, transparent);
+  }
+}
