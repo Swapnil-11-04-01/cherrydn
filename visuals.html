@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Visuals — Cherry DN</title>
+  <meta name="description" content="Cherry DN — writer, sound, image. Welcome to the paradise you carry within." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%8D%92%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Inter:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet" />
+  <script>document.documentElement.classList.add("js");</script>
+  <link rel="stylesheet" href="css/cherry.css" />
+</head>
+<body>
+
+  <header class="nav">
+    <a class="nav__logo" href="index.html">CHERRY&nbsp;DN</a>
+    <nav class="nav__links" aria-label="Primary">
+      <a href="music.html">Music</a>
+      <a href="written-word.html">Written Word</a>
+      <a href="spoken-word.html">Spoken Word</a>
+      <a href="visuals.html">Visuals</a>
+      <a href="film.html">Film</a>
+      <a href="about.html">About</a>
+    </nav>
+    <a class="nav__cta" href="contact.html">Contact</a>
+    <button class="nav__burger" id="burger" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span></button>
+  </header>
+
+  <div class="menu" id="menu">
+    <a href="music.html">Music</a>
+    <a href="written-word.html">Written Word</a>
+    <a href="spoken-word.html">Spoken Word</a>
+    <a href="visuals.html">Visuals</a>
+    <a href="film.html">Film</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+  </div>
+
+  <main>
+    <div class="page">
+    <header class="page__head" data-r>
+      <p class="page__num">04</p>
+      <h1 class="page__title">VISUALS</h1>
+      <p class="page__tag">Images are how I keep things that left.</p>
+    </header>
+
+    <div class="tabs" data-tabs=".vgrid" data-r>
+      <button class="tab is-active" type="button" data-filter="all">All</button>
+      <button class="tab" type="button" data-filter="photography">Photography</button>
+      <button class="tab" type="button" data-filter="collage">Collage</button>
+      <button class="tab" type="button" data-filter="digital">Digital</button>
+      <button class="tab" type="button" data-filter="still-life">Still Life</button>
+    </div>
+
+    <div class="vgrid">
+      <figure class="vitem vg1" data-tags="digital" data-r>
+        <img src="assets/visuals/v1.jpg" alt="Head of Sunshine" loading="lazy" onerror="this.remove()" />
+        <figcaption class="vitem__cap">Head of Sunshine</figcaption>
+      </figure>
+      <figure class="vitem vg2" data-tags="photography" data-r>
+        <img src="assets/visuals/v2.jpg" alt="The Cage" loading="lazy" onerror="this.remove()" />
+        <figcaption class="vitem__cap">The Cage</figcaption>
+      </figure>
+      <figure class="vitem vg3" data-tags="still-life" data-r>
+        <img src="assets/visuals/v3.jpg" alt="Petals Around the Rose" loading="lazy" onerror="this.remove()" />
+        <figcaption class="vitem__cap">Petals Around the Rose</figcaption>
+      </figure>
+      <figure class="vitem vg5" data-tags="photography" data-r>
+        <img src="assets/visuals/v4.jpg" alt="The Locked Door" loading="lazy" onerror="this.remove()" />
+        <figcaption class="vitem__cap">The Locked Door</figcaption>
+      </figure>
+      <figure class="vitem vg4" data-tags="digital" data-r>
+        <img src="assets/visuals/v5.jpg" alt="Descending" loading="lazy" onerror="this.remove()" />
+        <figcaption class="vitem__cap">Descending</figcaption>
+      </figure>
+      <figure class="vitem vg1" data-tags="collage" data-r>
+        <img src="assets/visuals/v6.jpg" alt="Corrupted" loading="lazy" onerror="this.remove()" />
+        <figcaption class="vitem__cap">Corrupted</figcaption>
+      </figure>
+      <figure class="vitem vg3" data-tags="collage" data-r>
+        <img src="assets/visuals/v7.jpg" alt="No. 7 of Many" loading="lazy" onerror="this.remove()" />
+        <figcaption class="vitem__cap">No. 7 of Many</figcaption>
+      </figure>
+      <figure class="vitem vg2" data-tags="photography" data-r>
+        <img src="assets/visuals/v8.jpg" alt="No. 9 of Many" loading="lazy" onerror="this.remove()" />
+        <figcaption class="vitem__cap">No. 9 of Many</figcaption>
+      </figure>
+      <figure class="vitem vg5" data-tags="still-life" data-r>
+        <img src="assets/visuals/v9.jpg" alt="No. 11 of Many" loading="lazy" onerror="this.remove()" />
+        <figcaption class="vitem__cap">No. 11 of Many</figcaption>
+      </figure>
+    </div>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <p class="foot__line">Beauty is a wound that blooms anyway. <em class="foot__sig">cd.</em></p>
+    <div class="foot__cherry"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.6 2.2c-.3 2.8-1.7 5.2-3.9 7.1l.9 1c1.4-1.2 2.5-2.6 3.3-4.2.6 1.7 1.6 3.2 3 4.4l.9-1c-2-1.8-3.1-4.3-2.9-7.1l-1.3-.2z"/><circle cx="7.6" cy="15.6" r="4.4"/><circle cx="16.4" cy="16.6" r="3.7"/></svg></div>
+    <p class="foot__meta">© 2026 Cherry DN &nbsp;·&nbsp; <a href="mailto:cherrydn.contact@gmail.com">cherrydn.contact@gmail.com</a> &nbsp;·&nbsp; <a href="https://instagram.com/cherry.dn" rel="noopener">@cherry.dn</a></p>
+  </footer>
+
+  <script src="js/cherry.js"></script>
+</body>
+</html>

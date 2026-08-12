@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cherry DN — writer · sound · image</title>
+  <title>Music — Cherry DN</title>
   <meta name="description" content="Cherry DN — writer, sound, image. Welcome to the paradise you carry within." />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%8D%92%3C/text%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -39,54 +39,50 @@
   </div>
 
   <main>
-    <section class="hero">
-      <img class="hero__img" src="assets/hero.jpg" alt="" onerror="this.remove()" />
-      <div class="hero__veil"></div>
-      <div class="hero__body">
-        <h1 class="hero__title">CHERRY&nbsp;DN</h1>
-        <p class="hero__roles">writer <i>·</i> sound <i>·</i> image</p>
-        <p class="hero__welcome">Welcome to the paradise you carry within.</p>
-        <div class="hero__row">
-          <a class="btn-line btn-line--red" href="written-word.html">Enter</a>
-          <a class="btn-line" href="#work">View Work</a>
-        </div>
+    <div class="page">
+    <header class="page__head" data-r>
+      <p class="page__num">01</p>
+      <h1 class="page__title">MUSIC</h1>
+      <p class="page__tag">Sound is how I bleed in the dark.</p>
+    </header>
+
+    <div class="player" data-r>
+      <button class="player__btn" type="button" aria-label="Play"></button>
+      <div class="player__meta">
+        <p class="player__now">Sweet, Slow, Poison</p>
+        <div class="player__wave" aria-hidden="true"></div>
       </div>
-    </section>
+      <span class="player__time">00:00 / 03:45</span>
+    </div>
 
-    <section class="portals" id="work">
-      <a class="portal portal--word" href="written-word.html" data-r>
-        <div class="portal__fallback"></div>
-        <img src="assets/portal-word.jpg" alt="" loading="lazy" onerror="this.remove()" />
-        <div class="portal__veil"></div>
-        <div class="portal__text">
-          <h2 class="portal__name">WRITTEN WORD</h2>
-          <p class="portal__desc">Fragments, confessions,<br/>and the things we don&rsquo;t say out loud.</p>
-        </div>
-      </a>
-      <a class="portal portal--music" href="music.html" data-r>
-        <div class="portal__fallback"></div>
-        <img src="assets/portal-music.jpg" alt="" loading="lazy" onerror="this.remove()" />
-        <div class="portal__veil"></div>
-        <div class="portal__text">
-          <h2 class="portal__name">MUSIC</h2>
-          <p class="portal__desc">Songs from the in-between.<br/>Echoes, oceans, and soft ruins.</p>
-        </div>
-      </a>
-      <a class="portal portal--visuals" href="visuals.html" data-r>
-        <div class="portal__fallback"></div>
-        <img src="assets/portal-visuals.jpg" alt="" loading="lazy" onerror="this.remove()" />
-        <div class="portal__veil"></div>
-        <div class="portal__text">
-          <h2 class="portal__name">VISUALS</h2>
-          <p class="portal__desc">Images of feeling.<br/>Bodies, blooms, and quiet hauntings.</p>
-        </div>
-      </a>
-    </section>
+    <ul class="tracklist" data-r>
+        <li class="trk" data-src="assets/audio/track-01.mp3" data-title="Sweet, Slow, Poison">
+          <span class="trk__no">01</span><span class="trk__name">Sweet, Slow, Poison</span><span class="trk__len">3:45</span>
+        </li>
+        <li class="trk" data-src="assets/audio/track-02.mp3" data-title="Undone">
+          <span class="trk__no">02</span><span class="trk__name">Undone</span><span class="trk__len">4:21</span>
+        </li>
+        <li class="trk" data-src="assets/audio/track-03.mp3" data-title="Finally, Unbound">
+          <span class="trk__no">03</span><span class="trk__name">Finally, Unbound</span><span class="trk__len">3:57</span>
+        </li>
+        <li class="trk" data-src="assets/audio/track-04.mp3" data-title="Blackwater Highway">
+          <span class="trk__no">04</span><span class="trk__name">Blackwater Highway</span><span class="trk__len">4:02</span>
+        </li>
+        <li class="trk" data-src="assets/audio/track-05.mp3" data-title="Pretty Thing">
+          <span class="trk__no">05</span><span class="trk__name">Pretty Thing</span><span class="trk__len">3:18</span>
+        </li>
+    </ul>
 
-    <div class="strip" data-r>
-      <a href="spoken-word.html">Spoken Word &rarr;</a>
-      <a href="film.html">Film / Moving Image &rarr;</a>
-      <a href="about.html">About Cherry &rarr;</a>
+    <div class="melodies" data-r>
+      <div class="melodies__art">
+        <img src="assets/music.jpg" alt="" loading="lazy" onerror="this.remove()" />
+      </div>
+      <div>
+        <h2 class="melodies__title">A place for haunted melodies</h2>
+        <p class="melodies__text">Melancholy draped in silk.<br/>Intimacy, decay, devotion.<br/>Songs that taste like night air<br/>and something you cannot name.</p>
+        <a class="rlink" href="written-word.html">view lyrics / notes &rarr;</a>
+      </div>
+    </div>
     </div>
   </main>
 
