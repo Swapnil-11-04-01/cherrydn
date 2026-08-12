@@ -1519,3 +1519,184 @@ body[data-persona="dn"] .dstage__half--cherry {
   .dstage__amp { top: 50%; }
   .dstage__inner { width: 100%; }
 }
+
+/* ============================================================
+   THE DIPTYCH AS WEATHER — full-page stage, diffused seam,
+   two atmospheres breathing into each other
+   ============================================================ */
+.stage-page .nav {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  background: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: 0;
+}
+.stage-page .nav.is-scrolled { border-bottom-color: transparent; }
+
+.dstage--hero {
+  margin: 0 0 0.5rem;
+  min-height: 100svh;
+  overflow: hidden;
+}
+.dstage--hero::before { display: none; }   /* no hard line — the seam is mist */
+.dstage--hero .dstage__half {
+  min-height: 100svh;
+  padding: 15rem 3.4rem 5rem;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+.dstage--hero .dstage__inner { margin: auto 0; }
+.dstage--hero .dstage__half--cherry {
+  background:
+    radial-gradient(ellipse at 70% 8%, rgba(142, 31, 45, 0.14), transparent 55%),
+    linear-gradient(115deg, #150d10 0%, #0d1214 100%);
+}
+.dstage--hero .dstage__half--dn {
+  background:
+    radial-gradient(ellipse at 30% 8%, rgba(70, 110, 115, 0.13), transparent 55%),
+    linear-gradient(245deg, #0c1517 0%, #0d1113 100%);
+}
+
+/* crown */
+.dstage__crown {
+  position: absolute;
+  top: 6.2rem; left: 0; right: 0;
+  text-align: center;
+  z-index: 3;
+  pointer-events: none;
+}
+.crown__num {
+  font-size: 0.62rem;
+  font-weight: 400;
+  letter-spacing: 0.44em;
+  text-transform: uppercase;
+  color: var(--red-t);
+}
+.crown__tag {
+  margin-top: 0.7rem;
+  font-size: 0.66rem;
+  font-weight: 400;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.crown__line {
+  margin-top: 0.6rem;
+  font-family: var(--poetic);
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--muted);
+}
+.crown__line::after {
+  content: "";
+  display: block;
+  width: 1px; height: 2.2rem;
+  margin: 1rem auto 0;
+  background: linear-gradient(to bottom, var(--line), transparent);
+}
+
+/* --- the mist: two atmospheres diffusing across the seam --- */
+.dstage__mist {
+  position: absolute; inset: -12%;
+  z-index: 0;
+  pointer-events: none;
+}
+.mist {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 58%;
+  opacity: 0.6;
+  will-change: transform, opacity;
+  transition: opacity 1.8s ease, transform 2.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mist::before {
+  content: "";
+  position: absolute; inset: 0;
+  filter: blur(64px);
+}
+.mist--cherry { left: -4%; }
+.mist--cherry::before {
+  background:
+    radial-gradient(46% 38% at 70% 32%, rgba(142, 31, 45, 0.34), transparent 72%),
+    radial-gradient(38% 30% at 58% 72%, rgba(203, 178, 140, 0.1), transparent 70%);
+}
+.mist--dn { right: -4%; }
+.mist--dn::before {
+  background:
+    radial-gradient(46% 38% at 30% 62%, rgba(74, 118, 124, 0.44), transparent 72%),
+    radial-gradient(36% 28% at 42% 24%, rgba(135, 168, 172, 0.18), transparent 70%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mist--cherry::before { animation: mist-flow-a 17s ease-in-out infinite alternate; }
+  .mist--dn::before { animation: mist-flow-b 21s ease-in-out infinite alternate; }
+  @keyframes mist-flow-a {
+    0%   { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+    50%  { transform: translate3d(3.5%, -2.5%, 0) scale(1.07) rotate(1.2deg); }
+    100% { transform: translate3d(1.5%, 2.5%, 0) scale(1.03) rotate(-1deg); }
+  }
+  @keyframes mist-flow-b {
+    0%   { transform: translate3d(0, 0, 0) scale(1.04) rotate(0deg); }
+    50%  { transform: translate3d(-3.5%, 3%, 0) scale(1) rotate(-1.2deg); }
+    100% { transform: translate3d(-1.5%, -2%, 0) scale(1.08) rotate(0.8deg); }
+  }
+}
+
+/* attention feeds the weather: the hovered side floods the seam */
+.dstage:has(.dstage__half--cherry:hover) .mist--cherry,
+.dstage.sim-cherry .mist--cherry,
+body[data-persona="cherry"] .mist--cherry {
+  opacity: 0.95;
+  transform: translate3d(15%, 0, 0) scale(1.18);
+}
+.dstage:has(.dstage__half--cherry:hover) .mist--dn,
+.dstage.sim-cherry .mist--dn,
+body[data-persona="cherry"] .mist--dn {
+  opacity: 0.28;
+  transform: translate3d(7%, 0, 0) scale(0.94);
+}
+.dstage:has(.dstage__half--dn:hover) .mist--dn,
+.dstage.sim-dn .mist--dn,
+body[data-persona="dn"] .mist--dn {
+  opacity: 0.95;
+  transform: translate3d(-15%, 0, 0) scale(1.18);
+}
+.dstage:has(.dstage__half--dn:hover) .mist--cherry,
+.dstage.sim-dn .mist--cherry,
+body[data-persona="dn"] .mist--cherry {
+  opacity: 0.28;
+  transform: translate3d(-7%, 0, 0) scale(0.94);
+}
+
+/* halves themselves keep only a whisper of the old dimming — the mist speaks now */
+.dstage--hero:has(.dstage__half--cherry:hover) .dstage__half--dn,
+.dstage--hero:has(.dstage__half--dn:hover) .dstage__half--cherry {
+  opacity: 0.78;
+  filter: saturate(0.75);
+}
+
+/* the & floats free in the mist */
+.dstage--hero .dstage__amp {
+  background: none;
+  font-size: 2.7rem;
+  top: 47%;
+  text-shadow: 0 0 26px rgba(12, 23, 24, 0.9);
+}
+
+/* entrance */
+@media (prefers-reduced-motion: no-preference) {
+  .dstage__crown { animation: soft-in 1.2s ease 0.2s both; }
+  .dstage--hero .dstage__half--cherry .dstage__inner { animation: soft-in 1.3s ease 0.55s both; }
+  .dstage--hero .dstage__half--dn .dstage__inner { animation: soft-in 1.3s ease 0.8s both; }
+  .dstage__mist { animation: soft-in 2.6s ease 0.1s both; }
+}
+
+@media (max-width: 860px) {
+  .dstage--hero .dstage__half { min-height: 0; padding: 3.2rem 1.5rem 2.8rem; }
+  .dstage--hero .dstage__half--cherry { padding-top: 15rem; }
+  .dstage__crown { top: 5.4rem; }
+  .mist { width: 120%; height: 58%; top: auto; }
+  .mist--cherry { left: -10%; top: 0; }
+  .mist--dn { right: -10%; bottom: 0; }
+}
