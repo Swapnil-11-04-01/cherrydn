@@ -829,3 +829,80 @@ html.js [data-r].is-in { opacity: 1; transform: none; }
 
 /* script signature, like the mock */
 .about-sig { font-family: "Great Vibes", "Cormorant Garamond", cursive; font-style: normal; font-size: 2.6rem; }
+
+/* ============================================================
+   LANDING — reference-exact: image to the very top, nav floating
+   on the parchment, title low over the cherries, heavy vignette
+   ============================================================ */
+.landing .nav {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  background: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: 0;
+}
+.landing .nav.is-scrolled { border-bottom-color: transparent; }
+.landing .nav__logo { color: #EFE6D2; text-shadow: 0 1px 14px rgba(18, 14, 9, 0.55); }
+.landing .nav__links { margin-left: auto; margin-right: 1.6rem; }
+.landing .nav__links a { color: #2e2822; font-weight: 500; text-shadow: 0 1px 6px rgba(224, 212, 190, 0.35); }
+.landing .nav__links a:hover { color: #8E1F2D; }
+.landing .nav__links a.is-active { color: #2e2822; border-bottom-color: transparent; }
+.landing .nav__cta {
+  color: #2f2a24;
+  border-color: var(--red);
+  background: rgba(213, 200, 178, 0.22);
+}
+.landing .nav__cta:hover { background: var(--red); color: var(--ink); }
+.landing .nav__burger span { background: #2f2a24; }
+
+.landing .hero {
+  min-height: 97svh;
+  align-items: flex-end;
+  justify-content: center;
+}
+.landing .hero__veil {
+  background:
+    radial-gradient(ellipse 65% 55% at 0% 0%, rgba(10, 14, 14, 0.62), transparent 70%),
+    radial-gradient(ellipse 55% 45% at 100% 0%, rgba(10, 14, 14, 0.16), transparent 70%),
+    radial-gradient(ellipse 130% 95% at 50% 25%, transparent 45%, rgba(10, 14, 14, 0.5) 100%),
+    linear-gradient(180deg, transparent 55%, rgba(12, 23, 24, 0.55) 82%, var(--bg) 99%);
+}
+.landing .hero__body {
+  width: 100%;
+  padding: 10rem 1.5rem 6.5vh;
+}
+.landing .hero__title {
+  font-size: clamp(3rem, 11vw, 8.4rem);
+  letter-spacing: 0.13em;
+  opacity: 0.97;
+}
+.landing .hero__row { margin-top: 2.2rem; }
+
+.landing .portals {
+  max-width: none;
+  padding: 1.4rem 1.1rem 0.6rem;
+  gap: 1rem;
+}
+.landing .portal { aspect-ratio: 16 / 10.5; border: 0; }
+.landing .portal img { filter: saturate(0.85) brightness(0.7); }
+.landing .portal:hover img { filter: saturate(1) brightness(0.88); }
+.landing .portal__veil {
+  background: linear-gradient(to top, rgba(7, 12, 13, 0.92), rgba(7, 12, 13, 0.25) 45%, rgba(7, 12, 13, 0.12));
+}
+.landing .portal__text { left: 1.9rem; right: 1.9rem; bottom: 1.7rem; }
+.landing .portal__name { font-size: clamp(1.9rem, 3.2vw, 2.7rem); letter-spacing: 0.1em; }
+.landing .portal__name::after { width: 30px; height: 2px; margin-top: 0.55rem; }
+.landing .portal__desc { font-size: 1.03rem; margin-top: 0.7rem; }
+
+.landing .foot { border-top: 0; padding-top: 0.6rem; }
+.landing .foot__meta, .landing .foot__cherry { display: none; }
+.landing .foot__line { font-size: 0.64rem; }
+
+@media (max-width: 1080px) {
+  .landing .nav__cta { display: inline-flex; }
+}
+@media (max-width: 780px) {
+  .landing .hero__body { padding-bottom: 9vh; }
+  .landing .portals { grid-template-columns: 1fr; }
+}
