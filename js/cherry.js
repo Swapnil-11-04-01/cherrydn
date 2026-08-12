@@ -117,6 +117,7 @@
     if (currentRow) currentRow.classList.remove("is-current");
     if (playerBtn) playerBtn.classList.remove("is-playing");
     currentRow = null;
+    delete document.body.dataset.persona;
   }
   audio.addEventListener("ended", stopAll);
   audio.addEventListener("timeupdate", function () {
@@ -153,6 +154,11 @@
       audio.play().then(function () {
         currentRow = row;
         row.classList.add("is-current");
+        var half = row.closest(".duality__half");
+        if (half) {
+          document.body.dataset.persona =
+            half.classList.contains("duality__half--dn") ? "dn" : "cherry";
+        }
         if (playerBtn) playerBtn.classList.add("is-playing");
         if (playerNow) playerNow.textContent = row.dataset.title || row.textContent.trim();
       }).catch(function (err) {

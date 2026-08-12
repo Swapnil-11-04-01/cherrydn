@@ -1255,3 +1255,89 @@ html.js .page__head[data-r] { opacity: 1; transform: none; transition: none; }
     background: linear-gradient(to right, transparent, var(--line) 30%, var(--line) 70%, transparent);
   }
 }
+
+/* ============================================================
+   THE DUALITY, ALIVE — mirrored, responsive, one voice at a time
+   ============================================================ */
+
+/* they face each other across the spine */
+.duality__half--dn { text-align: right; }
+.duality__half--dn .duality__name::after { margin-left: auto; }
+.duality__half--dn .duality__desc { margin-left: auto; }
+.duality__half--dn .tracklist { direction: ltr; text-align: left; }
+
+/* two voices, two temperaments — even the hairlines have a temperature */
+.duality__half--cherry { border-color: rgba(203, 178, 140, 0.22); }
+.duality__half--dn { border-color: rgba(94, 116, 118, 0.4); }
+.duality__half--cherry .duality__name { letter-spacing: 0.18em; }
+.duality__half--dn .duality__name { letter-spacing: 0.08em; }
+.duality__eyebrow--dn {
+  font-family: var(--ui);
+  font-style: normal;
+  font-size: 0.6rem;
+  font-weight: 400;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+}
+.duality__half--cherry .trk__no { color: var(--red-t); }
+.duality__half--dn .trk__no { color: #7E9496; }
+.duality__half--cherry .trk.is-current { box-shadow: inset 2px 0 0 var(--red); }
+.duality__half--dn .trk.is-current { box-shadow: inset 2px 0 0 #5E7476; }
+
+/* contradiction: reaching for one, the other recedes */
+.duality__half { transition: background 0.7s, opacity 0.7s, filter 0.7s, border-color 0.7s; }
+.duality:has(.duality__half--cherry:hover) .duality__half--dn,
+.duality:has(.duality__half--dn:hover) .duality__half--cherry {
+  opacity: 0.55;
+  filter: saturate(0.6);
+}
+
+/* the hinge leans toward whoever you reach for, and it breathes */
+.duality__divider span {
+  display: inline-block;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), color 0.6s;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .duality__divider span { animation: hinge-breathe 6s ease-in-out infinite alternate; }
+  @keyframes hinge-breathe {
+    from { opacity: 0.65; }
+    to   { opacity: 1; }
+  }
+}
+.duality:has(.duality__half--cherry:hover) .duality__divider span {
+  transform: rotate(-12deg) scale(1.15);
+  color: var(--red-display);
+}
+.duality:has(.duality__half--dn:hover) .duality__divider span {
+  transform: rotate(12deg) scale(1.15);
+  color: #A9B7B7;
+}
+
+/* one voice: whoever sings, the world takes their temperature */
+body[data-persona] .duality__half { transition: opacity 1.2s, filter 1.2s, border-color 1.2s, background 1.2s; }
+body[data-persona="cherry"] .duality__half--dn,
+body[data-persona="dn"] .duality__half--cherry { opacity: 0.5; filter: saturate(0.55); }
+body[data-persona="cherry"] .player { border-color: rgba(142, 31, 45, 0.55); }
+body[data-persona="cherry"] .player__btn { border-color: var(--red); }
+body[data-persona="dn"] .player { border-color: rgba(94, 116, 118, 0.65); }
+body[data-persona="dn"] .player__btn { border-color: #5E7476; }
+body[data-persona="dn"] .player__btn.is-playing { animation: pulse-steel 2.2s ease-in-out infinite; }
+@keyframes pulse-steel {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(94, 116, 118, 0.4); }
+  50%      { box-shadow: 0 0 0 9px rgba(94, 116, 118, 0); }
+}
+body::before { transition: opacity 2.5s ease; }
+body[data-persona="dn"]::before { opacity: 0.3; }
+
+/* the intro carries the spine down into the split */
+.duality-intro { position: relative; padding-bottom: 1.6rem; margin-bottom: 0.4rem; }
+.duality-intro::after {
+  content: "";
+  position: absolute; left: 50%; bottom: 0;
+  width: 1px; height: 1.4rem;
+  background: linear-gradient(to bottom, var(--line), transparent);
+}
+
+@media (max-width: 860px) {
+  .duality__half--dn { text-align: right; }
+}
