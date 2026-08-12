@@ -1821,3 +1821,68 @@ body[data-persona] .mist--merge {
 .dstage:has(.dstage__half--cherry:hover) .mist--merge,
 .dstage:has(.dstage__half--dn:hover) .mist--merge,
 body[data-persona] .mist--merge { opacity: 0.55; }
+
+/* ============================================================
+   FOCUS — the courted side confides; the other becomes
+   only its name, larger, sunk in its own river
+   ============================================================ */
+.dstage__eyebrow, .dstage__desc, .dstage__half .dlist {
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.dstage__name {
+  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1), color 0.6s;
+}
+.dstage__name--cherry { transform-origin: right center; }
+.dstage__name--dn { transform-origin: left center; }
+
+/* details of the unattended side fall silent */
+.dstage:has(.dstage__half--cherry:hover) .dstage__half--dn .dstage__eyebrow,
+.dstage:has(.dstage__half--cherry:hover) .dstage__half--dn .dstage__desc,
+.dstage:has(.dstage__half--cherry:hover) .dstage__half--dn .dlist,
+.dstage.sim-cherry .dstage__half--dn .dstage__eyebrow,
+.dstage.sim-cherry .dstage__half--dn .dstage__desc,
+.dstage.sim-cherry .dstage__half--dn .dlist,
+body[data-persona="cherry"] .dstage__half--dn .dstage__eyebrow,
+body[data-persona="cherry"] .dstage__half--dn .dstage__desc,
+body[data-persona="cherry"] .dstage__half--dn .dlist,
+.dstage:has(.dstage__half--dn:hover) .dstage__half--cherry .dstage__eyebrow,
+.dstage:has(.dstage__half--dn:hover) .dstage__half--cherry .dstage__desc,
+.dstage:has(.dstage__half--dn:hover) .dstage__half--cherry .dlist,
+.dstage.sim-dn .dstage__half--cherry .dstage__eyebrow,
+.dstage.sim-dn .dstage__half--cherry .dstage__desc,
+.dstage.sim-dn .dstage__half--cherry .dlist,
+body[data-persona="dn"] .dstage__half--cherry .dstage__eyebrow,
+body[data-persona="dn"] .dstage__half--cherry .dstage__desc,
+body[data-persona="dn"] .dstage__half--cherry .dlist {
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+}
+
+/* ...while its name rises, monumental */
+.dstage:has(.dstage__half--cherry:hover) .dstage__half--dn .dstage__name,
+.dstage.sim-cherry .dstage__half--dn .dstage__name,
+body[data-persona="cherry"] .dstage__half--dn .dstage__name,
+.dstage:has(.dstage__half--dn:hover) .dstage__half--cherry .dstage__name,
+.dstage.sim-dn .dstage__half--cherry .dstage__name,
+body[data-persona="dn"] .dstage__half--cherry .dstage__name {
+  transform: scale(1.6);
+}
+.dstage:has(.dstage__half--cherry:hover) .dstage__half--dn .dstage__name::after,
+.dstage.sim-cherry .dstage__half--dn .dstage__name::after,
+body[data-persona="cherry"] .dstage__half--dn .dstage__name::after,
+.dstage:has(.dstage__half--dn:hover) .dstage__half--cherry .dstage__name::after,
+.dstage.sim-dn .dstage__half--cherry .dstage__name::after,
+body[data-persona="dn"] .dstage__half--cherry .dstage__name::after {
+  width: 0;
+  opacity: 0;
+}
+
+/* touch / reduced motion: everything stays visible */
+@media (hover: none) {
+  .dstage__eyebrow, .dstage__desc, .dstage__half .dlist { opacity: 1 !important; transform: none !important; }
+  .dstage__name { transform: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dstage__eyebrow, .dstage__desc, .dstage__half .dlist, .dstage__name { transition: none; }
+}
