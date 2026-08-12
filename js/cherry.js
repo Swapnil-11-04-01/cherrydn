@@ -154,10 +154,10 @@
       audio.play().then(function () {
         currentRow = row;
         row.classList.add("is-current");
-        var half = row.closest(".duality__half");
+        var half = row.closest(".dstage__half, .duality__half");
         if (half) {
           document.body.dataset.persona =
-            half.classList.contains("duality__half--dn") ? "dn" : "cherry";
+            /--dn/.test(half.className) ? "dn" : "cherry";
         }
         if (playerBtn) playerBtn.classList.add("is-playing");
         if (playerNow) playerNow.textContent = row.dataset.title || row.textContent.trim();
