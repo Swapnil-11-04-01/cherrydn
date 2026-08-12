@@ -1749,3 +1749,75 @@ body[data-persona="dn"] .mist--cherry {
 body[data-persona] .mist--merge {
   opacity: 0.78;
 }
+
+/* ============================================================
+   RIVERS v2 — two strong bodies of liquid, churning where they meet
+   ============================================================ */
+
+/* each side owns its color, richly */
+.mist { width: 60%; opacity: 0.85; }
+.mist--cherry::before {
+  background:
+    radial-gradient(72% 62% at 28% 46%, rgba(142, 31, 45, 0.52), rgba(130, 28, 42, 0.26) 56%, transparent 80%),
+    radial-gradient(48% 40% at 60% 74%, rgba(118, 24, 36, 0.34), transparent 72%);
+  filter: blur(54px);
+}
+.mist--dn::before {
+  background:
+    radial-gradient(72% 62% at 72% 50%, rgba(86, 122, 128, 0.48), rgba(78, 112, 118, 0.22) 56%, transparent 80%),
+    radial-gradient(46% 38% at 40% 24%, rgba(126, 156, 162, 0.26), transparent 70%);
+  filter: blur(54px);
+}
+
+/* the churn: tongues of each liquid pushing across the midline,
+   interleaved at different heights so they fill each other's gaps */
+.mist::after {
+  content: "";
+  position: absolute;
+  top: -4%; bottom: -4%;
+  width: 58%;
+  filter: blur(42px);
+  pointer-events: none;
+}
+.mist--cherry::after {
+  right: -22%;
+  background:
+    radial-gradient(30% 15% at 66% 24%, rgba(148, 34, 48, 0.44), transparent 70%),
+    radial-gradient(34% 13% at 76% 52%, rgba(142, 31, 45, 0.38), transparent 70%),
+    radial-gradient(26% 12% at 62% 79%, rgba(126, 28, 40, 0.32), transparent 70%);
+}
+.mist--dn::after {
+  left: -22%;
+  background:
+    radial-gradient(30% 14% at 34% 12%, rgba(96, 132, 138, 0.4), transparent 70%),
+    radial-gradient(34% 15% at 24% 38%, rgba(88, 124, 130, 0.42), transparent 70%),
+    radial-gradient(28% 13% at 38% 65%, rgba(104, 138, 144, 0.34), transparent 70%),
+    radial-gradient(24% 11% at 28% 90%, rgba(90, 126, 132, 0.3), transparent 70%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mist--cherry::after { animation: tongues-a 13s ease-in-out infinite alternate; }
+  .mist--dn::after { animation: tongues-b 16s ease-in-out infinite alternate; }
+  @keyframes tongues-a {
+    0%   { transform: translate3d(0, -2.5%, 0) scaleY(1); }
+    50%  { transform: translate3d(2.5%, 1.5%, 0) scaleY(1.06); }
+    100% { transform: translate3d(0.8%, 3%, 0) scaleY(0.98); }
+  }
+  @keyframes tongues-b {
+    0%   { transform: translate3d(0, 2.5%, 0) scaleY(1.04); }
+    50%  { transform: translate3d(-2.5%, -1.5%, 0) scaleY(0.97); }
+    100% { transform: translate3d(-0.8%, -3%, 0) scaleY(1.05); }
+  }
+}
+
+/* the old central wash muddied everything — reduce it to a faint glint
+   in the churn, nothing more */
+.mist--merge { left: 36%; right: 36%; opacity: 0.4; }
+.mist--merge::before {
+  background:
+    radial-gradient(34% 18% at 44% 34%, rgba(150, 60, 62, 0.18), transparent 70%),
+    radial-gradient(36% 20% at 56% 62%, rgba(96, 126, 132, 0.2), transparent 70%);
+  filter: blur(64px);
+}
+.dstage:has(.dstage__half--cherry:hover) .mist--merge,
+.dstage:has(.dstage__half--dn:hover) .mist--merge,
+body[data-persona] .mist--merge { opacity: 0.55; }
