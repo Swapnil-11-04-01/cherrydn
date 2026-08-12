@@ -831,8 +831,7 @@ html.js [data-r].is-in { opacity: 1; transform: none; }
 .about-sig { font-family: "Great Vibes", "Cormorant Garamond", cursive; font-style: normal; font-size: 2.6rem; }
 
 /* ============================================================
-   LANDING — reference-exact: image to the very top, nav floating
-   on the parchment, title low over the cherries, heavy vignette
+   LANDING — graded like the reference: dark frame, luminous center
    ============================================================ */
 .landing .nav {
   position: absolute;
@@ -843,66 +842,95 @@ html.js [data-r].is-in { opacity: 1; transform: none; }
   border-bottom: 0;
 }
 .landing .nav.is-scrolled { border-bottom-color: transparent; }
-.landing .nav__logo { color: #EFE6D2; text-shadow: 0 1px 14px rgba(18, 14, 9, 0.55); }
+.landing .nav__logo {
+  font-size: 1.3rem;
+  letter-spacing: 0.3em;
+  color: #EDE3CF;
+  text-shadow: 0 1px 16px rgba(10, 8, 5, 0.6);
+}
 .landing .nav__links { margin-left: auto; margin-right: 1.6rem; }
-.landing .nav__links a { color: #2e2822; font-weight: 500; text-shadow: 0 1px 6px rgba(224, 212, 190, 0.35); }
-.landing .nav__links a:hover { color: #8E1F2D; }
-.landing .nav__links a.is-active { color: #2e2822; border-bottom-color: transparent; }
+.landing .nav__links a {
+  color: #D9CFBD;
+  text-shadow: 0 1px 10px rgba(10, 8, 5, 0.6);
+}
+.landing .nav__links a:hover { color: #F5EDDC; }
+.landing .nav__links a.is-active { color: #D9CFBD; border-bottom-color: transparent; }
 .landing .nav__cta {
-  color: #2f2a24;
+  color: #E9DFC9;
   border-color: var(--red);
-  background: rgba(213, 200, 178, 0.22);
+  background: rgba(9, 13, 14, 0.45);
 }
 .landing .nav__cta:hover { background: var(--red); color: var(--ink); }
-.landing .nav__burger span { background: #2f2a24; }
+.landing .nav__burger span { background: #E9DFC9; }
 
 .landing .hero {
-  min-height: 97svh;
-  align-items: flex-end;
+  min-height: max(64svh, 540px);
+  align-items: center;
   justify-content: center;
 }
+.landing .hero__img { filter: brightness(0.92) contrast(1.06) saturate(1.02); }
 .landing .hero__veil {
   background:
-    radial-gradient(ellipse 65% 55% at 0% 0%, rgba(10, 14, 14, 0.62), transparent 70%),
-    radial-gradient(ellipse 55% 45% at 100% 0%, rgba(10, 14, 14, 0.16), transparent 70%),
-    radial-gradient(ellipse 130% 95% at 50% 25%, transparent 45%, rgba(10, 14, 14, 0.5) 100%),
-    linear-gradient(180deg, transparent 55%, rgba(12, 23, 24, 0.55) 82%, var(--bg) 99%);
+    linear-gradient(180deg, rgba(8, 11, 11, 0.52), rgba(8, 11, 11, 0.12) 20%, transparent 34%),
+    radial-gradient(ellipse 105% 85% at 50% 36%, transparent 32%, rgba(8, 11, 11, 0.66) 100%),
+    linear-gradient(180deg, transparent 58%, rgba(12, 23, 24, 0.72) 86%, var(--bg) 100%);
 }
 .landing .hero__body {
   width: 100%;
-  padding: 10rem 1.5rem 6.5vh;
+  padding: 8.5rem 1.5rem 3.4rem;
 }
 .landing .hero__title {
-  font-size: clamp(3rem, 11vw, 8.4rem);
+  font-size: clamp(3rem, 10.5vw, 8rem);
   letter-spacing: 0.13em;
+  color: #EDE3CF;
   opacity: 0.97;
 }
-.landing .hero__row { margin-top: 2.2rem; }
+.landing .hero__roles {
+  margin-top: 0.9rem;
+  text-transform: lowercase;
+  letter-spacing: 0.52em;
+  font-size: 0.82rem;
+  font-weight: 300;
+  color: #E4D9C2;
+}
+.landing .hero__welcome { letter-spacing: 0.2em; }
+.landing .hero__row { margin-top: 2.1rem; }
+.landing .btn-line {
+  min-height: 44px;
+  padding: 0.65rem 1.9rem;
+  color: #E9DFC9;
+  background: rgba(9, 13, 14, 0.62);
+  border-color: rgba(190, 180, 160, 0.55);
+  backdrop-filter: blur(2px);
+}
+.landing .btn-line:hover { background: rgba(9, 13, 14, 0.85); }
+.landing .btn-line--red { border-color: var(--red); }
+.landing .btn-line--red:hover { background: var(--red); }
 
 .landing .portals {
   max-width: none;
-  padding: 1.4rem 1.1rem 0.6rem;
-  gap: 1rem;
+  padding: 1.2rem 1.1rem 0.4rem;
+  gap: 1.15rem;
 }
-.landing .portal { aspect-ratio: 16 / 10.5; border: 0; }
-.landing .portal img { filter: saturate(0.85) brightness(0.7); }
-.landing .portal:hover img { filter: saturate(1) brightness(0.88); }
+.landing .portal { aspect-ratio: 5 / 4; border: 0; }
+.landing .portal img { filter: saturate(0.8) brightness(0.55) contrast(1.05); }
+.landing .portal:hover img { filter: saturate(0.95) brightness(0.72) contrast(1.05); }
 .landing .portal__veil {
-  background: linear-gradient(to top, rgba(7, 12, 13, 0.92), rgba(7, 12, 13, 0.25) 45%, rgba(7, 12, 13, 0.12));
+  background:
+    linear-gradient(to top, rgba(6, 10, 11, 0.94), rgba(6, 10, 11, 0.3) 42%, rgba(6, 10, 11, 0.18)),
+    radial-gradient(ellipse 120% 100% at 50% 0%, transparent 55%, rgba(6, 10, 11, 0.5) 100%);
 }
-.landing .portal__text { left: 1.9rem; right: 1.9rem; bottom: 1.7rem; }
-.landing .portal__name { font-size: clamp(1.9rem, 3.2vw, 2.7rem); letter-spacing: 0.1em; }
+.landing .portal__text { left: 2rem; right: 2rem; bottom: 1.9rem; }
+.landing .portal__name { font-size: clamp(1.9rem, 3.1vw, 2.6rem); letter-spacing: 0.1em; color: #EDE3CF; }
 .landing .portal__name::after { width: 30px; height: 2px; margin-top: 0.55rem; }
-.landing .portal__desc { font-size: 1.03rem; margin-top: 0.7rem; }
+.landing .portal__desc { font-size: 1.02rem; margin-top: 0.7rem; color: #BDB2A0; }
 
-.landing .foot { border-top: 0; padding-top: 0.6rem; }
+.landing .foot { border-top: 0; padding-top: 1.2rem; }
 .landing .foot__meta, .landing .foot__cherry { display: none; }
-.landing .foot__line { font-size: 0.64rem; }
+.landing .foot__line { font-size: 0.66rem; color: #A23440; }
 
-@media (max-width: 1080px) {
-  .landing .nav__cta { display: inline-flex; }
-}
 @media (max-width: 780px) {
-  .landing .hero__body { padding-bottom: 9vh; }
+  .landing .hero { min-height: max(70svh, 480px); }
   .landing .portals { grid-template-columns: 1fr; }
+  .landing .portal { aspect-ratio: 16 / 11; }
 }
