@@ -42,11 +42,12 @@
     .tpl-cards {
       margin-top: 3.2rem;
       display: grid;
-      grid-template-columns: repeat(2, minmax(260px, 400px));
+      grid-template-columns: repeat(3, minmax(240px, 360px));
       gap: 1.8rem;
       width: 100%;
       justify-content: center;
     }
+    @media (max-width: 1020px) { .tpl-cards { grid-template-columns: repeat(2, minmax(240px, 400px)); } }
     @media (max-width: 720px) { .tpl-cards { grid-template-columns: minmax(0, 400px); } }
     .tpl-card {
       border: 1px solid var(--line);
@@ -143,10 +144,10 @@
 
   <main>
     <section class="tpl-page">
-      <p class="tpl-page__kicker">settings · the world has two forms</p>
+      <p class="tpl-page__kicker">settings · the world has three forms</p>
       <h1 class="tpl-page__title">Templates</h1>
       <p class="tpl-page__sub">
-        Choose how the site opens. Both forms carry the same words, art,
+        Choose how the site opens. Every form carries the same words, art,
         moods and curator uploads — only the way a visitor moves through
         the world changes.
       </p>
@@ -183,6 +184,21 @@
             <a class="tpl-preview" href="template2.html">preview →</a>
           </div>
         </article>
+        <article class="tpl-card" id="card3">
+          <span class="tpl-card__badge">current</span>
+          <span class="tpl-card__num">template 3</span>
+          <h2 class="tpl-card__name">The Confluence</h2>
+          <p class="tpl-card__desc">
+            The two forms fused. The page flows like The Descent — but when
+            you reach the poetry, the screen holds still and the four
+            elements play as full stages, the sea re-tinting around each,
+            before the current carries you onward.
+          </p>
+          <div class="tpl-card__row">
+            <button class="tpl-choose" type="button" data-choose="3">use this form</button>
+            <a class="tpl-preview" href="template3.html">preview →</a>
+          </div>
+        </article>
       </div>
 
       <p class="tpl-note" id="tplNote"></p>
@@ -204,21 +220,24 @@
       var enter = document.getElementById("enterLink");
 
       function current() {
-        try { return localStorage.getItem("cdn-template") === "2" ? "2" : "1"; }
-        catch (e) { return "1"; }
+        try {
+          var v = localStorage.getItem("cdn-template");
+          return v === "2" || v === "3" ? v : "1";
+        } catch (e) { return "1"; }
       }
       function paint() {
         var cur = current();
         document.getElementById("card1").classList.toggle("is-current", cur === "1");
         document.getElementById("card2").classList.toggle("is-current", cur === "2");
-        enter.href = cur === "2" ? "template2.html" : "index.html?stay";
+        document.getElementById("card3").classList.toggle("is-current", cur === "3");
+        enter.href = cur === "2" ? "template2.html" : cur === "3" ? "template3.html" : "index.html?stay";
       }
       document.querySelectorAll("[data-choose]").forEach(function (btn) {
         btn.addEventListener("click", function () {
           try { localStorage.setItem("cdn-template", btn.dataset.choose); } catch (e) {}
           paint();
-          note.textContent = "Saved — the site now opens as Template " + btn.dataset.choose +
-            (btn.dataset.choose === "1" ? " · The Descent." : " · The Stages.");
+          var names = { "1": " · The Descent.", "2": " · The Stages.", "3": " · The Confluence." };
+          note.textContent = "Saved — the site now opens as Template " + btn.dataset.choose + names[btn.dataset.choose];
         });
       });
       paint();

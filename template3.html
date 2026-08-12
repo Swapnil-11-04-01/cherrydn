@@ -10,17 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Italiana&family=Archivo:wght@200;300;400;500&display=swap" rel="stylesheet" />
   <script>document.documentElement.classList.add("js");</script>
-  <script>
-    /* template switch: settings.html can lock the site to another form */
-    try {
-      var t = localStorage.getItem("cdn-template");
-      if ((t === "2" || t === "3") &&
-          !new URLSearchParams(location.search).has("stay")) {
-        location.replace((t === "2" ? "template2.html" : "template3.html") + location.search + location.hash);
-      }
-    } catch (e) {}
-  </script>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style3.css" />
 </head>
 <body>
 
@@ -28,6 +18,10 @@
   <div class="atmosphere" aria-hidden="true">
     <div class="aurora aurora--cherry"></div>
     <div class="aurora aurora--blue"></div>
+    <div class="wash wash--water"></div>
+    <div class="wash wash--fire"></div>
+    <div class="wash wash--earth"></div>
+    <div class="wash wash--air"></div>
     <canvas id="embers"></canvas>
     <div class="grain"></div>
   </div>
@@ -126,55 +120,60 @@
       </div>
     </section>
 
-    <!-- ======= ELEMENTS / POETRY JOURNEY ======= -->
-    <section class="elements section" id="elements">
-      <div class="section__head" data-flow="right">
-        <span class="section__num">02</span>
-        <h2 class="section__title">Poetry — the Elements</h2>
-        <p class="section__sub" data-edit="elements-sub">Read it the way she lived it — element by element.<br/>Four stages. One becoming.</p>
+    <!-- ======= POETRY — THE PINNED ELEMENT STAGES ======= -->
+    <section class="elements-pin" id="elements" aria-label="Poetry — the elements">
+      <div class="elements-pin__viewport">
+        <div class="pin-stage element-stage--water">
+          <div class="pin-stage__inner">
+            <p class="element-stage__eyebrow">poetry · the elements — stage I</p>
+            <h2 class="element-stage__name">Water</h2>
+            <p class="element-stage__greek">ὕδωρ</p>
+            <p class="element-stage__theme" data-edit="el1-theme">dissolving — grief, memory, surrender</p>
+            <p class="element-stage__verse" data-edit="el1-verse">“I practiced drowning<br/>until the sea mistook me<br/>for one of her own.”</p>
+          </div>
+          <div class="element-stage__orb" aria-hidden="true"></div>
+        </div>
+
+        <div class="pin-stage element-stage--fire">
+          <div class="pin-stage__inner">
+            <p class="element-stage__eyebrow">the elements — stage II</p>
+            <h2 class="element-stage__name">Fire</h2>
+            <p class="element-stage__greek">πῦρ</p>
+            <p class="element-stage__theme" data-edit="el2-theme">igniting — desire, anger, awakening</p>
+            <p class="element-stage__verse" data-edit="el2-verse">“Even underwater<br/>something in me<br/>refused to go out.”</p>
+          </div>
+          <div class="element-stage__orb" aria-hidden="true"></div>
+        </div>
+
+        <div class="pin-stage element-stage--earth">
+          <div class="pin-stage__inner">
+            <p class="element-stage__eyebrow">the elements — stage III</p>
+            <h2 class="element-stage__name">Earth</h2>
+            <p class="element-stage__greek">γῆ</p>
+            <p class="element-stage__theme" data-edit="el3-theme">rooting — healing, body, belonging</p>
+            <p class="element-stage__verse" data-edit="el3-verse">“The earth took my ashes<br/>without asking<br/>what they had been.”</p>
+          </div>
+          <div class="element-stage__orb" aria-hidden="true"></div>
+        </div>
+
+        <div class="pin-stage element-stage--air">
+          <div class="pin-stage__inner">
+            <p class="element-stage__eyebrow">the elements — stage IV</p>
+            <h2 class="element-stage__name">Air</h2>
+            <p class="element-stage__greek">ἀήρ</p>
+            <p class="element-stage__theme" data-edit="el4-theme">releasing — forgiveness, flight, return</p>
+            <p class="element-stage__verse" data-edit="el4-verse">“What the water kept,<br/>what the fire spared —<br/>I exhale, and it is sky.”</p>
+          </div>
+          <div class="element-stage__orb" aria-hidden="true"></div>
+        </div>
+
+        <div class="pin-progress" aria-label="Element stages">
+          <button class="pin-progress__mark" type="button" aria-label="Water">I</button>
+          <button class="pin-progress__mark" type="button" aria-label="Fire">II</button>
+          <button class="pin-progress__mark" type="button" aria-label="Earth">III</button>
+          <button class="pin-progress__mark" type="button" aria-label="Air">IV</button>
+        </div>
       </div>
-
-      <ol class="elements__list">
-        <li class="element element--water" data-flow>
-          <span class="element__numeral">I<span class="element__greek">ὕδωρ</span></span>
-          <div class="element__body">
-            <h3 class="element__name">Water</h3>
-            <p class="element__theme" data-edit="el1-theme">dissolving — grief, memory, surrender</p>
-            <p class="element__verse" data-edit="el1-verse">“I practiced drowning<br/>until the sea mistook me<br/>for one of her own.”</p>
-          </div>
-          <span class="element__glyph element__glyph--water" data-drift="-0.07" aria-hidden="true"></span>
-        </li>
-
-        <li class="element element--fire" data-flow>
-          <span class="element__numeral">II<span class="element__greek">πῦρ</span></span>
-          <div class="element__body">
-            <h3 class="element__name">Fire</h3>
-            <p class="element__theme" data-edit="el2-theme">igniting — desire, anger, awakening</p>
-            <p class="element__verse" data-edit="el2-verse">“Even underwater<br/>something in me<br/>refused to go out.”</p>
-          </div>
-          <span class="element__glyph element__glyph--fire" data-drift="-0.07" aria-hidden="true"></span>
-        </li>
-
-        <li class="element element--earth" data-flow>
-          <span class="element__numeral">III<span class="element__greek">γῆ</span></span>
-          <div class="element__body">
-            <h3 class="element__name">Earth</h3>
-            <p class="element__theme" data-edit="el3-theme">rooting — healing, body, belonging</p>
-            <p class="element__verse" data-edit="el3-verse">“The earth took my ashes<br/>without asking<br/>what they had been.”</p>
-          </div>
-          <span class="element__glyph element__glyph--earth" data-drift="-0.07" aria-hidden="true"></span>
-        </li>
-
-        <li class="element element--air" data-flow>
-          <span class="element__numeral">IV<span class="element__greek">ἀήρ</span></span>
-          <div class="element__body">
-            <h3 class="element__name">Air</h3>
-            <p class="element__theme" data-edit="el4-theme">releasing — forgiveness, flight, return</p>
-            <p class="element__verse" data-edit="el4-verse">“What the water kept,<br/>what the fire spared —<br/>I exhale, and it is sky.”</p>
-          </div>
-          <span class="element__glyph element__glyph--air" data-drift="-0.07" aria-hidden="true"></span>
-        </li>
-      </ol>
     </section>
 
     <!-- ======= THE BOOK ======= -->
@@ -432,6 +431,6 @@
 
   </main>
 
-  <script src="js/main.js"></script>
+  <script src="js/main3.js"></script>
 </body>
 </html>

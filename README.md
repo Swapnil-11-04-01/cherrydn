@@ -18,6 +18,7 @@ via the small "✦ templates" link in the footer):
 |---|---|
 | **1 · The Descent** (default) | one flowing page; everything moves with the scroll |
 | **2 · The Stages** | a deck of 13 full-screen scenes; wheel/swipe dissolves between them, each poetry element is its own act, the sea re-tints per element, the book leans toward the cursor |
+| **3 · The Confluence** | the fused form: the page flows like The Descent, but the poetry chapter pins full-screen and the four elements play as stages (with the element color washes) while natural scrolling drives them |
 
 The choice is saved in the browser (`cdn-template`); `index.html` opens as
 whichever template is selected. Both templates share the same content, moods,
@@ -74,10 +75,12 @@ with any QR generator and replace the decorative QR SVG in `index.html`.
 ```
 index.html      — Template 1 (The Descent): content + long-page choreography
 template2.html  — Template 2 (The Stages): the full-screen scene deck
+template3.html  — Template 3 (The Confluence): flowing page + pinned poetry stages
 settings.html   — template picker (saved per browser)
 gift.html       — the hidden audiobook-gift page (QR destination)
 css/style.css   — Template 1 styling      js/main.js  — Template 1 engine
 css/style2.css  — Template 2 styling      js/main2.js — Template 2 engine
+css/style3.css  — Template 3 styling      js/main3.js — Template 3 engine
 _archive/       — an earlier multi-page experiment, kept for reference
 ```
 
