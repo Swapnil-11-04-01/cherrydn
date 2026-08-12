@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="fire">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Hidden Gift — Cherry DN</title>
+  <meta name="robots" content="noindex" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%8D%92%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Italiana&family=Archivo:wght@300;400&display=swap" rel="stylesheet" />
+  <script>document.documentElement.classList.add("js");</script>
+  <link rel="stylesheet" href="css/style.css?v=6" />
+</head>
+<body>
+
+  <div class="atmosphere" aria-hidden="true">
+    <div class="aurora aurora--cherry"></div>
+    <div class="aurora aurora--blue"></div>
+    <div class="grain"></div>
+  </div>
+
+  <main>
+    <section class="gift-page">
+      <p class="gift-page__kicker">you found the ember key</p>
+      <h1 class="gift-page__title">The Hidden<br/>Gift</h1>
+      <p class="gift-page__sub">
+        You are holding the book. This is its voice —
+        <em>Underwater Fire</em>, read by Cherry, for you. Free, always.
+      </p>
+
+      <div class="gift-page__player" id="player">
+        <p id="playerMsg">The recording is still being made.<br/>Come back when the book reaches your hands.</p>
+      </div>
+
+      <a class="gift-page__back" href="index.html">← back to the surface</a>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+      var root = document.documentElement;
+      try {
+        var saved = localStorage.getItem("cdn-theme");
+        if (saved === "fire" || saved === "noir") root.dataset.theme = saved;
+      } catch (e) {}
+
+      var player = document.getElementById("player");
+      var msg = document.getElementById("playerMsg");
+      var curate = new URLSearchParams(location.search).has("curate");
+
+      function openDB() {
+        return new Promise(function (resolve, reject) {
+          try {
+            var req = indexedDB.open("cdn-site", 1);
+            req.onupgradeneeded = function () { req.result.createObjectStore("media"); };
+            req.onsuccess = function () { resolve(req.result); };
+            req.onerror = function () { reject(req.error); };
+          } catch (e) { reject(e); }
+        });
+      }
+      function get(key) {
+        return openDB().then(function (db) {
+          return new Promise(function (resolve, reject) {
+            var tx = db.transaction("media", "readonly");
+            var rq = tx.objectStore("media").get(key);
+            tx.oncomplete = function () { resolve(rq.result); };
+            tx.onerror = function () { reject(tx.error); };
+          });
+        });
+      }
+      function put(key, val) {
+        return openDB().then(function (db) {
+          return new Promise(function (resolve, reject) {
+            var tx = db.transaction("media", "readwrite");
+            tx.objectStore("media").put(val, key);
+            tx.oncomplete = resolve;
+            tx.onerror = function () { reject(tx.error); };
+          });
+        });
+      }
+
+      function showAudio(rec) {
+        msg.innerHTML = "<em>Underwater Fire</em> — the audiobook.";
+        var old = player.querySelector("audio");
+        if (old) old.remove();
+        var a = document.createElement("audio");
+        a.controls = true;
+        a.src = URL.createObjectURL(rec.blob);
+        player.appendChild(a);
+      }
+
+      get("gift:audio").then(function (rec) {
+        if (rec) showAudio(rec);
+      }).catch(function () {});
+
+      if (curate) {
+        var up = document.createElement("button");
+        up.type = "button";
+        up.className = "gift-page__upload";
+        up.textContent = "upload the audiobook";
+        var input = document.createElement("input");
+        input.type = "file";
+        input.accept = "audio/*";
+        input.hidden = true;
+        up.addEventListener("click", function () { input.click(); });
+        input.addEventListener("change", function () {
+          var file = input.files[0];
+          if (!file) return;
+          var rec = { blob: file, type: file.type };
+          put("gift:audio", rec).catch(function () {});
+          showAudio(rec);
+        });
+        player.appendChild(up);
+        player.appendChild(input);
+      }
+    })();
+  </script>
+</body>
+</html>

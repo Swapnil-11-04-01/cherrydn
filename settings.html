@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="fire">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Templates — Cherry DN</title>
+  <meta name="robots" content="noindex" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%8D%92%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Italiana&family=Archivo:wght@300;400&display=swap" rel="stylesheet" />
+  <script>document.documentElement.classList.add("js");</script>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .tpl-page {
+      min-height: 100svh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 6rem 1.6rem 4rem;
+      position: relative; z-index: 1;
+      text-align: center;
+    }
+    .tpl-page__kicker {
+      font-family: var(--sans);
+      font-size: 0.66rem; font-weight: 300;
+      letter-spacing: 0.5em; text-transform: uppercase;
+      color: var(--cherry-text);
+      margin-bottom: 1.4rem;
+    }
+    .tpl-page__title {
+      font-family: var(--display);
+      font-size: clamp(2.6rem, 8vw, 5rem);
+      text-transform: uppercase; letter-spacing: 0.04em;
+      line-height: 1.02;
+    }
+    .tpl-page__sub {
+      margin-top: 1.2rem;
+      font-style: italic; font-weight: 300;
+      color: var(--muted);
+      max-width: 52ch;
+    }
+    .tpl-cards {
+      margin-top: 3.2rem;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(260px, 400px));
+      gap: 1.8rem;
+      width: 100%;
+      justify-content: center;
+    }
+    @media (max-width: 720px) { .tpl-cards { grid-template-columns: minmax(0, 400px); } }
+    .tpl-card {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      backdrop-filter: blur(8px);
+      padding: 2rem 1.7rem 1.7rem;
+      text-align: left;
+      display: flex; flex-direction: column;
+      gap: 0.7rem;
+      position: relative;
+      transition: border-color 0.4s, box-shadow 0.4s;
+    }
+    .tpl-card.is-current {
+      border-color: var(--cherry);
+      box-shadow: 0 0 34px var(--glow-cherry);
+    }
+    .tpl-card__num {
+      font-family: var(--sans);
+      font-size: 0.6rem; font-weight: 300;
+      letter-spacing: 0.4em; text-transform: uppercase;
+      color: var(--cherry-text);
+    }
+    .tpl-card__name {
+      font-family: var(--display);
+      font-size: 1.7rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .tpl-card__desc {
+      color: var(--muted);
+      font-weight: 300;
+      font-size: 0.98rem;
+      flex: 1;
+    }
+    .tpl-card__badge {
+      position: absolute; top: 1.2rem; right: 1.2rem;
+      font-family: var(--sans);
+      font-size: 0.56rem; letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--cherry-text);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    .tpl-card.is-current .tpl-card__badge { opacity: 1; }
+    .tpl-card__row { display: flex; gap: 1.4rem; align-items: center; margin-top: 0.8rem; flex-wrap: wrap; }
+    .tpl-choose {
+      font-family: var(--sans);
+      font-size: 0.62rem; font-weight: 400;
+      letter-spacing: 0.28em; text-transform: uppercase;
+      color: var(--ink);
+      background: transparent;
+      border: 1px solid var(--cherry);
+      padding: 0.75rem 1.4rem;
+      cursor: pointer;
+      transition: background 0.3s, color 0.3s;
+      min-height: 44px;
+    }
+    .tpl-choose:hover { background: var(--cherry); color: #fff; }
+    .tpl-card.is-current .tpl-choose { border-color: var(--line); pointer-events: none; opacity: 0.45; }
+    .tpl-preview {
+      font-family: var(--sans);
+      font-size: 0.62rem; font-weight: 300;
+      letter-spacing: 0.28em; text-transform: uppercase;
+      color: var(--blue-pale);
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 0.3rem;
+      transition: color 0.3s, border-color 0.3s;
+    }
+    .tpl-preview:hover { color: var(--cherry-text); border-color: var(--cherry); }
+    .tpl-note {
+      margin-top: 2.2rem;
+      font-style: italic; font-weight: 300;
+      color: var(--blue-pale);
+      min-height: 1.6em;
+    }
+    .tpl-enter {
+      margin-top: 2.6rem;
+      font-family: var(--sans);
+      font-size: 0.64rem; font-weight: 300;
+      letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--muted);
+      transition: color 0.3s;
+    }
+    .tpl-enter:hover { color: var(--blue-pale); }
+  </style>
+</head>
+<body>
+
+  <div class="atmosphere" aria-hidden="true">
+    <div class="aurora aurora--cherry"></div>
+    <div class="aurora aurora--blue"></div>
+    <div class="grain"></div>
+  </div>
+
+  <main>
+    <section class="tpl-page">
+      <p class="tpl-page__kicker">settings · the world has two forms</p>
+      <h1 class="tpl-page__title">Templates</h1>
+      <p class="tpl-page__sub">
+        Choose how the site opens. Both forms carry the same words, art,
+        moods and curator uploads — only the way a visitor moves through
+        the world changes.
+      </p>
+
+      <div class="tpl-cards">
+        <article class="tpl-card" id="card1">
+          <span class="tpl-card__badge">current</span>
+          <span class="tpl-card__num">template 1</span>
+          <h2 class="tpl-card__name">The Descent</h2>
+          <p class="tpl-card__desc">
+            One flowing page — a slow dive from the surface to the sea floor.
+            Everything moves with the scroll: sections drift in and out,
+            the hero sinks away, the book opens as you reach it, the water
+            darkens the deeper you go.
+          </p>
+          <div class="tpl-card__row">
+            <button class="tpl-choose" type="button" data-choose="1">use this form</button>
+            <a class="tpl-preview" href="index.html?stay">preview →</a>
+          </div>
+        </article>
+
+        <article class="tpl-card" id="card2">
+          <span class="tpl-card__badge">current</span>
+          <span class="tpl-card__num">template 2</span>
+          <h2 class="tpl-card__name">The Stages</h2>
+          <p class="tpl-card__desc">
+            A deck of thirteen full-screen scenes — nothing scrolls like a page.
+            Each element of the poetry is its own act with the whole sea
+            re-tinting around it; the book leans toward the cursor; music,
+            photography and film play as composed stages.
+          </p>
+          <div class="tpl-card__row">
+            <button class="tpl-choose" type="button" data-choose="2">use this form</button>
+            <a class="tpl-preview" href="template2.html">preview →</a>
+          </div>
+        </article>
+      </div>
+
+      <p class="tpl-note" id="tplNote"></p>
+
+      <a class="tpl-enter" href="index.html" id="enterLink">enter the site →</a>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+      var root = document.documentElement;
+      try {
+        var saved = localStorage.getItem("cdn-theme");
+        if (saved === "fire" || saved === "noir") root.dataset.theme = saved;
+      } catch (e) {}
+
+      var note = document.getElementById("tplNote");
+      var enter = document.getElementById("enterLink");
+
+      function current() {
+        try { return localStorage.getItem("cdn-template") === "2" ? "2" : "1"; }
+        catch (e) { return "1"; }
+      }
+      function paint() {
+        var cur = current();
+        document.getElementById("card1").classList.toggle("is-current", cur === "1");
+        document.getElementById("card2").classList.toggle("is-current", cur === "2");
+        enter.href = cur === "2" ? "template2.html" : "index.html?stay";
+      }
+      document.querySelectorAll("[data-choose]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          try { localStorage.setItem("cdn-template", btn.dataset.choose); } catch (e) {}
+          paint();
+          note.textContent = "Saved — the site now opens as Template " + btn.dataset.choose +
+            (btn.dataset.choose === "1" ? " · The Descent." : " · The Stages.");
+        });
+      });
+      paint();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="fire">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cherry DN — Poet · Musician · Filmmaker</title>
+  <meta name="description" content="Cherry DN is a multidisciplinary artist — poetry, music, photography and film. Enter the world of Underwater Fire." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%8D%92%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Italiana&family=Archivo:wght@200;300;400;500&display=swap" rel="stylesheet" />
+  <script>document.documentElement.classList.add("js");</script>
+  <script>
+    /* template switch: settings.html can lock the site to Template 2 (The Stages) */
+    try {
+      if (localStorage.getItem("cdn-template") === "2" &&
+          !new URLSearchParams(location.search).has("stay")) {
+        location.replace("template2.html" + location.hash);
+      }
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ======= ATMOSPHERE (aurora + embers + grain) ======= -->
+  <div class="atmosphere" aria-hidden="true">
+    <div class="aurora aurora--cherry"></div>
+    <div class="aurora aurora--blue"></div>
+    <canvas id="embers"></canvas>
+    <div class="grain"></div>
+  </div>
+
+  <!-- ======= NAVIGATION ======= -->
+  <header class="nav" id="top">
+    <a class="nav__monogram" href="#top" aria-label="Cherry DN — home">C<span>·</span>DN</a>
+
+    <nav class="nav__links" aria-label="Primary">
+      <a href="#about">About</a>
+      <a href="#elements">Poetry</a>
+      <a href="#book">The Book</a>
+      <a href="#music">Music</a>
+      <a href="#photography">Photography</a>
+      <a href="#film">Film</a>
+      <a href="#shop">Shop</a>
+      <a href="#contact">Contact</a>
+    </nav>
+
+    <div class="nav__right">
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch color mood">
+        <span class="theme-toggle__dot"></span>
+        <span class="theme-toggle__label" data-label>Underwater&nbsp;Fire</span>
+      </button>
+      <a class="nav__settings" href="settings.html" title="Templates — choose the site’s form" aria-label="Templates">✦</a>
+      <button class="nav__burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile overlay menu -->
+  <div class="menu" id="menu" aria-hidden="true">
+    <nav class="menu__links" aria-label="Mobile">
+      <a href="#about"><em>01</em>About</a>
+      <a href="#elements"><em>02</em>Poetry</a>
+      <a href="#book"><em>03</em>The Book</a>
+      <a href="#music"><em>04</em>Music</a>
+      <a href="#photography"><em>05</em>Photography</a>
+      <a href="#film"><em>06</em>Film</a>
+      <a href="#shop"><em>07</em>Shop</a>
+      <a href="#contact"><em>08</em>Contact</a>
+    </nav>
+    <p class="menu__foot">poet · musician · filmmaker</p>
+  </div>
+
+  <main>
+
+    <!-- ======= HERO ======= -->
+    <section class="hero">
+      <p class="hero__kicker" data-reveal>a world by</p>
+      <h1 class="hero__name">
+        <span class="hero__line hero__line--accent" data-reveal>Cherry</span>
+        <span class="hero__line hero__line--initials" data-reveal>DN</span>
+      </h1>
+      <p class="hero__roles" data-reveal>
+        <span>poet</span><span>musician</span><span>filmmaker</span><span>photographer</span>
+      </p>
+      <p class="hero__tag" data-reveal data-edit="hero-tag"><em>underwater fire</em> — where the deep burns quietly.</p>
+      <a class="hero__scroll" href="#about" aria-label="Scroll down">
+        <span class="hero__scroll-line"></span>
+        <span class="hero__scroll-word">descend</span>
+      </a>
+    </section>
+
+    <!-- ======= ABOUT ======= -->
+    <section class="about section" id="about">
+      <div class="section__head" data-flow="left">
+        <span class="section__num">01</span>
+        <h2 class="section__title">The Artist</h2>
+      </div>
+
+      <div class="about__grid">
+        <figure class="about__portrait" data-flow="left">
+          <div class="portrait-frame">
+            <div class="portrait-frame__art"></div>
+            <span class="portrait-frame__caption">portrait — still developing</span>
+          </div>
+        </figure>
+
+        <div class="about__text">
+          <p class="about__lede" data-flow data-lag="1" data-edit="about-lede">
+            Cherry DN is a multidisciplinary artist working at the meeting point of
+            <em>word, sound and image</em> — where a poem becomes a song, a song becomes a film,
+            and a film becomes a way of remembering.
+          </p>
+          <p data-flow data-lag="2" data-edit="about-body">
+            Her work moves like water over embers — unhurried, low-lit, warm beneath
+            the surface. Through poetry collections, original music, photography and short film,
+            she traces one long story — a becoming, told in elements.
+          </p>
+          <blockquote class="about__quote" data-flow data-lag="3" data-edit="about-quote">
+            “I don’t separate the disciplines.<br />They are one voice, wearing different dresses.”
+          </blockquote>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======= ELEMENTS / POETRY JOURNEY ======= -->
+    <section class="elements section" id="elements">
+      <div class="section__head" data-flow="right">
+        <span class="section__num">02</span>
+        <h2 class="section__title">Poetry — the Elements</h2>
+        <p class="section__sub" data-edit="elements-sub">Read it the way she lived it — element by element.<br/>Four stages. One becoming.</p>
+      </div>
+
+      <ol class="elements__list">
+        <li class="element element--water" data-flow>
+          <span class="element__numeral">I<span class="element__greek">ὕδωρ</span></span>
+          <div class="element__body">
+            <h3 class="element__name">Water</h3>
+            <p class="element__theme" data-edit="el1-theme">dissolving — grief, memory, surrender</p>
+            <p class="element__verse" data-edit="el1-verse">“I practiced drowning<br/>until the sea mistook me<br/>for one of her own.”</p>
+          </div>
+          <span class="element__glyph element__glyph--water" data-drift="-0.07" aria-hidden="true"></span>
+        </li>
+
+        <li class="element element--fire" data-flow>
+          <span class="element__numeral">II<span class="element__greek">πῦρ</span></span>
+          <div class="element__body">
+            <h3 class="element__name">Fire</h3>
+            <p class="element__theme" data-edit="el2-theme">igniting — desire, anger, awakening</p>
+            <p class="element__verse" data-edit="el2-verse">“Even underwater<br/>something in me<br/>refused to go out.”</p>
+          </div>
+          <span class="element__glyph element__glyph--fire" data-drift="-0.07" aria-hidden="true"></span>
+        </li>
+
+        <li class="element element--earth" data-flow>
+          <span class="element__numeral">III<span class="element__greek">γῆ</span></span>
+          <div class="element__body">
+            <h3 class="element__name">Earth</h3>
+            <p class="element__theme" data-edit="el3-theme">rooting — healing, body, belonging</p>
+            <p class="element__verse" data-edit="el3-verse">“The earth took my ashes<br/>without asking<br/>what they had been.”</p>
+          </div>
+          <span class="element__glyph element__glyph--earth" data-drift="-0.07" aria-hidden="true"></span>
+        </li>
+
+        <li class="element element--air" data-flow>
+          <span class="element__numeral">IV<span class="element__greek">ἀήρ</span></span>
+          <div class="element__body">
+            <h3 class="element__name">Air</h3>
+            <p class="element__theme" data-edit="el4-theme">releasing — forgiveness, flight, return</p>
+            <p class="element__verse" data-edit="el4-verse">“What the water kept,<br/>what the fire spared —<br/>I exhale, and it is sky.”</p>
+          </div>
+          <span class="element__glyph element__glyph--air" data-drift="-0.07" aria-hidden="true"></span>
+        </li>
+      </ol>
+    </section>
+
+    <!-- ======= THE BOOK ======= -->
+    <section class="book section" id="book">
+      <div class="section__head" data-flow="left">
+        <span class="section__num">03</span>
+        <h2 class="section__title">The Book</h2>
+      </div>
+
+      <div class="book__grid">
+        <div class="book__stage" data-flow="scale">
+          <div class="bookcover" aria-label="Book cover — Underwater Fire, poems by Cherry DN">
+            <div class="bookcover__spine"></div>
+            <div class="bookcover__front">
+              <span class="bookcover__topline">poems</span>
+              <span class="bookcover__title">Underwater<br/>Fire</span>
+              <span class="bookcover__author">Cherry DN</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="book__text">
+          <p class="book__lede" data-flow data-lag="1" data-edit="book-lede">
+            <em>Underwater Fire</em> is a poetry collection in four movements — water, fire,
+            earth, air — charting a woman’s becoming from dissolution to flight.
+          </p>
+          <p data-flow data-lag="2" data-edit="book-body">
+            Available as a signed first edition, with hand-numbered copies and
+            an art print of the cover.
+          </p>
+
+          <div class="book__gift" data-flow data-lag="3">
+            <div class="qr" aria-hidden="true">
+              <svg viewBox="0 0 21 21" class="qr__svg">
+                <path d="M0 0h7v7H0zM2 2h3v3H2zM14 0h7v7h-7zM16 2h3v3h-3zM0 14h7v7H0zM2 16h3v3H2zM9 0h1v2H9zM11 1h2v1h-2zM9 3h2v2H9zM12 4h1v3h-1zM9 6h2v1H9zM0 9h2v1H0zM3 9h2v2H3zM6 9h1v1H6zM8 9h2v2H8zM11 9h1v1h-1zM13 8h1v2h-1zM15 9h2v1h-2zM18 9h1v2h-1zM20 8h1v3h-1zM1 11h1v2H1zM4 12h2v1H4zM7 11h1v2H7zM10 12h2v2h-2zM14 11h2v2h-2zM17 12h2v1h-2zM9 14h1v3H9zM11 15h2v1h-2zM14 14h1v2h-1zM16 15h2v2h-2zM19 14h2v1h-2zM9 18h2v2H9zM12 17h1v2h-1zM14 18h3v1h-3zM18 17h1v2h-1zM20 16h1v2h-1zM12 20h2v1h-2zM16 20h2v1h-2zM19 20h2v1h-2z"/>
+              </svg>
+            </div>
+            <div class="book__gift-text">
+              <h3 data-edit="gift-title">The hidden gift</h3>
+              <p data-edit="gift-body">Every printed copy carries a QR code inside the cover. Scan it,
+              and the audiobook — read by Cherry — arrives as a gift, free with the book.</p>
+              <a class="gift-link" href="gift.html">preview the gift page →</a>
+            </div>
+          </div>
+
+          <a class="btn" href="#shop" data-flow data-lag="4">Reserve a signed edition</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======= MUSIC ======= -->
+    <section class="music section" id="music">
+      <div class="section__head" data-flow="right">
+        <span class="section__num">04</span>
+        <h2 class="section__title">Music</h2>
+        <p class="section__sub" data-edit="music-sub">Songs from the same water, wherever you listen.</p>
+      </div>
+
+      <ul class="tracks">
+        <li class="track" data-flow data-track="1">
+          <button class="track__play" type="button" aria-label="Play Saltwater Hymn"></button>
+          <div class="track__meta">
+            <span class="track__title" data-edit="track1-title">Saltwater Hymn</span>
+            <span class="track__note" data-edit="track1-note">single — from the Water movement</span>
+          </div>
+          <span class="track__len" data-edit="track1-len">3:47</span>
+        </li>
+        <li class="track" data-flow data-lag="1" data-track="2">
+          <button class="track__play" type="button" aria-label="Play Ember (Don’t Go Out)"></button>
+          <div class="track__meta">
+            <span class="track__title" data-edit="track2-title">Ember (Don’t Go Out)</span>
+            <span class="track__note" data-edit="track2-note">single — from the Fire movement</span>
+          </div>
+          <span class="track__len" data-edit="track2-len">4:12</span>
+        </li>
+        <li class="track" data-flow data-lag="2" data-track="3">
+          <button class="track__play" type="button" aria-label="Play Seeds / Ashes"></button>
+          <div class="track__meta">
+            <span class="track__title" data-edit="track3-title">Seeds / Ashes</span>
+            <span class="track__note" data-edit="track3-note">demo — from the Earth movement</span>
+          </div>
+          <span class="track__len" data-edit="track3-len">2:58</span>
+        </li>
+        <li class="track track--unreleased" data-flow data-lag="3" data-track="4">
+          <button class="track__play" type="button" aria-label="Play Exhale (It Is Sky)"></button>
+          <div class="track__meta">
+            <span class="track__title" data-edit="track4-title">Exhale (It Is Sky)</span>
+            <span class="track__note" data-edit="track4-note">unreleased — from the Air movement</span>
+          </div>
+          <span class="track__len" data-edit="track4-len">—:—</span>
+        </li>
+      </ul>
+
+      <div class="music__platforms" data-flow="fade">
+        <span class="music__platforms-label">streaming</span>
+        <a href="#" class="platform">Spotify</a>
+        <a href="#" class="platform">Apple Music</a>
+        <a href="#" class="platform">YouTube</a>
+        <a href="#" class="platform">Bandcamp</a>
+      </div>
+    </section>
+
+    <!-- ======= PHOTOGRAPHY ======= -->
+    <section class="photo section" id="photography">
+      <div class="section__head" data-flow="left">
+        <span class="section__num">05</span>
+        <h2 class="section__title">Photography</h2>
+        <p class="section__sub" data-edit="photo-sub">Visual studies — light behaving like feeling.</p>
+      </div>
+
+      <div class="photo__grid">
+        <figure class="photo__item photo__item--tall" data-flow>
+          <div class="photo__art photo__art--1" data-drift="0.05"></div>
+          <figcaption data-edit="photo-cap-1">Series I — <em>Saltwater</em></figcaption>
+        </figure>
+        <figure class="photo__item" data-flow data-lag="1">
+          <div class="photo__art photo__art--2" data-drift="-0.04"></div>
+          <figcaption data-edit="photo-cap-2">Series II — <em>Ignition</em></figcaption>
+        </figure>
+        <figure class="photo__item" data-flow>
+          <div class="photo__art photo__art--3" data-drift="-0.05"></div>
+          <figcaption data-edit="photo-cap-3">Series III — <em>Root &amp; Bone</em></figcaption>
+        </figure>
+        <figure class="photo__item photo__item--tall" data-flow data-lag="1">
+          <div class="photo__art photo__art--4" data-drift="0.04"></div>
+          <figcaption data-edit="photo-cap-4">Series IV — <em>Open Sky</em></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ======= FILM ======= -->
+    <section class="film section" id="film">
+      <div class="section__head" data-flow="right">
+        <span class="section__num">06</span>
+        <h2 class="section__title">Film</h2>
+        <p class="section__sub" data-edit="film-sub">Moving image — poems meant to be watched in the dark.</p>
+      </div>
+
+      <div class="film__grid">
+        <figure class="film__item" data-flow="scale">
+          <div class="film__still film__still--1">
+            <span class="film__play" aria-hidden="true"></span>
+          </div>
+          <figcaption>
+            <span class="film__title" data-edit="film1-title">Underwater Fire — visual poem</span>
+            <span class="film__note" data-edit="film1-note">short film · 06:24</span>
+          </figcaption>
+        </figure>
+        <figure class="film__item" data-flow="scale" data-lag="1">
+          <div class="film__still film__still--2">
+            <span class="film__play" aria-hidden="true"></span>
+          </div>
+          <figcaption>
+            <span class="film__title" data-edit="film2-title">Saltwater Hymn — official video</span>
+            <span class="film__note" data-edit="film2-note">music video · 03:47</span>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ======= SHOP ======= -->
+    <section class="shop section" id="shop">
+      <div class="section__head" data-flow="right">
+        <span class="section__num">07</span>
+        <h2 class="section__title">Shop</h2>
+        <p class="section__sub" data-edit="shop-sub">Objects from the world — books, prints, signed things.</p>
+      </div>
+
+      <div class="shop__grid">
+        <article class="product" data-flow>
+          <div class="product__art product__art--book">
+            <span class="product__badge">signed</span>
+          </div>
+          <h3 class="product__name" data-edit="prod1-name">Underwater Fire — Signed First Edition</h3>
+          <p class="product__desc" data-edit="prod1-desc">Hand-numbered, signed by Cherry. Audiobook gift included via QR.</p>
+          <div class="product__row">
+            <span class="product__price" data-edit="prod1-price">€34</span>
+            <a class="btn btn--ghost" href="#contact">Reserve</a>
+          </div>
+        </article>
+
+        <article class="product" data-flow data-lag="1">
+          <div class="product__art product__art--print">
+            <span class="product__badge">limited</span>
+          </div>
+          <h3 class="product__name" data-edit="prod2-name">“Ember” — Art Print</h3>
+          <p class="product__desc" data-edit="prod2-desc">Museum-grade giclée, edition of 50. From the Ignition series.</p>
+          <div class="product__row">
+            <span class="product__price" data-edit="prod2-price">€58</span>
+            <a class="btn btn--ghost" href="#contact">Reserve</a>
+          </div>
+        </article>
+
+        <article class="product" data-flow data-lag="2">
+          <div class="product__art product__art--bundle">
+            <span class="product__badge">bundle</span>
+          </div>
+          <h3 class="product__name" data-edit="prod3-name">The Deep — Collector’s Bundle</h3>
+          <p class="product__desc" data-edit="prod3-desc">Signed book, art print, and a handwritten line from the poem of your choosing.</p>
+          <div class="product__row">
+            <span class="product__price" data-edit="prod3-price">€95</span>
+            <a class="btn btn--ghost" href="#contact">Reserve the bundle</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ======= NEWSLETTER ======= -->
+    <section class="letters section" id="letters">
+      <div class="letters__inner" data-flow="fade">
+        <h2 class="letters__title" data-edit="letters-title">Letters from the Deep</h2>
+        <p class="letters__sub" data-edit="letters-sub">New poems, songs and films — sent rarely, written carefully.</p>
+        <form class="letters__form" id="newsletterForm" novalidate>
+          <label class="sr-only" for="email">Email address</label>
+          <input class="letters__input" id="email" name="email" type="email" placeholder="where should the letters find you?" aria-describedby="newsletterErr" required />
+          <button class="btn" type="submit">Receive the letters</button>
+        </form>
+        <p class="letters__ok" id="newsletterOk" role="status" tabindex="-1" hidden>Welcome to the deep. A letter will find you soon.</p>
+        <p class="letters__err" id="newsletterErr" role="alert" hidden>Please enter a valid email address.</p>
+      </div>
+    </section>
+
+    <!-- ======= CONTACT / FOOTER ======= -->
+    <footer class="footer" id="contact">
+      <div class="footer__grid">
+        <div class="footer__block">
+          <h2 class="footer__title">Cherry<br/>DN</h2>
+          <p class="footer__tag" data-edit="footer-tag"><em>underwater fire</em> — where the deep burns quietly.</p>
+        </div>
+
+        <div class="footer__block">
+          <span class="footer__label">contact</span>
+          <a class="footer__mail" href="mailto:hello@cherrydn.art">hello@cherrydn.art</a>
+          <p class="footer__note" data-edit="footer-note">press · bookings · collaborations</p>
+        </div>
+
+        <div class="footer__block">
+          <span class="footer__label">follow</span>
+          <nav class="footer__social" aria-label="Social media">
+            <a href="#">Instagram</a>
+            <a href="#">YouTube</a>
+            <a href="#">Spotify</a>
+            <a href="#">TikTok</a>
+          </nav>
+        </div>
+      </div>
+
+      <div class="footer__base">
+        <span>© 2026 Cherry DN. All rights reserved.</span>
+        <button class="footer__curate" id="curateBtn" type="button">✦ curate</button>
+        <a class="footer__curate" href="settings.html">✦ templates</a>
+        <a href="#top" class="footer__up">back to the surface ↑</a>
+      </div>
+    </footer>
+
+  </main>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
