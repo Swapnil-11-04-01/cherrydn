@@ -311,7 +311,7 @@ body::after {
   line-height: 1.05;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--red);
+  color: #A32C3A;
 }
 .page__tag {
   margin-top: 1rem;
@@ -423,9 +423,8 @@ body::after {
   padding: 0.95rem 1.2rem;
   border-bottom: 1px solid var(--line);
   cursor: pointer;
-  font-size: 0.74rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
   color: var(--muted);
   transition: background 0.3s, color 0.3s;
 }
@@ -475,7 +474,7 @@ body::after {
 .wlist { list-style: none; }
 .wl {
   display: grid;
-  grid-template-columns: 130px 1fr;
+  grid-template-columns: 150px 1fr;
   gap: 1.8rem;
   padding: 1.8rem 0;
   border-bottom: 1px solid var(--line);
@@ -483,7 +482,7 @@ body::after {
 .wl:first-child { border-top: 1px solid var(--line); }
 .wl__thumb {
   position: relative;
-  aspect-ratio: 1;
+  aspect-ratio: 4 / 3;
   border: 1px solid var(--line);
   overflow: hidden;
   background: radial-gradient(ellipse at 45% 55%, rgba(142, 31, 45, 0.4), transparent 60%), linear-gradient(160deg, #141013, #0b090b);
@@ -806,3 +805,27 @@ html.js [data-r].is-in { opacity: 1; transform: none; }
   .melodies { grid-template-columns: 1fr; }
   .melodies__art { max-width: 300px; }
 }
+
+
+/* nav cherry glyph */
+.nav__cherry { width: 15px; display: inline-flex; }
+.nav__cherry svg { width: 100%; fill: var(--red); }
+
+/* film player control bar (decorative, like the mock) */
+.filmbox__bar {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  display: flex; align-items: center; gap: 1rem;
+  padding: 0.5rem 0.9rem;
+  background: linear-gradient(to top, rgba(6, 11, 12, 0.85), transparent);
+  color: var(--ink);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  z-index: 1;
+}
+.filmbox__t { flex: 1; text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+
+/* view-all rows */
+.viewall { margin-top: 2.4rem; text-align: center; }
+
+/* script signature, like the mock */
+.about-sig { font-family: "Great Vibes", "Cormorant Garamond", cursive; font-style: normal; font-size: 2.6rem; }
