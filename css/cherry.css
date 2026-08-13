@@ -21,7 +21,10 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+/* the clip lives here, not on body: overflow on body makes BODY the scroll
+   container, and every view timeline then attaches to something that never
+   scrolls, so scroll-driven animations sit inactive forever. */
+html { scroll-behavior: smooth; overflow-x: clip; }
 body {
   background: var(--bg);
   color: var(--ink);
@@ -29,7 +32,6 @@ body {
   font-weight: 300;
   font-size: 16px;
   line-height: 1.7;
-  overflow-x: clip;
 }
 img { max-width: 100%; display: block; }
 a { color: inherit; text-decoration: none; }
@@ -1060,10 +1062,13 @@ html.js .page__head[data-r] { opacity: 1; transform: none; transition: none; }
   content: "";
   position: absolute; inset: 0;
   border: 1px solid transparent;
-  transition: border-color 0.5s, inset 0.5s;
+  /* inset is not compositable; scale the frame instead so it never
+     janks against a scroll-driven animation */
+  transition: border-color 0.5s, transform 0.5s;
+  transform: scale(1);
   pointer-events: none;
 }
-.vitem:hover::after { border-color: rgba(142, 31, 45, 0.55); inset: 8px; }
+.vitem:hover::after { border-color: rgba(142, 31, 45, 0.55); transform: scale(0.955); }
 
 .wl__thumb img { transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1); }
 .wl:hover .wl__thumb img { transform: scale(1.05); }
@@ -1999,9 +2004,9 @@ body[data-persona="dn"] .dstage__half--cherry .dstage__name::after {
    ============================================================ */
 .astage {
   position: relative;
-  overflow: hidden;
-  content-visibility: auto;
-  contain-intrinsic-size: auto 92svh;
+  /* clip, not hidden: hidden kills position:sticky in descendants.
+     content-visibility is gone for the same reason. */
+  overflow: clip;
   min-height: 92svh;
   display: grid;
   place-items: center;
@@ -2018,7 +2023,9 @@ body[data-persona="dn"] .dstage__half--cherry .dstage__name::after {
   left: 0; right: 0; bottom: 0;
   height: 22svh;
   background: linear-gradient(to bottom, transparent, rgba(12, 23, 24, 0.12) 26%, rgba(12, 23, 24, 0.34) 48%, rgba(12, 23, 24, 0.64) 66%, rgba(12, 23, 24, 0.88) 80%, var(--bg) 92%);
-  z-index: 2;
+  /* the veil dissolves the weather, never the words: it must sit under
+     .astage__body, which is z-index 1 */
+  z-index: 0;
   pointer-events: none;
 }
 .astage__body { position: relative; z-index: 1; max-width: 900px; }
@@ -2577,4 +2584,312 @@ body[data-persona="dn"] .dstage__half--cherry .dstage__name::after {
   font-style: italic;
   font-size: 1.08rem;
   color: var(--muted);
+}
+
+/* ============================================================
+   THE DIVE — surface · hold · submerge
+   The page stops being a column of content and becomes a body of
+   water you descend through. Native scroll is the only transport:
+   nothing here intercepts the wheel, so trackpads, keyboards,
+   scrollbars and thumbs all behave exactly as the reader expects.
+
+   THE BASE-STATE LAW: every keyframe's `from` is the resting design
+   that already ships. Animations may only replay an arrival or add a
+   departure, never gate content into existence. Anything whose `to`
+   is a "gone" state lives inside @supports, so a browser without
+   scroll timelines simply sees the site as it is today.
+   ============================================================ */
+
+@property --tide {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+/* the depth gauge: how deep you are, bleeding Cherry red into DN steel */
+.gauge {
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  width: 2px;
+  z-index: 45;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(185, 174, 163, 0.1), rgba(185, 174, 163, 0.02));
+}
+.gauge__fill {
+  position: absolute;
+  left: 0; top: 0; right: 0;
+  height: 100%;
+  transform-origin: top;
+  transform: scaleY(0);
+  background: linear-gradient(to bottom, var(--red), #5E7476);
+}
+@media (prefers-reduced-motion: reduce) { .gauge { display: none; } }
+
+@supports (animation-timeline: scroll()) {
+  .gauge__fill {
+    animation: gauge-fill linear both;
+    animation-timeline: scroll(root block);
+  }
+  @keyframes gauge-fill { to { transform: scaleY(1); } }
+}
+
+@supports (animation-timeline: view()) {
+
+  /* ---- the stage holds, then submerges ------------------------------
+     The title card does not scroll away like a paragraph. It stays in
+     frame while the reader pushes past it, then sinks. */
+  /* one row, the full height of the stage: a sticky child can only
+     travel as far as its own grid area, so the area must be the dive. */
+  .astage {
+    min-height: 148svh;
+    /* an auto column sizes to its widest child and can exceed the
+       viewport; pin the track to the container instead */
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 1fr;
+    padding: 0 1.5rem;
+    /* the stage's own passage is the clock every layer animates against.
+       view() on a layer would be useless: a 100svh layer has a
+       zero-length `contain` range. */
+    view-timeline: --stage block;
+  }
+  /* every layer shares that cell so they stack instead of stacking UP.
+     ::after is a grid item too and must be named explicitly. */
+  .astage > *, .astage::after { grid-area: 1 / 1; align-self: start; }
+  /* the stage sets place-items:center, which stops grid items stretching.
+     The weather layers hold absolutely-positioned children, so without an
+     explicit width they collapse to zero and their lines wrap one word per
+     row. Every full-bleed layer must be told to span the cell. */
+  .astage__drift, .astage__rings, .astage__proj, .astage__her,
+  .astage .dstage__crown, .astage::after {
+    justify-self: stretch;
+    width: 100%;
+  }
+  .astage__body { justify-self: center; width: min(900px, 100%); }
+  /* the projector beam keeps its own geometry: it was centred by
+     left:50% + translateX(-50%), which a grid item must not inherit */
+  .astage__beam {
+    justify-self: center;
+    left: auto;
+    width: min(120vmin, 100%);
+    height: 100svh;
+    transform: none;
+  }
+  /* the book's bloom and the wax seal are absolutely positioned, so they
+     measure against the whole 148svh stage: pull them back into frame */
+  .astage--book::before { top: 34%; }
+  .astage--letter::before { top: 40%; }
+  /* contact stays the short, still room at the end of the descent */
+  .astage--letter { min-height: 92svh; }
+
+  /* film: the body is now the sticky viewport box, so the cinema screen
+     moves onto the inner block or it stretches to full height */
+  .astage__screenlum {
+    width: min(900px, 100%);
+    aspect-ratio: auto;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    padding: 9rem 0 6rem;
+  }
+  .astage__screenlum > div {
+    width: min(74vw, 880px);
+    aspect-ratio: 2.39 / 1;
+    border: 1px solid var(--line);
+    background:
+      radial-gradient(ellipse 80% 95% at 50% 46%, rgba(231, 222, 212, 0.085), rgba(12, 23, 24, 0.35) 80%),
+      linear-gradient(160deg, #101718, #0b0f10);
+    box-shadow: 0 34px 90px rgba(0, 0, 0, 0.55);
+    display: grid;
+    place-items: center;
+    padding: 1.5rem;
+  }
+  @media (max-width: 720px) {
+    .astage__screenlum > div { width: 92vw; padding: 1rem 1.1rem; }
+  }
+  .astage__body {
+    position: sticky;
+    top: 0;
+    min-height: 100svh;
+    display: grid;
+    place-content: center;
+    padding: 9rem 0 6rem;
+    animation: submerge linear both;
+    animation-timeline: --stage;
+    animation-range: contain 12% contain 100%;
+  }
+  @keyframes submerge {
+    0%   { opacity: 1; transform: none; }
+    62%  { opacity: 1; transform: translateY(-2vh); }
+    100% { opacity: 0; transform: translateY(-12vh) scale(0.965); }
+  }
+
+  /* the weather holds with it, and deepens as you go under */
+  .astage__drift, .astage__rings, .astage__proj, .astage__her {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    inset: auto;
+    animation: weather-deepen linear both;
+    animation-timeline: --stage;
+    animation-range: contain 0% contain 100%;
+  }
+  @keyframes weather-deepen {
+    from { opacity: 1; transform: scale(1); }
+    to   { opacity: 0.25; transform: scale(1.08); }
+  }
+  .astage__beam { position: sticky; top: 0; }
+  .astage .dstage__crown {
+    position: sticky;
+    top: 0;
+    padding-top: 6.2rem;
+    height: 100svh;
+    animation: crown-lift linear both;
+    animation-timeline: --stage;
+    animation-range: contain 0% contain 55%;
+  }
+  @keyframes crown-lift {
+    from { opacity: 1; transform: none; }
+    to   { opacity: 0; transform: translateY(-2.6rem); }
+  }
+  /* the estuary floods upward as the stage goes under */
+  .astage::after {
+    height: 100svh;
+    position: sticky;
+    top: 0;
+    animation: estuary-flood linear both;
+    animation-timeline: --stage;
+    animation-range: contain 0% contain 100%;
+  }
+  @keyframes estuary-flood {
+    from { opacity: 0.35; transform: translateY(78svh); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---- the acts: each phase pins its name while its work passes ---- */
+  .phase__head {
+    position: sticky;
+    /* clear the fixed nav, or the pinned element name hides behind it */
+    top: 5.4rem;
+    z-index: 3;
+    padding: 1.9rem 0 1.5rem;
+    margin-bottom: 0.6rem;
+    background: linear-gradient(to bottom, var(--bg) 0 84%, rgba(12, 23, 24, 0.92) 93%, transparent);
+    animation: plate-settle linear both;
+    animation-timeline: view();
+    animation-range: entry 60% contain 12%;
+  }
+  @keyframes plate-settle {
+    from { opacity: 0; transform: translateY(26px); }
+    to   { opacity: 1; transform: none; }
+  }
+  /* the element's name, huge and half-drowned, behind her lines only */
+  .wlist { position: relative; }
+  .phase[data-el] .wlist::before {
+    content: attr(data-el);
+    position: absolute;
+    left: 50%; top: 8%;
+    transform: translateX(-50%);
+    font-family: var(--display);
+    font-size: clamp(6rem, 22vw, 15rem);
+    letter-spacing: 0.06em;
+    line-height: 1;
+    color: var(--el, var(--red-display));
+    opacity: 0.06;
+    pointer-events: none;
+    z-index: 0;
+    white-space: nowrap;
+    animation: watermark-drift linear both;
+    animation-timeline: view();
+    animation-range: cover 0% cover 100%;
+  }
+  @keyframes watermark-drift {
+    from { transform: translate(-50%, 6vh); }
+    to   { transform: translate(-50%, -6vh); }
+  }
+  .wl, .vitem { position: relative; z-index: 1; }
+
+  /* ---- arrivals scrubbed by scroll, so scrolling back rewinds them --
+     staggered by animation-range, never by animation-delay: a delay
+     cannot play backwards. */
+  .vgrid .vitem {
+    animation: surface linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 86%;
+  }
+  .vgrid .vitem:nth-child(3n+2) { animation-range: entry 0% entry 96%; }
+  .vgrid .vitem:nth-child(3n+3) { animation-range: entry 0% cover 6%; }
+  @keyframes surface {
+    from { opacity: 0; transform: translateY(38px) scale(0.985); }
+    to   { opacity: 1; transform: none; }
+  }
+  .wlist .wl {
+    animation: surface linear both;
+    animation-timeline: view();
+    animation-range: entry 10% entry 92%;
+  }
+
+  /* the poem you are level with is the one lit */
+  .wl { transition: opacity 0.6s ease; }
+  .wlist:has(.wl:hover) .wl:not(:hover) { opacity: 0.45; }
+
+  /* ---- the landing: depth, without touching the approved frame ---- */
+  .landing .hero__img {
+    animation: hero-sink linear both;
+    animation-timeline: view();
+    animation-range: cover 0% cover 100%;
+  }
+  @keyframes hero-sink {
+    from { transform: scale(1.04) translateY(0); }
+    to   { transform: scale(1.12) translateY(4vh); }
+  }
+  .landing .hero__body {
+    animation: submerge linear both;
+    animation-timeline: view();
+    animation-range: exit 0% exit 100%;
+  }
+  .landing .portal {
+    animation: surface linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 92%;
+  }
+  .landing .portal:nth-child(2) { animation-range: entry 0% cover 4%; }
+  .landing .portal:nth-child(3) { animation-range: entry 0% cover 8%; }
+
+  /* ---- the coda and the closing lines rise out of the dark -------- */
+  .stage-page--music .page::before,
+  .astage + .page::before {
+    animation: thread-draw linear both;
+    animation-timeline: view();
+    animation-range: entry 20% cover 8%;
+  }
+  @keyframes thread-draw {
+    from { transform: scaleY(0); opacity: 0; }
+    to   { transform: scaleY(1); opacity: 1; }
+  }
+  .restline, .endline, .filmline {
+    animation: surface linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 90%;
+  }
+
+  /* contact is the one room where nothing moves: after a whole site of
+     descent, stillness is the strongest beat available */
+  body:has(.astage--letter) .astage__body { animation: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .astage { min-height: 92svh; align-content: center; padding: 10rem 1.5rem 7rem; }
+    .astage > * { grid-area: auto; }
+    .astage__body, .astage__drift, .astage__rings, .astage__proj,
+    .astage__her, .astage__beam, .astage .dstage__crown, .astage::after,
+    .phase__head, .vgrid .vitem, .wlist .wl, .landing .hero__img,
+    .landing .hero__body, .landing .portal, .restline, .endline, .filmline,
+    .phase[data-el] .wlist::before, .astage + .page::before {
+      animation: none !important;
+      position: static;
+    }
+    .astage__drift, .astage__rings, .astage__proj, .astage__her { position: absolute; }
+    .astage::after { position: absolute; height: 22svh; }
+    .astage .dstage__crown { position: absolute; height: auto; padding-top: 0; }
+    .phase__head { position: static; background: none; }
+  }
 }

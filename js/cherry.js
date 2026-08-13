@@ -8,6 +8,18 @@
 
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  /* one owner of the scroll lock. The menu and the lightbox both used to
+     write body.style.overflow directly, so closing one released the other. */
+  var locks = 0;
+  function lockScroll(on) {
+    locks = Math.max(0, locks + (on ? 1 : -1));
+    document.body.style.overflow = locks ? "hidden" : "";
+  }
+  function releaseAllLocks() {
+    locks = 0;
+    document.body.style.overflow = "";
+  }
+
   /* ---------- page breath ---------- */
   requestAnimationFrame(function () {
     requestAnimationFrame(function () {
@@ -52,7 +64,7 @@
       menu.classList.toggle("is-open", open);
       burger.classList.toggle("is-open", open);
       burger.setAttribute("aria-expanded", String(open));
-      document.body.style.overflow = open ? "hidden" : "";
+      lockScroll(open);
     });
   }
 
@@ -215,7 +227,7 @@
       var live = works.filter(function (w) { return !w.hidden && w.querySelector("img"); });
       show(live.indexOf(fig));
       lbox.hidden = false;
-      document.body.style.overflow = "hidden";
+      lockScroll(true);
       /* flush layout so the fade has a start frame. rAF would stall while
          the tab is throttled and the overlay could open invisible. */
       void lbox.offsetWidth;
@@ -224,7 +236,7 @@
     }
     function closeBox() {
       lbox.classList.remove("is-open");
-      document.body.style.overflow = "";
+      lockScroll(false);
       var done = function () { lbox.hidden = true; lImg.removeAttribute("src"); };
       if (reduced) done(); else setTimeout(done, 260);
       if (opener) opener.focus();
@@ -268,7 +280,7 @@
       burger.classList.remove("is-open");
       burger.setAttribute("aria-expanded", "false");
     }
-    document.body.style.overflow = "";
+    releaseAllLocks();
     stopAll();
   });
   document.addEventListener("keydown", function (e) {
