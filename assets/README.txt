@@ -15,3 +15,4 @@ audio/spoken-01.mp3 ... spoken-05.mp3 audiobook chapters
 
 Drop a file in, commit, push — the site picks it up. Until then every slot
 shows a designed fallback, never a broken image.
+book-cover.webp        the book page cover (typographic cover shows until this arrives)

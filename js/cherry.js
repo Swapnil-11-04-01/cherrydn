@@ -211,16 +211,60 @@
     }
   });
 
-  /* ---------- contact → opens a written letter ---------- */
+  /* ---------- contact → the letter sends itself ---------- */
   var cform = document.getElementById("cform");
   if (cform) {
+    var cstatus = document.getElementById("cstatus");
+    var csend = document.getElementById("csend");
+
+    /* arriving from the book page: the letter already knows why */
+    var about = new URLSearchParams(location.search).get("about");
+    if (about === "book" && cform.subject && !cform.subject.value) {
+      cform.subject.value = "Reserving a copy of the book";
+    }
+
+    function say(text, kind) {
+      if (!cstatus) return;
+      cstatus.textContent = text;
+      cstatus.className = "form-status" + (kind ? " form-status--" + kind : "");
+      cstatus.hidden = false;
+    }
+
     cform.addEventListener("submit", function (e) {
+      var endpoint = cform.dataset.endpoint;
+      if (!endpoint) return;               // no endpoint: let the plain POST happen
       e.preventDefault();
-      var f = cform;
-      var subject = (f.subject.value || "A whisper from the site").trim();
-      var body = "From: " + f.name.value.trim() + " <" + f.email.value.trim() + ">\n\n" + f.message.value.trim();
-      location.href = "mailto:cherrydn.contact@gmail.com?subject=" +
-        encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+      if (cform.classList.contains("is-sending")) return;
+      cform.classList.add("is-sending");
+      if (csend) csend.textContent = "sending";
+      say("Sending your letter.", null);
+
+      var payload = {
+        name: cform.name.value.trim(),
+        email: cform.email.value.trim(),
+        subject: (cform.subject.value || "A whisper from the site").trim(),
+        message: cform.message.value.trim(),
+        _subject: (cform.subject.value || "A whisper from the site").trim(),
+        _captcha: "false"
+      };
+
+      fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify(payload)
+      }).then(function (r) {
+        if (!r.ok) throw new Error("bad status " + r.status);
+        return r.json().catch(function () { return {}; });
+      }).then(function () {
+        cform.reset();
+        say("Your letter has been sent.", "sent");
+        if (csend) csend.textContent = "sent";
+      }).catch(function () {
+        say("The letter did not go through. Write to cherrydn.contact@gmail.com and it will reach her.", "error");
+        if (csend) csend.textContent = "send →";
+      }).then(function () {
+        cform.classList.remove("is-sending");
+      });
     });
   }
 })();

@@ -10,31 +10,33 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Inter:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Great+Vibes&display=swap" rel="stylesheet" />
   <script>document.documentElement.classList.add("js");if(!("onpagereveal" in window))document.documentElement.classList.add("fade");</script>
-  <link rel="stylesheet" href="css/cherry.css?v=17" />
+  <link rel="stylesheet" href="css/cherry.css?v=18" />
 </head>
 <body class="stage-page">
 
   <header class="nav">
     <a class="nav__logo" href="index.html">CHERRY&nbsp;DN</a>
     <nav class="nav__links" aria-label="Primary">
-      <a href="music.html">Music</a>
       <a href="written-word.html">Written Word</a>
-      <a href="spoken-word.html">Spoken Word</a>
       <a href="visuals.html">Visuals</a>
+      <a href="spoken-word.html">Spoken Word</a>
       <a href="film.html">Film</a>
+      <a href="music.html">Music</a>
       <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
     </nav>
     <span class="nav__cherry" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12.6 2.2c-.3 2.8-1.7 5.2-3.9 7.1l.9 1c1.4-1.2 2.5-2.6 3.3-4.2.6 1.7 1.6 3.2 3 4.4l.9-1c-2-1.8-3.1-4.3-2.9-7.1l-1.3-.2z"/><circle cx="7.6" cy="15.6" r="4.4"/><circle cx="16.4" cy="16.6" r="3.7"/></svg></span>
-    <a class="nav__cta" href="contact.html">Contact</a>
+    <a class="nav__cta" href="book.html">Take a Dive</a>
     <button class="nav__burger" id="burger" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span></button>
   </header>
 
   <div class="menu" id="menu">
-    <a href="music.html">Music</a>
+    <a href="book.html">The Book</a>
     <a href="written-word.html">Written Word</a>
-    <a href="spoken-word.html">Spoken Word</a>
     <a href="visuals.html">Visuals</a>
+    <a href="spoken-word.html">Spoken Word</a>
     <a href="film.html">Film</a>
+    <a href="music.html">Music</a>
     <a href="about.html">About</a>
     <a href="contact.html">Contact</a>
   </div>
@@ -53,7 +55,9 @@
   </section>
 
     <div class="page">
-    <form class="cform" id="cform" data-r>
+    <form class="cform" id="cform" data-r
+          action="https://formsubmit.co/cherrydn.contact@gmail.com" method="POST"
+          data-endpoint="https://formsubmit.co/ajax/cherrydn.contact@gmail.com">
       <label class="sr-only" for="cname">Name</label>
       <input id="cname" name="name" type="text" placeholder="Name" required />
       <label class="sr-only" for="cemail">Email</label>
@@ -62,8 +66,12 @@
       <input id="csubject" name="subject" type="text" placeholder="Subject" />
       <label class="sr-only" for="cmessage">Message</label>
       <textarea id="cmessage" name="message" placeholder="Message" required></textarea>
-      <div><button class="rlink" type="submit">send &rarr;</button></div>
-      <p class="form-note">Send opens your mail app with the letter ready, or write directly to cherrydn.contact@gmail.com.</p>
+      <input class="sr-only" type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" />
+      <input type="hidden" name="_captcha" value="false" />
+      <input type="hidden" name="_template" value="table" />
+      <div><button class="rlink" id="csend" type="submit">send &rarr;</button></div>
+      <p class="form-status" id="cstatus" role="status" aria-live="polite" hidden></p>
+      <p class="form-note">Your letter goes straight to Cherry. She reads everything.</p>
     </form>
 
     <div class="contact-meta" data-r>
@@ -76,11 +84,11 @@
   </main>
 
   <footer class="foot">
-    <p class="foot__line">Beauty is a wound that blooms anyway. <em class="foot__sig">cd.</em></p>
+    <p class="foot__line">Beauty is a wound that blooms anyway.</p>
     <div class="foot__cherry"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.6 2.2c-.3 2.8-1.7 5.2-3.9 7.1l.9 1c1.4-1.2 2.5-2.6 3.3-4.2.6 1.7 1.6 3.2 3 4.4l.9-1c-2-1.8-3.1-4.3-2.9-7.1l-1.3-.2z"/><circle cx="7.6" cy="15.6" r="4.4"/><circle cx="16.4" cy="16.6" r="3.7"/></svg></div>
     <p class="foot__meta">© 2026 Cherry DN &nbsp;·&nbsp; <a href="mailto:cherrydn.contact@gmail.com">cherrydn.contact@gmail.com</a> &nbsp;·&nbsp; <a href="https://instagram.com/cherry.dn" rel="noopener">@cherry.dn</a></p>
   </footer>
 
-  <script src="js/cherry.js?v=17"></script>
+  <script src="js/cherry.js?v=18"></script>
 </body>
 </html>

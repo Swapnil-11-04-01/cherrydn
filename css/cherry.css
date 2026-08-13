@@ -2252,3 +2252,144 @@ body[data-persona="dn"] .dstage__half--cherry .dstage__name::after {
   .astage__proj img:first-child { opacity: 0.85; }
   .astage__screenlum { width: 92vw; padding: 1rem 1.1rem; }
 }
+
+/* ============================================================
+   THE GRAVITY OF HER ART — five worlds on the landing in her
+   order, and the book they all grew out of
+   ============================================================ */
+.landing .portals { grid-template-columns: repeat(6, 1fr); }
+.landing .portal:nth-child(-n+3) { grid-column: span 2; }
+.landing .portal:nth-child(n+4) { grid-column: span 3; aspect-ratio: 16 / 9; }
+@media (max-width: 1240px) and (min-width: 1081px) {
+  .nav__links { gap: 1.25rem; }
+  .landing .nav__links a { font-size: 0.76rem; letter-spacing: 0.16em; }
+}
+@media (max-width: 780px) {
+  .landing .portal:nth-child(-n+3),
+  .landing .portal:nth-child(n+4) { grid-column: auto; aspect-ratio: 16 / 11; }
+}
+
+/* --- 00 · the book: the heart, held up out of the dark --- */
+.astage--book::before {
+  content: "";
+  position: absolute;
+  left: 50%; top: 52%;
+  width: 58vmin; height: 58vmin;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(142, 31, 45, 0.26), rgba(142, 31, 45, 0.06) 48%, transparent 72%);
+  filter: blur(30px);
+  z-index: 0;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .astage--book::before { animation: seal-breathe 8s ease-in-out infinite alternate; }
+}
+.bookobj {
+  position: relative;
+  width: min(268px, 56vw);
+  aspect-ratio: 2 / 3;
+  margin: 0 auto 2.6rem;
+  border: 1px solid rgba(231, 222, 212, 0.18);
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 18%, rgba(142, 31, 45, 0.3), transparent 62%),
+    linear-gradient(155deg, #17090d 0%, #0e1315 72%);
+  box-shadow: 0 42px 90px rgba(0, 0, 0, 0.62);
+  display: grid; place-items: center;
+  padding: 2rem 1.5rem;
+  overflow: hidden;
+  transform: perspective(1400px) rotateY(-9deg);
+  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.bookobj:hover { transform: perspective(1400px) rotateY(0deg) translateY(-5px); }
+.bookobj::before {   /* the spine */
+  content: "";
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 14px;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.6), transparent);
+  z-index: 2;
+}
+.bookobj img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+.bookobj__face { position: relative; z-index: 0; text-align: center; }
+.bookobj__title {
+  font-family: var(--display);
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  letter-spacing: 0.09em;
+  line-height: 1.14;
+  color: var(--ink);
+}
+.bookobj__rule { display: block; width: 26px; height: 1px; background: var(--red-display); margin: 1.2rem auto; }
+.bookobj__by {
+  font-size: 0.56rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.book-page { max-width: 860px; text-align: center; }
+.book-lede {
+  font-family: var(--poetic);
+  font-style: italic;
+  font-size: 1.2rem;
+  line-height: 1.7;
+  color: var(--ink);
+  max-width: 54ch;
+  margin: 0 auto 3.6rem;
+}
+.movements {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.6rem;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 2.6rem 0;
+  margin-bottom: 3.6rem;
+}
+.mv__no {
+  font-family: var(--display);
+  font-size: 0.72rem;
+  letter-spacing: 0.3em;
+  color: var(--red-display);
+}
+.mv__name {
+  font-family: var(--display);
+  font-size: 1.5rem;
+  letter-spacing: 0.06em;
+  margin: 0.5rem 0 0.6rem;
+}
+.mv__theme {
+  font-family: var(--poetic);
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--muted);
+}
+.reserve { margin-top: 1rem; }
+.reserve__title {
+  font-family: var(--display);
+  font-size: 1.7rem;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.9rem;
+}
+.reserve__text {
+  font-family: var(--poetic);
+  font-style: italic;
+  font-size: 1.08rem;
+  color: var(--muted);
+  max-width: 46ch;
+  margin: 0 auto 1.7rem;
+}
+.book-page .giftpanel { text-align: left; margin-bottom: 3.4rem; }
+@media (max-width: 720px) {
+  .movements { grid-template-columns: repeat(2, 1fr); gap: 2rem 1.2rem; }
+}
+
+/* the letter's answer, spoken in place */
+.form-status {
+  margin-top: 1.1rem;
+  font-family: var(--poetic);
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+.form-status--sent { color: var(--red-display); }
+.form-status--error { color: var(--muted); }
+.cform.is-sending button[type="submit"] { opacity: 0.5; pointer-events: none; }
