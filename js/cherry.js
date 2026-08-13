@@ -253,12 +253,25 @@
         headers: { "Content-Type": "application/json", "Accept": "application/json" },
         body: JSON.stringify(payload)
       }).then(function (r) {
-        if (!r.ok) throw new Error("bad status " + r.status);
-        return r.json().catch(function () { return {}; });
-      }).then(function () {
-        cform.reset();
-        say("Your letter has been sent.", "sent");
-        if (csend) csend.textContent = "sent";
+        return r.json().catch(function () { return {}; }).then(function (data) {
+          return { ok: r.ok, data: data || {} };
+        });
+      }).then(function (res) {
+        /* only say "sent" when the service confirms it really was:
+           an unactivated form answers 200 with success false */
+        if (res.ok && String(res.data.success) === "true") {
+          cform.reset();
+          say("Your letter has been sent.", "sent");
+          if (csend) csend.textContent = "sent";
+          return;
+        }
+        var msg = String(res.data.message || "").toLowerCase();
+        if (msg.indexOf("activat") > -1 || msg.indexOf("confirm") > -1) {
+          say("This letterbox is not switched on yet. Write to cherrydn.contact@gmail.com and it will reach her.", "error");
+        } else {
+          say("The letter did not go through. Write to cherrydn.contact@gmail.com and it will reach her.", "error");
+        }
+        if (csend) csend.textContent = "send →";
       }).catch(function () {
         say("The letter did not go through. Write to cherrydn.contact@gmail.com and it will reach her.", "error");
         if (csend) csend.textContent = "send →";
