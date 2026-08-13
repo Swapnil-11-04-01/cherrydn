@@ -216,7 +216,10 @@
       show(live.indexOf(fig));
       lbox.hidden = false;
       document.body.style.overflow = "hidden";
-      requestAnimationFrame(function () { lbox.classList.add("is-open"); });
+      /* flush layout so the fade has a start frame. rAF would stall while
+         the tab is throttled and the overlay could open invisible. */
+      void lbox.offsetWidth;
+      lbox.classList.add("is-open");
       lClose.focus();
     }
     function closeBox() {

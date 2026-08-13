@@ -2501,3 +2501,6 @@ body[data-persona="dn"] .dstage__half--cherry .dstage__name::after {
 @media (max-width: 720px) {
   .bookhero { grid-template-columns: 1fr; justify-items: center; text-align: center; }
 }
+
+/* the crown never touches the edges of a phone */
+.dstage__crown { padding-inline: 1.3rem; }
