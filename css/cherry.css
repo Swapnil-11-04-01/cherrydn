@@ -2504,3 +2504,77 @@ body[data-persona="dn"] .dstage__half--cherry .dstage__name::after {
 
 /* the crown never touches the edges of a phone */
 .dstage__crown { padding-inline: 1.3rem; }
+
+/* ============================================================
+   THE FOUR PHASES — her elemental growth, the same movements
+   as the book, so the site reads as evolution not a dump
+   ============================================================ */
+.phase { margin-top: 4.6rem; }
+.phase:first-of-type { margin-top: 1.4rem; }
+.phase__head {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  margin-bottom: 2.4rem;
+}
+.phase__no {
+  font-family: var(--display);
+  font-size: 0.72rem;
+  letter-spacing: 0.4em;
+  color: var(--el, var(--red-display));
+}
+.phase__name {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(1.9rem, 4.4vw, 2.9rem);
+  letter-spacing: 0.16em;
+  margin: 0.5rem 0 0.7rem;
+  color: var(--ink);
+}
+.phase__name::after {
+  content: "";
+  display: block;
+  width: 38px; height: 1px;
+  margin: 0.9rem auto 0;
+  background: var(--el, var(--red-display));
+  opacity: 0.7;
+}
+.phase__theme {
+  font-family: var(--poetic);
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--muted);
+  margin-top: 0.9rem;
+}
+.phase--water { --el: #6E9BA6; }
+.phase--fire  { --el: var(--red-display); }
+.phase--earth { --el: #C0A275; }
+.phase--air   { --el: #C9C2B6; }
+.phase .wl:first-child { border-top: 1px solid var(--line); }
+
+.restline {
+  margin-top: 3.4rem;
+  text-align: center;
+  font-family: var(--poetic);
+  font-style: italic;
+  font-size: 1.18rem;
+  color: var(--ink);
+}
+.restline + .viewall { margin-top: 0.9rem; text-align: center; }
+
+/* her own frame, at the ratio the film was shot in */
+.filmbox--strip {
+  aspect-ratio: 691 / 1536;
+  max-width: 330px;
+  margin: 0 auto;
+  background: #000;
+}
+.filmbox--strip img { object-fit: contain; }
+.filmline {
+  margin-top: 1.6rem;
+  text-align: center;
+  font-family: var(--poetic);
+  font-style: italic;
+  font-size: 1.08rem;
+  color: var(--muted);
+}
