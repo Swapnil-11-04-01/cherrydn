@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Archive · Cherry DN</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%8D%92%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Inter:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0C1718; --bg2: #111E20; --red: #8E1F2D; --red-t: #C05263;
+      --ink: #E7DED4; --muted: #B9AEA3; --line: rgba(185, 174, 163, 0.16);
+      --display: "Bodoni Moda", Didot, serif; --ui: Inter, system-ui, sans-serif;
+      --poetic: "Cormorant Garamond", Georgia, serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--ink); font-family: var(--ui); font-weight: 300; line-height: 1.6; }
+    a { color: var(--red-t); }
+
+    .bar {
+      position: sticky; top: 0; z-index: 10;
+      display: flex; align-items: center; gap: 1.2rem;
+      padding: 1rem 1.6rem;
+      background: color-mix(in srgb, var(--bg) 92%, transparent);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+    }
+    .bar__logo { font-family: var(--display); letter-spacing: 0.3em; font-size: 0.95rem; }
+    .bar__spacer { flex: 1; }
+    .bar small { color: var(--muted); font-size: 0.66rem; letter-spacing: 0.24em; text-transform: uppercase; }
+
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 2.4rem 1.6rem 6rem; }
+
+    /* the door */
+    .gate { max-width: 420px; margin: 14vh auto; text-align: center; padding: 0 1.4rem; }
+    .gate h1 { font-family: var(--display); font-size: clamp(2rem, 6vw, 3rem); letter-spacing: 0.08em; font-weight: 400; }
+    .gate p { font-family: var(--poetic); font-style: italic; color: var(--muted); margin: 1rem 0 2rem; font-size: 1.1rem; }
+    .gate input { width: 100%; margin-bottom: 1rem; }
+    #gateMsg { min-height: 1.4em; margin-top: 1.1rem; font-family: var(--poetic); font-style: italic; color: var(--red-t); }
+
+    input, textarea, select {
+      width: 100%; background: var(--bg2); color: var(--ink);
+      border: 1px solid var(--line); border-radius: 0;
+      padding: 0.72rem 0.85rem; font-family: var(--ui); font-size: 0.92rem;
+    }
+    textarea { font-family: var(--poetic); font-size: 1rem; line-height: 1.55; resize: vertical; }
+    input:focus, textarea:focus, select:focus { outline: 1px solid var(--red-t); outline-offset: 1px; }
+
+    .btn {
+      font-family: var(--ui); font-size: 0.6rem; letter-spacing: 0.26em; text-transform: uppercase;
+      color: var(--ink); background: transparent; border: 1px solid var(--red);
+      padding: 0.7rem 1.3rem; cursor: pointer; min-height: 40px;
+      transition: background 0.3s, color 0.3s;
+    }
+    .btn:hover { background: var(--red); }
+    .btn--ghost { border-color: var(--line); color: var(--muted); }
+    .btn--ghost:hover { background: transparent; border-color: var(--red); color: var(--red-t); }
+
+    .tabs { display: flex; gap: 0.6rem; margin-bottom: 1.8rem; flex-wrap: wrap; }
+    .tabs button {
+      font-family: var(--ui); font-size: 0.6rem; letter-spacing: 0.26em; text-transform: uppercase;
+      background: none; border: 1px solid var(--line); color: var(--muted);
+      padding: 0.65rem 1.2rem; cursor: pointer;
+    }
+    .tabs button.is-on { color: var(--ink); border-color: var(--red); }
+
+    .status { min-height: 1.5em; font-family: var(--poetic); font-style: italic; color: var(--muted); margin-bottom: 1rem; }
+    .status--ok { color: var(--red-t); }
+    .status--bad { color: #E0864F; }
+
+    .grp { margin-bottom: 2.6rem; }
+    .grp h3 {
+      font-family: var(--display); font-weight: 400; font-size: 1.25rem;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      padding-bottom: 0.6rem; border-bottom: 1px solid var(--line); margin-bottom: 1.2rem;
+    }
+    .grp h3 em { color: var(--muted); font-style: normal; font-size: 0.7rem; letter-spacing: 0.2em; }
+    .empty { color: var(--muted); font-family: var(--poetic); font-style: italic; }
+
+    .card {
+      display: grid; grid-template-columns: 150px 1fr; gap: 1.2rem;
+      background: var(--bg2); border: 1px solid var(--line);
+      padding: 1.1rem; margin-bottom: 1rem;
+    }
+    .card--text { grid-template-columns: 1fr; }
+    .card__thumb { position: relative; aspect-ratio: 1; background: #0a1112; border: 1px solid var(--line); overflow: hidden; }
+    .card__thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .card__thumb span { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font-size: 0.65rem; letter-spacing: 0.2em; }
+    .card__body { display: grid; gap: 0.75rem; min-width: 0; }
+
+    .f { display: grid; gap: 0.32rem; }
+    .f > span { font-size: 0.58rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); }
+    .f--check { grid-auto-flow: column; justify-content: start; align-items: center; gap: 0.5rem; }
+    .f--check input { width: auto; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; align-items: end; }
+    .row--end { display: flex; justify-content: flex-end; gap: 0.7rem; }
+
+    .drop {
+      border: 1px dashed var(--line); padding: 2.2rem 1.4rem; text-align: center;
+      cursor: pointer; margin-bottom: 1.6rem; transition: border-color 0.3s, background 0.3s;
+    }
+    .drop:hover, .drop.is-over { border-color: var(--red); background: rgba(142, 31, 45, 0.06); }
+    .drop strong { display: block; font-family: var(--display); font-size: 1.1rem; letter-spacing: 0.1em; font-weight: 400; }
+    .drop span { color: var(--muted); font-family: var(--poetic); font-style: italic; }
+    .uprow { display: grid; grid-template-columns: 1fr 200px; gap: 1rem; align-items: end; margin-bottom: 1rem; }
+
+    @media (max-width: 720px) {
+      .card { grid-template-columns: 1fr; }
+      .row, .uprow { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="bar">
+    <span class="bar__logo">CHERRY&nbsp;DN</span>
+    <small>the archive</small>
+    <span class="bar__spacer"></span>
+    <small id="who"></small>
+    <button class="btn btn--ghost" id="signout" type="button" hidden>sign out</button>
+  </header>
+
+  <!-- the door -->
+  <section class="gate" id="gate" hidden>
+    <h1>THE ARCHIVE</h1>
+    <p>This door is yours alone. Enter your address and a link will arrive that signs you in. There is no password to remember or lose.</p>
+    <form id="gateForm">
+      <label class="f"><span>your email</span>
+        <input id="email" type="email" autocomplete="email" placeholder="you@example.com" required />
+      </label>
+      <div style="margin-top:1rem"><button class="btn" type="submit">send me the link</button></div>
+    </form>
+    <p id="gateMsg"></p>
+  </section>
+
+  <!-- the desk -->
+  <main class="wrap" id="desk" hidden>
+    <div class="tabs">
+      <button type="button" data-pane="works" class="is-on">visuals</button>
+      <button type="button" data-pane="pieces">written word</button>
+    </div>
+
+    <p class="status" id="status"></p>
+
+    <section id="uploader">
+      <div class="uprow">
+        <div>
+          <label class="f"><span>new work goes into</span>
+            <select id="newPhase">
+              <option value="water">water</option>
+              <option value="fire">fire</option>
+              <option value="earth">earth</option>
+              <option value="air">air</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <div class="drop" id="drop">
+        <strong>Add artwork</strong>
+        <span>drop images here, or click to choose</span>
+      </div>
+      <input id="picker" type="file" accept="image/*" multiple hidden />
+    </section>
+
+    <div id="works"></div>
+    <div id="pieces" hidden></div>
+
+    <p style="margin-top:2rem">
+      <button class="btn btn--ghost" id="addPiece" type="button">add a written piece</button>
+    </p>
+  </main>
+
+  <script src="js/cherry-config.js?v=1"></script>
+  <script src="js/cherry-admin.js?v=1"></script>
+</body>
+</html>

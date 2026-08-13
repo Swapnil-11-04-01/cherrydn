@@ -71,21 +71,25 @@
   }
 
   /* ---------- reveals ---------- */
-  var revealEls = document.querySelectorAll("[data-r], .page__head");
-  if ("IntersectionObserver" in window &&
-      !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    var io = new IntersectionObserver(function (entries) {
+  var io = null;
+  if ("IntersectionObserver" in window && !reduced) {
+    io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         if (e.isIntersecting) { e.target.classList.add("is-in"); io.unobserve(e.target); }
       });
     }, { threshold: 0.1 });
-    revealEls.forEach(function (el, i) {
+  }
+  function observeReveals() {
+    var els = document.querySelectorAll("[data-r], .page__head");
+    els.forEach(function (el, i) {
+      if (el.dataset.watched) return;
+      el.dataset.watched = "1";
+      if (!io) { el.classList.add("is-in"); return; }
       el.style.transitionDelay = Math.min(i % 6 * 0.07, 0.4) + "s";
       io.observe(el);
     });
-  } else {
-    revealEls.forEach(function (el) { el.classList.add("is-in"); });
   }
+  observeReveals();
 
   /* ---------- filter tabs (written word, visuals) ---------- */
   document.querySelectorAll("[data-tabs]").forEach(function (tabs) {
@@ -104,13 +108,18 @@
   });
 
   /* ---------- read toggles (written word) ---------- */
-  document.querySelectorAll(".wl__read").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      var wl = btn.closest(".wl");
-      var open = wl.classList.toggle("is-open");
-      btn.textContent = open ? "close" : "read \u2192";
+  function bindReadToggles(root) {
+    (root || document).querySelectorAll(".wl__read").forEach(function (btn) {
+      if (btn.dataset.bound) return;
+      btn.dataset.bound = "1";
+      btn.addEventListener("click", function () {
+        var wl = btn.closest(".wl");
+        var open = wl.classList.toggle("is-open");
+        btn.textContent = open ? "close" : "read \u2192";
+      });
     });
-  });
+  }
+  bindReadToggles();
 
   /* ---------- audio (music + spoken word) ----------
      Rows carry data-src pointing into assets/audio/.
@@ -197,6 +206,7 @@
   }
 
   /* ---------- the wall opens: an artwork, held up with her words ---------- */
+  var bindWorks = null;
   var lbox = document.getElementById("lbox");
   if (lbox) {
     var works = [].slice.call(document.querySelectorAll(".vitem"));
@@ -245,12 +255,18 @@
     }
     function step(d) { show(at + d); }
 
-    works.forEach(function (fig) {
-      fig.addEventListener("click", function () { if (fig.querySelector("img")) openAt(fig); });
-      fig.addEventListener("keydown", function (e) {
-        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fig.click(); }
+    bindWorks = function () {
+      works = [].slice.call(document.querySelectorAll(".vitem"));
+      works.forEach(function (fig) {
+        if (fig.dataset.bound) return;
+        fig.dataset.bound = "1";
+        fig.addEventListener("click", function () { if (fig.querySelector("img")) openAt(fig); });
+        fig.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fig.click(); }
+        });
       });
-    });
+    };
+    bindWorks();
     lClose.addEventListener("click", closeBox);
     lPrev.addEventListener("click", function () { step(-1); });
     lNext.addEventListener("click", function () { step(1); });
@@ -291,6 +307,14 @@
       burger.focus();
     }
   });
+
+  /* the archive can re-render a wall or a list from the database after
+     load; give it one way to wake the behaviour back up */
+  window.CherryRebind = function () {
+    observeReveals();
+    bindReadToggles();
+    if (typeof bindWorks === "function") bindWorks();
+  };
 
   /* ---------- contact → the letter sends itself ---------- */
   var cform = document.getElementById("cform");
