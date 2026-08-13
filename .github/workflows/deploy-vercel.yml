@@ -1,0 +1,54 @@
+name: Deploy to Vercel
+
+# Publishes the site to cherrydn.vercel.app on every push to main, so the
+# live site never depends on a chat connector being reachable.
+#
+# Dormant until the repository has a VERCEL_TOKEN secret:
+#   GitHub → Settings → Secrets and variables → Actions → New repository secret
+#   Name: VERCEL_TOKEN   Value: a token from vercel.com/account/tokens
+# Without the secret every run exits quietly, so nothing turns red.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG_ID: team_Sy8Lc483FLiqyhnLtnXjti0J
+      VERCEL_PROJECT_ID: prj_fcPMjEIkTiSKhRItn8uN0v2nh9XR
+    steps:
+      - name: Check for a deploy token
+        id: guard
+        run: |
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "No VERCEL_TOKEN secret set. Skipping deploy."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check out the site
+        if: steps.guard.outputs.ready == 'true'
+        uses: actions/checkout@v4
+
+      - name: Assemble the static output
+        if: steps.guard.outputs.ready == 'true'
+        run: |
+          cat > package.json <<'JSON'
+          {
+            "name": "cherrydn",
+            "private": true,
+            "scripts": {
+              "build": "mkdir -p out && cp -R index.html book.html music.html written-word.html spoken-word.html visuals.html film.html about.html contact.html gift.html css js assets out/"
+            }
+          }
+          JSON
+
+      - name: Publish
+        if: steps.guard.outputs.ready == 'true'
+        run: |
+          npm install --global vercel@latest
+          vercel deploy --prod --yes --token "${{ secrets.VERCEL_TOKEN }}"
