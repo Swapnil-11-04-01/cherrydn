@@ -182,6 +182,70 @@
     });
   }
 
+  /* ---------- the wall opens: an artwork, held up with her words ---------- */
+  var lbox = document.getElementById("lbox");
+  if (lbox) {
+    var works = [].slice.call(document.querySelectorAll(".vitem"));
+    var lImg = document.getElementById("lboxImg");
+    var lTitle = document.getElementById("lboxTitle");
+    var lNote = document.getElementById("lboxNote");
+    var lPrev = document.getElementById("lboxPrev");
+    var lNext = document.getElementById("lboxNext");
+    var lClose = document.getElementById("lboxClose");
+    var at = -1;
+    var opener = null;
+
+    function show(i) {
+      var live = works.filter(function (w) { return !w.hidden && w.querySelector("img"); });
+      if (!live.length) return;
+      at = (i + live.length) % live.length;
+      var fig = live[at];
+      var img = fig.querySelector("img");
+      var cap = fig.querySelector(".vitem__cap");
+      lImg.src = img.getAttribute("src");
+      lImg.alt = cap ? cap.textContent.trim() : "";
+      lTitle.textContent = cap ? cap.textContent.trim() : "";
+      var note = (fig.dataset.note || "").trim();
+      lNote.innerHTML = note;
+      lNote.hidden = !note;
+      lbox._live = live;
+    }
+    function openAt(fig) {
+      opener = fig;
+      var live = works.filter(function (w) { return !w.hidden && w.querySelector("img"); });
+      show(live.indexOf(fig));
+      lbox.hidden = false;
+      document.body.style.overflow = "hidden";
+      requestAnimationFrame(function () { lbox.classList.add("is-open"); });
+      lClose.focus();
+    }
+    function closeBox() {
+      lbox.classList.remove("is-open");
+      document.body.style.overflow = "";
+      var done = function () { lbox.hidden = true; lImg.removeAttribute("src"); };
+      if (reduced) done(); else setTimeout(done, 260);
+      if (opener) opener.focus();
+    }
+    function step(d) { show(at + d); }
+
+    works.forEach(function (fig) {
+      fig.addEventListener("click", function () { if (fig.querySelector("img")) openAt(fig); });
+      fig.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fig.click(); }
+      });
+    });
+    lClose.addEventListener("click", closeBox);
+    lPrev.addEventListener("click", function () { step(-1); });
+    lNext.addEventListener("click", function () { step(1); });
+    lbox.addEventListener("click", function (e) { if (e.target === lbox) closeBox(); });
+    document.addEventListener("keydown", function (e) {
+      if (lbox.hidden) return;
+      if (e.key === "Escape") { e.preventDefault(); closeBox(); }
+      else if (e.key === "ArrowLeft") step(-1);
+      else if (e.key === "ArrowRight") step(1);
+    });
+  }
+
   /* ---------- film box: answer the click ---------- */
   var fb = document.querySelector(".filmbox");
   if (fb) {
@@ -230,8 +294,14 @@
       cstatus.hidden = false;
     }
 
+    /* letters land in Cherry's own inbox. The address is assembled here
+       rather than sitting in the page source for harvesters to scrape;
+       the form's action attribute keeps the public artist address so the
+       page still works with JavaScript off. */
+    var inbox = ["natalia", "domprits", "@", "gmail.com"].join("");
+
     cform.addEventListener("submit", function (e) {
-      var endpoint = cform.dataset.endpoint;
+      var endpoint = cform.dataset.endpoint || ("https://formsubmit.co/ajax/" + inbox);
       if (!endpoint) return;               // no endpoint: let the plain POST happen
       e.preventDefault();
       if (cform.classList.contains("is-sending")) return;
