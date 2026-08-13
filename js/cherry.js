@@ -13,11 +13,13 @@
   var locks = 0;
   function lockScroll(on) {
     locks = Math.max(0, locks + (on ? 1 : -1));
-    document.body.style.overflow = locks ? "hidden" : "";
+    /* the root, not body: overflow lives on html now, so body no longer
+       propagates to the viewport and locking it would do nothing. */
+    document.documentElement.style.overflow = locks ? "hidden" : "";
   }
   function releaseAllLocks() {
     locks = 0;
-    document.body.style.overflow = "";
+    document.documentElement.style.overflow = "";
   }
 
   /* ---------- page breath ---------- */

@@ -24,7 +24,7 @@
 /* the clip lives here, not on body: overflow on body makes BODY the scroll
    container, and every view timeline then attaches to something that never
    scrolls, so scroll-driven animations sit inactive forever. */
-html { scroll-behavior: smooth; overflow-x: clip; }
+html { scroll-behavior: smooth; overflow-x: clip; scrollbar-gutter: stable; }
 body {
   background: var(--bg);
   color: var(--ink);
@@ -2665,6 +2665,8 @@ body[data-persona="dn"] .dstage__half--cherry .dstage__name::after {
     width: 100%;
   }
   .astage__body { justify-self: center; width: min(900px, 100%); }
+  /* the ember rises from beneath the words, expressed for a sticky layer */
+  .astage--voice .astage__rings { inset: auto; top: 0; padding-top: 16svh; }
   /* the projector beam keeps its own geometry: it was centred by
      left:50% + translateX(-50%), which a grid item must not inherit */
   .astage__beam {
@@ -2726,9 +2728,11 @@ body[data-persona="dn"] .dstage__half--cherry .dstage__name::after {
   /* the weather holds with it, and deepens as you go under */
   .astage__drift, .astage__rings, .astage__proj, .astage__her {
     position: sticky;
+    /* the shorthand must come FIRST: `inset: auto` after `top: 0` resets
+       the offset and a sticky box with no offsets never sticks. */
+    inset: auto;
     top: 0;
     height: 100svh;
-    inset: auto;
     animation: weather-deepen linear both;
     animation-timeline: --stage;
     animation-range: contain 0% contain 100%;
@@ -2816,8 +2820,8 @@ body[data-persona="dn"] .dstage__half--cherry .dstage__name::after {
     animation-timeline: view();
     animation-range: entry 0% entry 86%;
   }
-  .vgrid .vitem:nth-child(3n+2) { animation-range: entry 0% entry 96%; }
-  .vgrid .vitem:nth-child(3n+3) { animation-range: entry 0% cover 6%; }
+  .vgrid .vitem:nth-child(3n+2) { animation-range: entry 0% entry 94%; }
+  .vgrid .vitem:nth-child(3n+3) { animation-range: entry 0% entry 100%; }
   @keyframes surface {
     from { opacity: 0; transform: translateY(38px) scale(0.985); }
     to   { opacity: 1; transform: none; }
@@ -2827,21 +2831,33 @@ body[data-persona="dn"] .dstage__half--cherry .dstage__name::after {
     animation-timeline: view();
     animation-range: entry 10% entry 92%;
   }
+  /* opening a poem makes it taller than the scrollport, which re-resolves
+     its entry range and scrubs the arrival BACKWARDS: the reader clicks
+     read and the poem ghosts out. Open pieces leave the timeline. */
+  html.js .wlist .wl.is-open {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  /* one arrival per element. The children scrub on scroll here, so the
+     container's time-based reveal must stand down (it stays the arrival in
+     browsers without scroll timelines, which is why this is scoped). */
+  html.js .wlist[data-r], html.js .vgrid[data-r] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 
   /* the poem you are level with is the one lit */
   .wl { transition: opacity 0.6s ease; }
-  .wlist:has(.wl:hover) .wl:not(:hover) { opacity: 0.45; }
+  /* animation declarations outrank normal ones; only !important wins back */
+  .wlist:has(.wl:hover) .wl:not(:hover) { opacity: 0.45 !important; }
 
   /* ---- the landing: depth, without touching the approved frame ---- */
-  .landing .hero__img {
-    animation: hero-sink linear both;
-    animation-timeline: view();
-    animation-range: cover 0% cover 100%;
-  }
-  @keyframes hero-sink {
-    from { transform: scale(1.04) translateY(0); }
-    to   { transform: scale(1.12) translateY(4vh); }
-  }
+  /* the landing frame was matched to an approved reference and keeps its
+     shipped hero-settle entrance: a sink here bound view() to .hero, which
+     is overflow:hidden and therefore a scroll container with no range. */
   .landing .hero__body {
     animation: submerge linear both;
     animation-timeline: view();
@@ -2852,8 +2868,8 @@ body[data-persona="dn"] .dstage__half--cherry .dstage__name::after {
     animation-timeline: view();
     animation-range: entry 0% entry 92%;
   }
-  .landing .portal:nth-child(2) { animation-range: entry 0% cover 4%; }
-  .landing .portal:nth-child(3) { animation-range: entry 0% cover 8%; }
+  .landing .portal:nth-child(2) { animation-range: entry 0% entry 96%; }
+  .landing .portal:nth-child(3) { animation-range: entry 0% entry 100%; }
 
   /* ---- the coda and the closing lines rise out of the dark -------- */
   .stage-page--music .page::before,
@@ -2874,7 +2890,12 @@ body[data-persona="dn"] .dstage__half--cherry .dstage__name::after {
 
   /* contact is the one room where nothing moves: after a whole site of
      descent, stillness is the strongest beat available */
-  body:has(.astage--letter) .astage__body { animation: none; }
+  /* contact's stage is exactly one viewport tall, so a `contain` range has
+     zero length and fill:both would paint the END state from the first frame,
+     erasing the crown entirely. Stillness here is the design anyway. */
+  body:has(.astage--letter) .astage__body,
+  body:has(.astage--letter) .astage .dstage__crown,
+  body:has(.astage--letter) .astage::after { animation: none; }
 
   @media (prefers-reduced-motion: reduce) {
     .astage { min-height: 92svh; align-content: center; padding: 10rem 1.5rem 7rem; }
