@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Inter:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Great+Vibes&display=swap" rel="stylesheet" />
   <script>document.documentElement.classList.add("js");if(!("onpagereveal" in window))document.documentElement.classList.add("fade");</script>
-  <link rel="stylesheet" href="css/cherry.css?v=26" />
+  <link rel="stylesheet" href="css/cherry.css?v=27" />
 </head>
 <body class="stage-page">
 
@@ -48,25 +48,25 @@
   <section class="astage astage--screen">
       <header class="dstage__crown">
         <p class="crown__num">04 &middot; film</p>
-        <p class="crown__tag">fragments of dreams that refuse to be still.</p>
+        <p data-cms="film_crown_tag" class="crown__tag">fragments of dreams that refuse to be still.</p>
       </header>
       <i class="astage__beam" aria-hidden="true"></i>
       <div class="astage__body astage__screenlum">
         <div>
-          <h1 class="astage__display">MOVING IMAGE</h1>
-          <p class="astage__sub">the films are being cut. first screening soon.</p>
+          <h1 data-cms="film_display" class="astage__display">MOVING IMAGE</h1>
+          <p data-cms="film_sub" class="astage__sub">the films are being cut. first screening soon.</p>
         </div>
       </div>
   </section>
 
     <div class="page">
     <div class="filmbox filmbox--strip" data-r>
-      <img src="assets/film-frame.webp" alt="A frame from Cherry&rsquo;s film" onerror="this.remove()" />
+      <img data-cms-src="film_frame_image" src="assets/film-frame.webp" alt="A frame from Cherry&rsquo;s film" onerror="this.remove()" />
       <div class="filmbox__play" aria-hidden="true"></div>
-      <p class="filmbox__note">The films are being cut. First screening soon.</p>
+      <p data-cms="film_note" class="filmbox__note">The films are being cut. First screening soon.</p>
     </div>
 
-    <p class="filmline" data-r>One frame, kept from the reel.</p>
+    <p data-cms="film_line" class="filmline" data-r>One frame, kept from the reel.</p>
       <p class="filmbox__note">The films are being cut. First screening soon.</p>
     </div>
 
@@ -74,11 +74,15 @@
   </main>
 
   <footer class="foot">
-    <p class="foot__line">Beauty is a wound that blooms anyway.</p>
+    <p class="foot__line" data-cms="site_foot_line">Beauty is a wound that blooms anyway.</p>
     <div class="foot__cherry"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.6 2.2c-.3 2.8-1.7 5.2-3.9 7.1l.9 1c1.4-1.2 2.5-2.6 3.3-4.2.6 1.7 1.6 3.2 3 4.4l.9-1c-2-1.8-3.1-4.3-2.9-7.1l-1.3-.2z"/><circle cx="7.6" cy="15.6" r="4.4"/><circle cx="16.4" cy="16.6" r="3.7"/></svg></div>
     <p class="foot__meta">© 2026 Cherry DN &nbsp;·&nbsp; <a href="mailto:cherrydn.contact@gmail.com">cherrydn.contact@gmail.com</a> &nbsp;·&nbsp; <a href="https://instagram.com/cherry.dn" rel="noopener">@cherry.dn</a></p>
   </footer>
 
-  <script src="js/cherry.js?v=26"></script>
+  <script src="js/cherry-config.js?v=1"></script>
+
+  <script src="js/cherry.js?v=27"></script>
+
+  <script src="js/cherry-data.js?v=2"></script>
 </body>
 </html>

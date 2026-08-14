@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Inter:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Great+Vibes&display=swap" rel="stylesheet" />
   <script>document.documentElement.classList.add("js");if(!("onpagereveal" in window))document.documentElement.classList.add("fade");</script>
-  <link rel="stylesheet" href="css/cherry.css?v=26" />
+  <link rel="stylesheet" href="css/cherry.css?v=27" />
 </head>
 <body>
 
@@ -52,14 +52,14 @@
       <p class="page__tag">For the ones holding the printed book.</p>
     </header>
 
-    <p class="spoken-intro" data-r>You are holding the book. This is its voice:
+    <p data-cms="gift_intro" class="spoken-intro" data-r>You are holding the book. This is its voice:
     <em>The View From Above</em>, read by Cherry, for you.</p>
 
     <div class="giftpanel giftpanel--tall" data-r>
       <div class="giftpanel__qr giftpanel__qr--big" aria-hidden="true"><svg viewBox="0 0 21 21"><path d="M0 0h7v7H0zM2 2h3v3H2zM14 0h7v7h-7zM16 2h3v3h-3zM0 14h7v7H0zM2 16h3v3H2zM9 0h1v2H9zM11 1h2v1h-2zM9 3h2v2H9zM12 4h1v3h-1zM9 6h2v1H9zM0 9h2v1H0zM3 9h2v2H3zM6 9h1v1H6zM8 9h2v2H8zM11 9h1v1h-1zM13 8h1v2h-1zM15 9h2v1h-2zM18 9h1v2h-1zM20 8h1v3h-1zM1 11h1v2H1zM4 12h2v1H4zM7 11h1v2H7zM10 12h2v2h-2zM14 11h2v2h-2zM17 12h2v1h-2zM9 14h1v3H9zM11 15h2v1h-2zM14 14h1v2h-1zM16 15h2v2h-2zM19 14h2v1h-2zM9 18h2v2H9zM12 17h1v2h-1zM14 18h3v1h-3zM18 17h1v2h-1zM20 16h1v2h-1zM12 20h2v1h-2zM16 20h2v1h-2zM19 20h2v1h-2z"/></svg></div>
       <div>
-        <h2 class="giftpanel__title">What this code opens</h2>
-        <p class="giftpanel__text">The recordings are being made in Cherry&rsquo;s own voice.
+        <h2 data-cms="gift_panel_title" class="giftpanel__title">What this code opens</h2>
+        <p data-cms="gift_panel_text" class="giftpanel__text">The recordings are being made in Cherry&rsquo;s own voice.
         Chapters appear on this page as they are finished, beginning with the Prologue.
         Your code does not expire: come back and whatever has been recorded since
         will be waiting.</p>
@@ -71,16 +71,20 @@
       </div>
     </div>
 
-    <p class="endline" data-r>Some things are meant to find you.</p>
+    <p data-cms="gift_endline" class="endline" data-r>Some things are meant to find you.</p>
     </div>
   </main>
 
   <footer class="foot">
-    <p class="foot__line">Beauty is a wound that blooms anyway.</p>
+    <p class="foot__line" data-cms="site_foot_line">Beauty is a wound that blooms anyway.</p>
     <div class="foot__cherry"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.6 2.2c-.3 2.8-1.7 5.2-3.9 7.1l.9 1c1.4-1.2 2.5-2.6 3.3-4.2.6 1.7 1.6 3.2 3 4.4l.9-1c-2-1.8-3.1-4.3-2.9-7.1l-1.3-.2z"/><circle cx="7.6" cy="15.6" r="4.4"/><circle cx="16.4" cy="16.6" r="3.7"/></svg></div>
     <p class="foot__meta">© 2026 Cherry DN &nbsp;·&nbsp; <a href="mailto:cherrydn.contact@gmail.com">cherrydn.contact@gmail.com</a> &nbsp;·&nbsp; <a href="https://instagram.com/cherry.dn" rel="noopener">@cherry.dn</a></p>
   </footer>
 
-  <script src="js/cherry.js?v=26"></script>
+  <script src="js/cherry-config.js?v=1"></script>
+
+  <script src="js/cherry.js?v=27"></script>
+
+  <script src="js/cherry-data.js?v=2"></script>
 </body>
 </html>

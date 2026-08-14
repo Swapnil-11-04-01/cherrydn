@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Inter:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Great+Vibes&display=swap" rel="stylesheet" />
   <script>document.documentElement.classList.add("js");if(!("onpagereveal" in window))document.documentElement.classList.add("fade");</script>
-  <link rel="stylesheet" href="css/cherry.css?v=26" />
+  <link rel="stylesheet" href="css/cherry.css?v=27" />
 </head>
 <body class="stage-page stage-page--music">
 
@@ -48,8 +48,8 @@
   <section class="dstage dstage--hero">
       <header class="dstage__crown">
         <p class="crown__num">05 &middot; music</p>
-        <p class="crown__tag">sound is how i bleed in the dark.</p>
-        <p class="crown__line">the duality of the identity</p>
+        <p data-cms="music_crown_tag" class="crown__tag">sound is how i bleed in the dark.</p>
+        <p data-cms="music_crown_line" class="crown__line">the duality of the identity</p>
       </header>
       <div class="dstage__mist" aria-hidden="true">
         <i class="mist mist--cherry"></i>
@@ -58,7 +58,7 @@
       </div>
       <div class="dstage__half dstage__half--cherry">
         <div class="dstage__inner">
-          <p class="dstage__eyebrow dstage__eyebrow--cherry">the one who feels</p>
+          <p data-cms="music_cherry_eyebrow" class="dstage__eyebrow dstage__eyebrow--cherry">the one who feels</p>
           <h2 class="dstage__name dstage__name--cherry">CHERRY</h2>
           <p class="dstage__desc">Silk, ache, devotion.<br/>Songs sung toward the light.</p>
           <ul class="dlist dlist--cherry">
@@ -77,7 +77,7 @@
       <span class="dstage__amp" aria-hidden="true">&amp;</span>
       <div class="dstage__half dstage__half--dn">
         <div class="dstage__inner">
-          <p class="dstage__eyebrow dstage__eyebrow--dn">the one who watches</p>
+          <p data-cms="music_dn_eyebrow" class="dstage__eyebrow dstage__eyebrow--dn">the one who watches</p>
           <h2 class="dstage__name dstage__name--dn">DN</h2>
           <p class="dstage__desc">Smoke, static, midnight.<br/>Songs from the other side of the door.</p>
           <ul class="dlist dlist--dn">
@@ -108,11 +108,11 @@
 
     <div class="melodies" data-r>
       <div class="melodies__art">
-        <img src="assets/music.webp" alt="" loading="lazy" onerror="this.remove()" />
+        <img data-cms-src="music_melodies_image" src="assets/music.webp" alt="" loading="lazy" onerror="this.remove()" />
       </div>
       <div>
-        <h2 class="melodies__title">A place for haunted melodies</h2>
-        <p class="melodies__text">Melancholy draped in silk.<br/>Intimacy, decay, devotion.<br/>Songs that taste like night air<br/>and something you cannot name.</p>
+        <h2 data-cms="music_melodies_title" class="melodies__title">A place for haunted melodies</h2>
+        <p data-cms="music_melodies_text" class="melodies__text">Melancholy draped in silk.<br/>Intimacy, decay, devotion.<br/>Songs that taste like night air<br/>and something you cannot name.</p>
         <a class="rlink" href="written-word.html">view lyrics / notes &rarr;</a>
       </div>
     </div>
@@ -120,11 +120,15 @@
   </main>
 
   <footer class="foot">
-    <p class="foot__line">Beauty is a wound that blooms anyway.</p>
+    <p class="foot__line" data-cms="site_foot_line">Beauty is a wound that blooms anyway.</p>
     <div class="foot__cherry"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.6 2.2c-.3 2.8-1.7 5.2-3.9 7.1l.9 1c1.4-1.2 2.5-2.6 3.3-4.2.6 1.7 1.6 3.2 3 4.4l.9-1c-2-1.8-3.1-4.3-2.9-7.1l-1.3-.2z"/><circle cx="7.6" cy="15.6" r="4.4"/><circle cx="16.4" cy="16.6" r="3.7"/></svg></div>
     <p class="foot__meta">© 2026 Cherry DN &nbsp;·&nbsp; <a href="mailto:cherrydn.contact@gmail.com">cherrydn.contact@gmail.com</a> &nbsp;·&nbsp; <a href="https://instagram.com/cherry.dn" rel="noopener">@cherry.dn</a></p>
   </footer>
 
-  <script src="js/cherry.js?v=26"></script>
+  <script src="js/cherry-config.js?v=1"></script>
+
+  <script src="js/cherry.js?v=27"></script>
+
+  <script src="js/cherry-data.js?v=2"></script>
 </body>
 </html>

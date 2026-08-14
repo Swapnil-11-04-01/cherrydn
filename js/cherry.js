@@ -151,7 +151,9 @@
     stopAll();
   });
 
-  var rows = document.querySelectorAll("[data-src]");
+  var rows = [];
+  function preflight() {
+  rows = [].slice.call(document.querySelectorAll("[data-src]"));
   var liveCount = 0, checked = 0;
   rows.forEach(function (row) {
     fetch(row.dataset.src, { method: "HEAD" }).then(function (r) {
@@ -168,7 +170,12 @@
       }
     });
   });
+  }
+  function bindRows() {
+  rows = [].slice.call(document.querySelectorAll("[data-src]"));
   rows.forEach(function (row) {
+    if (row.dataset.bound) return;
+    row.dataset.bound = "1";
     row.tabIndex = 0;
     row.setAttribute("role", "button");
     row.addEventListener("keydown", function (e) {
@@ -195,6 +202,9 @@
       });
     });
   });
+  }
+  preflight();
+  bindRows();
   if (playerBtn) {
     playerBtn.addEventListener("click", function () {
       if (currentRow) { stopAll(); return; }
@@ -313,6 +323,8 @@
   window.CherryRebind = function () {
     observeReveals();
     bindReadToggles();
+    bindRows();
+    preflight();
     if (typeof bindWorks === "function") bindWorks();
   };
 
