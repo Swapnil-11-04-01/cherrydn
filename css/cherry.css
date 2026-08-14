@@ -2317,6 +2317,7 @@ body[data-persona="dn"] .dstage__half--cherry .dstage__name::after {
   z-index: 2;
 }
 .bookobj img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+.bookobj img:not([src]) { display: none; }   /* no photograph yet: the type is the cover */
 .bookobj__face { position: relative; z-index: 0; text-align: center; }
 .bookobj__title {
   font-family: var(--display);

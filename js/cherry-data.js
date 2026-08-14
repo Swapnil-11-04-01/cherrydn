@@ -64,16 +64,31 @@
 
     document.querySelectorAll("[data-cms]").forEach(function (el) {
       var v = map[el.dataset.cms];
-      if (v == null || v === "") return;
-      el.innerHTML = clean(v);
+      if (v == null) return;          /* never touched: the shipped HTML stands */
+      el.innerHTML = clean(v);        /* emptied on purpose: honour it */
     });
     document.querySelectorAll("[data-cms-src]").forEach(function (el) {
       var v = map[el.dataset.cmsSrc];
-      if (v == null || v === "") return;
+      if (v == null || v === "") return;   /* an empty image would break the layout */
       var url = plain(v).trim();
       if (/^javascript:/i.test(url)) return;
       if (el.getAttribute("src") !== url) el.setAttribute("src", url);
     });
+    /* the footer address and handle, text and link together */
+    var mail = map.site_email, insta = map.site_instagram;
+    if (mail) {
+      document.querySelectorAll('.foot__meta a[href^="mailto:"]').forEach(function (a) {
+        a.textContent = plain(mail); a.setAttribute("href", "mailto:" + plain(mail));
+      });
+    }
+    if (insta) {
+      document.querySelectorAll('.foot__meta a[href*="instagram"]').forEach(function (a) {
+        var handle = plain(insta).trim();
+        a.textContent = handle;
+        a.setAttribute("href", "https://instagram.com/" + handle.replace(/^@/, ""));
+      });
+    }
+
     /* the four phase themes are shared by the poems and the paintings */
     C.phases.forEach(function (p) {
       var v = map["phase_" + p + "_theme"];
@@ -88,9 +103,9 @@
     var groups = byPhase(rows), touched = 0;
     C.phases.forEach(function (phase) {
       var grid = document.querySelector(".phase--" + phase + " .vgrid");
-      if (!grid || !groups[phase].length) return;
+      if (!grid) return;
       grid.innerHTML = groups[phase].map(function (w, i) {
-        return '<figure tabindex="0" role="button" data-note="' + plain(w.note).replace(/"/g, "&quot;") +
+        return '<figure tabindex="0" role="button" data-cms-row="cherry_works:' + w.id + '" data-note="' + plain(w.note).replace(/"/g, "&quot;") +
           '" class="vitem vg' + (i % 5 + 1) + '" data-r>' +
           '<img src="' + plain(w.image_url).replace(/"/g, "&quot;") + '" alt="' + plain(w.title).replace(/"/g, "&quot;") +
           '" loading="lazy" onerror="this.parentElement.classList.add(\'is-empty\');this.remove()" />' +
@@ -106,9 +121,9 @@
     var groups = byPhase(rows), touched = 0;
     C.phases.forEach(function (phase) {
       var list = document.querySelector(".phase--" + phase + " .wlist");
-      if (!list || !groups[phase].length) return;
+      if (!list) return;
       list.innerHTML = groups[phase].map(function (p) {
-        return '<li class="wl wl--text" data-r><div>' +
+        return '<li class="wl wl--text" data-cms-row="cherry_pieces:' + p.id + '" data-r><div>' +
           '<h2 class="wl__title">' + clean(p.title) + "</h2>" +
           '<p class="wl__kind">' + clean(p.kind) + "</p>" +
           '<p class="wl__excerpt">' + clean(p.excerpt) + "</p>" +
@@ -126,7 +141,7 @@
     var len = '<span class="trk__len">' + clean(t.length || "--:--") + "</span>";
     var name = '<span class="trk__name">' + clean(t.title) + "</span>";
     var no = '<span class="trk__no">' + (t._n < 10 ? "0" + t._n : t._n) + "</span>";
-    return '<li class="trk" data-src="' + plain(t.audio_url).replace(/"/g, "&quot;") +
+    return '<li class="trk" data-cms-row="cherry_tracks:' + t.id + '" data-src="' + plain(t.audio_url).replace(/"/g, "&quot;") +
       '" data-title="' + plain(t.title).replace(/"/g, "&quot;") + '">' +
       (mirrored ? len + name + no : no + name + len) + "</li>";
   }
@@ -137,7 +152,7 @@
       var list = document.querySelector(spec[1]);
       if (!list) return;
       var mine = bySort(rows.filter(function (r) { return r.voice === spec[0]; }));
-      if (!mine.length) return;
+
       mine.forEach(function (t, i) { t._n = i + 1; });
       list.innerHTML = mine.map(function (t) { return trackRow(t, spec[2]); }).join("");
       touched++;
@@ -151,10 +166,10 @@
     var strip = document.querySelector(".strip");
     var touched = 0;
     var doors = bySort(rows.filter(function (r) { return r.kind === "portal"; }));
-    if (grid && doors.length) {
+    if (grid) {
       grid.innerHTML = doors.map(function (p) {
         var slug = plain(p.href).replace(".html", "").replace(/[^a-z0-9-]/gi, "");
-        return '<a class="portal portal--' + slug + '" href="' + plain(p.href).replace(/"/g, "&quot;") + '" data-r>' +
+        return '<a class="portal portal--' + slug + '" data-cms-row="cherry_portals:' + p.id + '" href="' + plain(p.href).replace(/"/g, "&quot;") + '" data-r>' +
           '<div class="portal__fallback"></div>' +
           '<img src="' + plain(p.image_url).replace(/"/g, "&quot;") + '" alt="" loading="lazy" onerror="this.remove()" />' +
           '<div class="portal__veil"></div><div class="portal__text">' +
@@ -164,7 +179,7 @@
       touched++;
     }
     var links = bySort(rows.filter(function (r) { return r.kind === "strip"; }));
-    if (strip && links.length) {
+    if (strip) {
       strip.innerHTML = links.map(function (l) {
         return '<a href="' + plain(l.href).replace(/"/g, "&quot;") + '">' + clean(l.name) + "</a>";
       }).join("");
@@ -175,15 +190,15 @@
 
   /* ---------- ask once, apply what belongs to this page ---------- */
   var page = document.body.dataset.archive || "";
-  var jobs = [api("cherry_settings?select=key,value")];
+  var jobs = [api("cherry_settings?select=key,value&key=neq.desk_trash")];
   jobs.push(page === "visuals"
-    ? api("cherry_works?select=title,phase,note,image_url,sort&published=eq.true") : null);
+    ? api("cherry_works?select=id,title,phase,note,image_url,sort&published=eq.true") : null);
   jobs.push(page === "written"
-    ? api("cherry_pieces?select=title,kind,phase,excerpt,body,sort&published=eq.true") : null);
+    ? api("cherry_pieces?select=id,title,kind,phase,excerpt,body,sort&published=eq.true") : null);
   jobs.push(document.querySelector(".dlist--cherry, .tracklist")
-    ? api("cherry_tracks?select=title,voice,length,audio_url,sort&published=eq.true") : null);
+    ? api("cherry_tracks?select=id,title,voice,length,audio_url,sort&published=eq.true") : null);
   jobs.push(document.querySelector(".portals")
-    ? api("cherry_portals?select=name,blurb,href,image_url,kind,sort&published=eq.true") : null);
+    ? api("cherry_portals?select=id,name,blurb,href,image_url,kind,sort&published=eq.true") : null);
 
   Promise.all(jobs.map(function (j) { return j ? j.catch(function () { return null; }) : null; }))
     .then(function (res) {

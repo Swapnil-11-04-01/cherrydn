@@ -1,207 +1,232 @@
 /* ============================================================
-   WHAT SHE CAN CHANGE
-   One description of the whole site, so the portal builds itself and
-   nothing can drift out of sync. Every key here matches a data-cms
-   hook in the pages.
+   WHAT SHE CAN CHANGE, IN HER OWN WORDS
+   Not one label here is a column name, a CSS class or a team
+   metaphor. Every line is what Cherry reads.
    ============================================================ */
+
+/* the three lines at the top of a page are named identically everywhere,
+   because they are the same three lines everywhere */
+var TOP = function (prefix) {
+  return [
+    { k: prefix + "_crown_tag", label: "The small italic line at the very top" },
+    { k: prefix + "_display", label: "The big title on this page", enter: true },
+    { k: prefix + "_sub", label: "The line just under the big title" }
+  ];
+};
+
 window.CHERRY_SCHEMA = [
   {
-    id: "landing", name: "Landing", num: "—", page: "index.html",
-    blurb: "The first breath. The doors are edited below in Doors.",
+    id: "home", name: "Home page", page: "index.html",
+    blurb: "What people see first.",
     fields: [
-      { k: "landing_hero_image", label: "Hero image", type: "image" },
-      { k: "landing_roles", label: "The trinity", hint: "the dots are <i>·</i>" },
-      { k: "landing_welcome", label: "Welcome line" },
-      { k: "landing_cta", label: "Main button" },
-      { k: "landing_cta2", label: "Second button" }
+      { k: "landing_hero_image", label: "The big photo behind your name", type: "image",
+        hint: "It fills the whole screen, so choose something that reads well very wide." },
+      { k: "landing_roles", label: "The three words under your name",
+        hint: "The site puts the dots between them for you." },
+      { k: "landing_welcome", label: "The sentence under the three words" },
+      { k: "landing_cta", label: "The red button" },
+      { k: "landing_cta2", label: "The outline button" }
+    ],
+    lists: [
+      { id: "portals", title: "The five picture links" },
+      { id: "strip", title: "The three small links underneath" }
     ]
   },
   {
-    id: "doors", name: "Doors", num: "—", page: "index.html",
-    blurb: "The five worlds on the landing, and the quiet links beneath them.",
-    list: "portals"
-  },
-  {
-    id: "book", name: "The Book", num: "00", page: "book.html",
+    id: "book", name: "The Book", page: "book.html",
     blurb: "The heart. Everything else grew out of it.",
-    fields: [
-      { k: "book_crown_tag", label: "Crown line" },
-      { k: "book_display", label: "Title" },
-      { k: "book_sub", label: "Subtitle" },
-      { k: "book_kind", label: "Kind line", hint: "poetry / forthcoming" },
-      { k: "book_cover_title", label: "Title on the cover", hint: "use <br/> for the line break" },
-      { k: "book_cover_by", label: "Byline on the cover" },
-      { k: "book_cover_image", label: "Cover image", type: "image",
-        hint: "until this exists the typographic cover shows" },
-      { k: "book_lede", label: "Opening paragraph", type: "long" },
-      { k: "book_gift_title", label: "Audiobook panel title" },
-      { k: "book_gift_text", label: "Audiobook panel text", type: "long" },
-      { k: "book_reserve_title", label: "Reserve title" },
-      { k: "book_reserve_text", label: "Reserve text", type: "long" },
-      { k: "book_endline", label: "Closing line" }
-    ]
+    fields: TOP("book").concat([
+      { k: "book_kind", label: "The little label under the subtitle" },
+      { k: "book_cover_title", label: "The title printed on the cover", enter: true,
+        hint: "Press Enter to split it across two lines." },
+      { k: "book_cover_by", label: "The line under it on the cover" },
+      { k: "book_cover_image", label: "A photo of the cover", type: "image",
+        hint: "Leave this empty and the site draws the cover in type instead." },
+      { k: "book_lede", label: "The opening paragraph", type: "long", enter: true },
+      { k: "book_gift_title", label: "The audiobook box: its heading" },
+      { k: "book_gift_text", label: "The audiobook box: the words inside", type: "long", enter: true },
+      { k: "book_reserve_title", label: "Above the sign-up: the heading" },
+      { k: "book_reserve_text", label: "Above the sign-up: the words", type: "long", enter: true },
+      { k: "book_endline", label: "The last line on this page" }
+    ])
   },
   {
-    id: "written", name: "Written Word", num: "01", page: "written-word.html",
-    blurb: "Poems and monologues, two to a phase.",
-    fields: [
-      { k: "ww_crown_tag", label: "Crown line" },
-      { k: "ww_display", label: "Display title", hint: "use <br/> for the line break" },
-      { k: "ww_sub", label: "Subtitle" },
-      { k: "ww_restline", label: "Closing line" }
-    ],
-    list: "pieces"
+    id: "written", name: "Written Word", page: "written-word.html",
+    blurb: "Your poems and monologues.",
+    fields: TOP("ww").map(function (f) {   /* this one carries an <em>, so it gets the note */
+      return f.k === "ww_sub" ? { k: "ww_sub", label: f.label, em: true } : f;
+    }).concat([
+      { k: "ww_restline", label: "The last line on this page" }
+    ]),
+    rooms: "pieces"
   },
   {
-    id: "visuals", name: "Visuals", num: "02", page: "visuals.html",
-    blurb: "The wall. Drop new work straight in.",
-    fields: [
-      { k: "vis_crown_tag", label: "Crown line" },
-      { k: "vis_display", label: "Display title" },
-      { k: "vis_sub", label: "Subtitle" }
-    ],
-    list: "works"
+    id: "visuals", name: "Visuals", page: "visuals.html",
+    blurb: "Your wall of pictures.",
+    fields: TOP("vis"),
+    rooms: "works"
   },
   {
-    id: "spoken", name: "Spoken Word", num: "03", page: "spoken-word.html",
-    blurb: "The audiobook, chapter by chapter.",
-    fields: [
-      { k: "sw_crown_tag", label: "Crown line" },
-      { k: "sw_display", label: "Display title" },
-      { k: "sw_sub", label: "Subtitle" },
-      { k: "sw_intro", label: "Intro paragraph", type: "long" },
-      { k: "sw_note", label: "Waiting note", hint: "shown while no audio exists" },
-      { k: "sw_gift_title", label: "Gift panel title" },
-      { k: "sw_gift_text", label: "Gift panel text", type: "long" }
-    ],
-    list: "spoken"
+    id: "spoken", name: "Spoken Word", page: "spoken-word.html",
+    blurb: "The book, read aloud.",
+    fields: TOP("sw").concat([
+      { k: "sw_intro", label: "The opening paragraph", type: "long", enter: true, em: true },
+      { k: "sw_note", label: "What to show until the recordings are ready",
+        hint: "This disappears on its own once you add your first chapter." },
+      { k: "sw_gift_title", label: "The gift box: its heading" },
+      { k: "sw_gift_text", label: "The gift box: the words inside", type: "long", enter: true, em: true }
+    ]),
+    lists: [{ id: "spoken", title: "The chapters" }]
   },
   {
-    id: "film", name: "Film", num: "04", page: "film.html",
+    id: "film", name: "Film", page: "film.html",
     blurb: "Moving image.",
-    fields: [
-      { k: "film_crown_tag", label: "Crown line" },
-      { k: "film_display", label: "Display title" },
-      { k: "film_sub", label: "Subtitle" },
-      { k: "film_frame_image", label: "The frame", type: "image" },
-      { k: "film_line", label: "Line under the frame" },
-      { k: "film_note", label: "Note when clicked" }
-    ]
+    fields: TOP("film").concat([
+      { k: "film_frame_image", label: "The still from your film", type: "image" },
+      { k: "film_line", label: "The line under the picture" },
+      { k: "film_note", label: "The words that appear when someone taps the picture" }
+    ])
   },
   {
-    id: "music", name: "Music", num: "05", page: "music.html",
+    id: "music", name: "Music", page: "music.html",
     blurb: "Cherry and DN, and the songs between them.",
     fields: [
-      { k: "music_crown_tag", label: "Crown line" },
-      { k: "music_crown_line", label: "Duality line" },
-      { k: "music_cherry_eyebrow", label: "Cherry's line", hint: "the one who feels" },
-      { k: "music_dn_eyebrow", label: "DN's line", hint: "the one who watches" },
-      { k: "music_melodies_title", label: "Coda title" },
-      { k: "music_melodies_text", label: "Coda poem", type: "long", hint: "use <br/> for line breaks" },
-      { k: "music_melodies_image", label: "Coda image", type: "image" }
+      { k: "music_crown_tag", label: "The small italic line at the very top" },
+      { k: "music_crown_line", label: "The line above the two names" },
+      { k: "music_cherry_eyebrow", label: "The words under CHERRY" },
+      { k: "music_dn_eyebrow", label: "The words under DN" },
+      { k: "music_melodies_title", label: "The block at the bottom: its heading" },
+      { k: "music_melodies_text", label: "The block at the bottom: the little poem", type: "long", enter: true },
+      { k: "music_melodies_image", label: "The block at the bottom: the picture", type: "image" }
     ],
-    list: "tracks"
+    lists: [{ id: "cherrysongs", title: "Cherry's songs" }, { id: "dnsongs", title: "DN's songs" }]
   },
   {
-    id: "about", name: "About", num: "06", page: "about.html",
+    id: "about", name: "About you", page: "about.html",
     blurb: "Who is speaking.",
-    fields: [
-      { k: "about_crown_tag", label: "Crown line" },
-      { k: "about_display", label: "Display title" },
-      { k: "about_sub", label: "Subtitle" },
-      { k: "about_portrait_image", label: "Portrait", type: "image" },
-      { k: "about_duality", label: "The duality line" },
-      { k: "about_signature", label: "Signature" }
-    ]
+    fields: TOP("about").concat([
+      { k: "about_portrait_image", label: "Your portrait", type: "image" },
+      { k: "about_duality", label: "The Cherry-and-DN sentence near the end" },
+      { k: "about_signature", label: "Your signature at the very bottom" }
+    ])
   },
   {
-    id: "contact", name: "Contact", num: "07", page: "contact.html",
+    id: "contact", name: "Contact", page: "contact.html",
     blurb: "Where letters arrive.",
+    fields: TOP("contact").concat([
+      { k: "contact_note", label: "The note under the form" },
+      { k: "contact_endline", label: "The last line on this page" }
+    ])
+  },
+  {
+    id: "gift", name: "The QR-code page", page: "gift.html",
+    blurb: "What the code inside the printed book opens.",
     fields: [
-      { k: "contact_crown_tag", label: "Crown line" },
-      { k: "contact_display", label: "Display title" },
-      { k: "contact_sub", label: "Subtitle" },
-      { k: "contact_note", label: "Note under the form" },
-      { k: "contact_endline", label: "Closing line" }
+      { k: "gift_intro", label: "The opening paragraph", type: "long", enter: true, em: true },
+      { k: "gift_panel_title", label: "The box on this page: its heading" },
+      { k: "gift_panel_text", label: "The box on this page: the words inside", type: "long", enter: true },
+      { k: "gift_endline", label: "The last line on this page" }
     ]
   },
   {
-    id: "gift", name: "The Gift", num: "—", page: "gift.html",
-    blurb: "What the QR code in the printed book opens.",
+    id: "everywhere", name: "The bottom of every page", page: "index.html",
+    blurb: "Lines that show on all nine pages.",
     fields: [
-      { k: "gift_intro", label: "Intro", type: "long" },
-      { k: "gift_panel_title", label: "Panel title" },
-      { k: "gift_panel_text", label: "Panel text", type: "long" },
-      { k: "gift_endline", label: "Closing line" }
+      { k: "site_foot_line", label: "The line at the bottom of every page" },
+      { k: "site_email", label: "Your email address" },
+      { k: "site_instagram", label: "Your Instagram" }
     ]
   },
   {
-    id: "site", name: "Everywhere", num: "—", page: "index.html",
-    blurb: "Lines that appear on every page.",
-    fields: [
-      { k: "site_foot_line", label: "Footer line" },
-      { k: "site_email", label: "Public email" },
-      { k: "site_instagram", label: "Instagram" },
-      { k: "phase_water_theme", label: "Water" },
-      { k: "phase_fire_theme", label: "Fire" },
-      { k: "phase_earth_theme", label: "Earth" },
-      { k: "phase_air_theme", label: "Air" }
-    ]
+    id: "hidden", name: "Hidden & removed", page: "index.html",
+    blurb: "Everything only you can see, and anything you have taken off the site.",
+    special: "hidden"
   }
 ];
 
-/* the four lists, and how each row is edited */
+/* the four rooms, described the way she talks about them */
+window.CHERRY_ROOMS = [
+  { k: "water", name: "Water", says: "grief, memory, surrender" },
+  { k: "fire",  name: "Fire",  says: "desire, anger, awakening" },
+  { k: "earth", name: "Earth", says: "healing, body, belonging" },
+  { k: "air",   name: "Air",   says: "forgiveness, flight, return" }
+];
+
 window.CHERRY_LISTS = {
   works: {
-    table: "cherry_works", label: "Artwork", adds: "image",
-    grouped: "phase", media: "image_url",
+    table: "cherry_works", one: "artwork", add: "Add an artwork",
+    accept: "image/*", media: "image_url", room: "phase",
+    drop: "Drop photos here, or choose them from your phone.",
     fields: [
-      { k: "title", label: "Title" },
-      { k: "phase", label: "Phase", type: "phase" },
-      { k: "note", label: "A few words", type: "long",
-        hint: "shown when the image is opened" },
-      { k: "image_url", label: "Image", type: "image" }
+      { k: "title", label: "Its name" },
+      { k: "note", label: "What you want to say about this picture", type: "long", enter: true,
+        hint: "People see this when they tap it." },
+      { k: "image_url", label: "The picture", type: "image" }
     ]
   },
   pieces: {
-    table: "cherry_pieces", label: "Piece", adds: "blank",
-    grouped: "phase",
+    table: "cherry_pieces", one: "poem", add: "Add a poem", room: "phase",
     fields: [
-      { k: "title", label: "Title" },
-      { k: "kind", label: "Kind", type: "choice", options: ["poem", "monologue"] },
-      { k: "phase", label: "Phase", type: "phase" },
-      { k: "excerpt", label: "Excerpt", type: "long", hint: "the lines shown before opening" },
-      { k: "body", label: "The piece", type: "long", rows: 14, hint: "use <br/> for line breaks" }
-    ]
-  },
-  tracks: {
-    table: "cherry_tracks", label: "Track", adds: "audio", filter: { voice: ["cherry", "dn"] },
-    grouped: "voice", media: "audio_url",
-    fields: [
-      { k: "title", label: "Title" },
-      { k: "voice", label: "Whose", type: "choice", options: ["cherry", "dn"] },
-      { k: "length", label: "Length", hint: "3:45" },
-      { k: "audio_url", label: "Audio", type: "audio" }
-    ]
-  },
-  spoken: {
-    table: "cherry_tracks", label: "Chapter", adds: "audio", filter: { voice: ["spoken"] },
-    defaults: { voice: "spoken", length: "--:--" }, media: "audio_url",
-    fields: [
-      { k: "title", label: "Title" },
-      { k: "length", label: "Length" },
-      { k: "audio_url", label: "Audio", type: "audio" }
+      { k: "title", label: "Its name" },
+      { k: "kind", label: "Is this a poem or a monologue?", type: "choice",
+        options: [["poem", "Poem"], ["monologue", "Monologue"]] },
+      { k: "excerpt", label: "The lines people see before they tap", type: "long", enter: true },
+      { k: "body", label: "The poem", type: "long", rows: 14, enter: true,
+        hint: "Write it the way it should look. Press Enter for a new line." }
     ]
   },
   portals: {
-    table: "cherry_portals", label: "Door", adds: "blank",
-    grouped: "kind", media: "image_url",
+    table: "cherry_portals", one: "picture link", add: "Add a picture link",
+    accept: "image/*", media: "image_url", where: { kind: "portal" },
     fields: [
-      { k: "name", label: "Name" },
-      { k: "blurb", label: "Words beneath", type: "long" },
-      { k: "href", label: "Goes to", hint: "written-word.html" },
-      { k: "kind", label: "Kind", type: "choice", options: ["portal", "strip"] },
-      { k: "image_url", label: "Image", type: "image" }
+      { k: "name", label: "Its name" },
+      { k: "blurb", label: "The words under the name", type: "long", enter: true },
+      { k: "href", label: "Where it goes", type: "page" },
+      { k: "image_url", label: "Its picture", type: "image" }
+    ]
+  },
+  strip: {
+    table: "cherry_portals", one: "small link", add: "Add a small link",
+    where: { kind: "strip" },
+    fields: [
+      { k: "name", label: "What it says" },
+      { k: "href", label: "Where it goes", type: "page" }
+    ]
+  },
+  cherrysongs: {
+    table: "cherry_tracks", one: "song", add: "Add a song",
+    accept: "audio/*", media: "audio_url", where: { voice: "cherry" },
+    fields: [
+      { k: "title", label: "Its name" },
+      { k: "length", label: "How long it is", hint: "Read from the recording, change it if you like." },
+      { k: "audio_url", label: "The recording", type: "audio" }
+    ]
+  },
+  dnsongs: {
+    table: "cherry_tracks", one: "song", add: "Add a song",
+    accept: "audio/*", media: "audio_url", where: { voice: "dn" },
+    fields: [
+      { k: "title", label: "Its name" },
+      { k: "length", label: "How long it is", hint: "Read from the recording, change it if you like." },
+      { k: "audio_url", label: "The recording", type: "audio" }
+    ]
+  },
+  spoken: {
+    table: "cherry_tracks", one: "chapter", add: "Add a chapter",
+    accept: "audio/*", media: "audio_url", where: { voice: "spoken" },
+    fields: [
+      { k: "title", label: "Its name" },
+      { k: "length", label: "How long it is", hint: "Read from the recording, change it if you like." },
+      { k: "audio_url", label: "The recording", type: "audio" }
     ]
   }
 };
+
+/* where a picture link can point */
+window.CHERRY_PAGES = [
+  ["book.html", "The Book"], ["written-word.html", "Written Word"],
+  ["visuals.html", "Visuals"], ["spoken-word.html", "Spoken Word"],
+  ["film.html", "Film"], ["music.html", "Music"],
+  ["about.html", "About you"], ["contact.html", "Contact"],
+  ["gift.html", "The QR-code page"], ["index.html", "Home page"]
+];

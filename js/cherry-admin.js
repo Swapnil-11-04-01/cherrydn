@@ -1,14 +1,22 @@
 /* ============================================================
-   THE ARCHIVE — Cherry's own way in.
-   No framework, no build step, and no credential in this file: the
-   password is checked by the auth service, and the database itself
-   refuses every write that does not carry her signed-in session. There
-   is no way to sign up; the only accounts that exist were made for her.
+   THE STUDIO — her page on one side, her words on the other.
+   Nothing here is a credential: the password is checked by the auth
+   service and the database refuses every write that does not carry
+   her signed-in session. There is no way to sign up.
+
+   Notes for whoever comes next:
+   · the frame has no sandbox attribute on purpose. It is same-origin,
+     which is what lets a keystroke repaint the page instantly.
+   · never reassign frame.src to "refresh" it, and never move the frame
+     in the DOM. Both reload the page and lose her place. Move it with
+     CSS only.
    ============================================================ */
 (function () {
   "use strict";
-  var C = window.CHERRY, SCHEMA = window.CHERRY_SCHEMA, LISTS = window.CHERRY_LISTS;
-  var SESSION = "cherry.session", LAST = "cherry.section";
+  var C = window.CHERRY, SCHEMA = window.CHERRY_SCHEMA,
+      LISTS = window.CHERRY_LISTS, ROOMS = window.CHERRY_ROOMS,
+      PAGES = window.CHERRY_PAGES;
+  var SESSION = "cherry.session", LAST = "cherry.page";
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return [].slice.call((r || document).querySelectorAll(s)); };
 
@@ -16,26 +24,31 @@
   function save(s) { try { localStorage.setItem(SESSION, JSON.stringify(s)); } catch (e) {} }
   function load() { try { return JSON.parse(localStorage.getItem(SESSION) || "null"); } catch (e) { return null; } }
   function forget() { try { localStorage.removeItem(SESSION); } catch (e) {} }
-
   var session = load();
-
   function token() { return session ? session.access_token : C.key; }
 
-  /* Sessions last an hour. Rather than throwing her out mid-sentence,
-     trade the refresh token for a fresh one and repeat the request. */
   function refresh() {
     if (!session || !session.refresh_token) return Promise.reject(new Error("no session"));
     return fetch(C.url + "/auth/v1/token?grant_type=refresh_token", {
       method: "POST", headers: { apikey: C.key, "Content-Type": "application/json" },
       body: JSON.stringify({ refresh_token: session.refresh_token })
-    }).then(function (r) {
-      if (!r.ok) throw new Error("refresh failed");
-      return r.json();
-    }).then(function (s) {
-      session = { access_token: s.access_token, refresh_token: s.refresh_token };
-      save(session);
-      return session;
-    });
+    }).then(function (r) { if (!r.ok) throw new Error("refresh"); return r.json(); })
+      .then(function (s) {
+        session = { access_token: s.access_token, refresh_token: s.refresh_token };
+        save(session); return session;
+      });
+  }
+
+  /* every error she can see is one of these four sentences */
+  function humanise(err) {
+    var raw = String(err && err.message || err || "");
+    console.error("[archive]", raw);
+    if (/signed out|refresh|JWT|401|403/i.test(raw))
+      return "You have been signed out. Sign in again; your words are still on this screen.";
+    if (/too large|413|exceeded/i.test(raw)) return "That file is too big. Try one under 20 MB.";
+    if (/Failed to fetch|NetworkError|offline/i.test(raw))
+      return "The archive did not answer. Nothing is lost, try again in a moment.";
+    return "Something went wrong saving that. Your words are still on screen.";
   }
 
   function rest(path, opts, retried) {
@@ -47,17 +60,10 @@
       body: opts.body ? JSON.stringify(opts.body) : undefined
     }).then(function (r) {
       if ((r.status === 401 || r.status === 403) && !retried && session) {
-        return refresh()
-          .then(function () { return rest(path, opts, true); })
-          .catch(function () {
-            forget();
-            throw new Error("You have been signed out. Sign in again to keep editing.");
-          });
+        return refresh().then(function () { return rest(path, opts, true); })
+          .catch(function () { forget(); throw new Error("signed out"); });
       }
-      if (r.status === 401 || r.status === 403) throw new Error("You are not signed in.");
-      if (!r.ok) return r.text().then(function (t) { throw new Error(t.slice(0, 160) || ("Error " + r.status)); });
-      /* a minimal write answers 200 or 204 with an empty body, so read the
-         text first and only parse when there is something to parse */
+      if (!r.ok) return r.text().then(function (t) { throw new Error(t.slice(0, 200) || ("Error " + r.status)); });
       return r.text().then(function (t) { return t ? JSON.parse(t) : null; });
     });
   }
@@ -65,198 +71,68 @@
   /* ---------- the door ---------- */
   function signIn(e) {
     e.preventDefault();
-    var email = $("#email").value.trim();
-    var password = $("#password").value;
-    var msg = $("#gateMsg");
-    var btn = $("#gateBtn");
+    var email = $("#email").value.trim(), password = $("#password").value;
+    var msg = $("#gateMsg"), btn = $("#gateBtn");
     if (!email || !password) return;
-    btn.disabled = true;
-    msg.textContent = "Opening…";
-
+    btn.disabled = true; msg.textContent = "Opening…";
     fetch(C.url + "/auth/v1/token?grant_type=password", {
       method: "POST", headers: { apikey: C.key, "Content-Type": "application/json" },
       body: JSON.stringify({ email: email, password: password })
-    }).then(function (r) {
-      return r.json().then(function (body) { return { ok: r.ok, body: body }; });
-    }).then(function (res) {
-      if (!res.ok || !res.body.access_token) {
-        throw new Error(/invalid/i.test(JSON.stringify(res.body))
-          ? "That email and password do not match."
-          : "Could not sign in. Try again in a moment.");
-      }
-      session = { access_token: res.body.access_token, refresh_token: res.body.refresh_token };
-      save(session);
-      /* a valid account is not the same as permission to edit her archive */
-      return fetch(C.url + "/rest/v1/rpc/cherry_is_admin", {
-        method: "POST",
-        headers: { apikey: C.key, Authorization: "Bearer " + session.access_token,
-                   "Content-Type": "application/json" },
-        body: "{}"
-      }).then(function (r) { return r.ok ? r.json() : false; });
-    }).then(function (isAdmin) {
-      if (isAdmin !== true) {
-        forget(); session = null;
-        throw new Error("This account cannot edit the archive.");
-      }
-      location.reload();
-    }).catch(function (err) {
-      msg.textContent = err.message;
-      btn.disabled = false;
-      $("#password").value = "";
-    });
+    }).then(function (r) { return r.json().then(function (b) { return { ok: r.ok, body: b }; }); })
+      .then(function (res) {
+        if (!res.ok || !res.body.access_token) throw new Error("That email and password do not match.");
+        session = { access_token: res.body.access_token, refresh_token: res.body.refresh_token };
+        save(session);
+        return fetch(C.url + "/rest/v1/rpc/cherry_is_admin", {
+          method: "POST", headers: { apikey: C.key, Authorization: "Bearer " + session.access_token,
+            "Content-Type": "application/json" }, body: "{}"
+        }).then(function (r) { return r.ok ? r.json() : false; });
+      }).then(function (isAdmin) {
+        if (isAdmin !== true) { forget(); session = null; throw new Error("This account cannot edit the archive."); }
+        location.reload();
+      }).catch(function (err) {
+        msg.textContent = err.message; btn.disabled = false; $("#password").value = "";
+      });
   }
 
   /* ---------- state ---------- */
   var data = { settings: {}, works: [], pieces: [], tracks: [], portals: [] };
-  var dirty = {};                 // key -> value, unsaved
-  var dirtyRows = {};             // table:id -> {field: value}
-  var current = null;
-
-  function countDirty() { return Object.keys(dirty).length + Object.keys(dirtyRows).length; }
-  function markDirty() {
-    var n = countDirty();
-    $("#saveBar").classList.toggle("is-on", n > 0);
-    $("#dirtyCount").textContent = n === 1 ? "1 change" : n + " changes";
-  }
-
-  var toastT;
-  function toast(msg, kind) {
-    var t = $("#toast");
-    t.textContent = msg;
-    t.className = "toast is-up" + (kind ? " toast--" + kind : "");
-    clearTimeout(toastT);
-    toastT = setTimeout(function () { t.className = "toast"; }, kind === "bad" ? 6000 : 2600);
-  }
+  var here = null, frame = null, picked = null;
 
   function esc(v) {
     return String(v == null ? "" : v).replace(/&/g, "&amp;").replace(/</g, "&lt;")
       .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
+  /* she presses Enter; the site needs <br> */
+  function toBox(v) { return String(v == null ? "" : v).replace(/<br\s*\/?>/gi, "\n"); }
+  function toSite(v) { return String(v == null ? "" : v).replace(/\r?\n/g, "<br/>"); }
 
-  /* ---------- fields ---------- */
-  function fieldHTML(f, value, scope) {
-    var id = scope + "|" + f.k;
-    var hint = f.hint ? '<em class="hint">' + f.hint + "</em>" : "";
-    var head = '<span class="f__label">' + esc(f.label) + hint + "</span>";
-
-    if (f.type === "image" || f.type === "audio") {
-      var isImg = f.type === "image";
-      return '<div class="f f--media" data-field="' + esc(id) + '">' + head +
-        '<div class="media">' +
-        (isImg
-          ? '<div class="media__thumb">' + (value ? '<img src="' + esc(value) + '" alt="" />' : "<span>empty</span>") + "</div>"
-          : '<div class="media__thumb media__thumb--audio"><span>' + (value ? "audio" : "empty") + "</span></div>") +
-        '<div class="media__side">' +
-        '<input type="text" data-k="' + esc(f.k) + '" value="' + esc(value) + '" placeholder="' +
-          (isImg ? "assets/… or a link" : "assets/audio/…") + '" />' +
-        '<button class="btn btn--ghost btn--pick" type="button" data-accept="' +
-          (isImg ? "image/*" : "audio/*") + '">choose a file</button>' +
-        "</div></div></div>";
-    }
-    if (f.type === "phase") {
-      return '<label class="f">' + head + '<select data-k="' + esc(f.k) + '">' +
-        C.phases.map(function (p) {
-          return '<option value="' + p + '"' + (p === value ? " selected" : "") + ">" + p + "</option>";
-        }).join("") + "</select></label>";
-    }
-    if (f.type === "choice") {
-      return '<label class="f">' + head + '<select data-k="' + esc(f.k) + '">' +
-        f.options.map(function (p) {
-          return '<option value="' + p + '"' + (p === value ? " selected" : "") + ">" + p + "</option>";
-        }).join("") + "</select></label>";
-    }
-    if (f.type === "long") {
-      return '<label class="f">' + head + '<textarea rows="' + (f.rows || 4) +
-        '" data-k="' + esc(f.k) + '">' + esc(value) + "</textarea></label>";
-    }
-    return '<label class="f">' + head + '<input type="text" data-k="' + esc(f.k) +
-      '" value="' + esc(value) + '" /></label>';
+  var sayT;
+  function say(text, kind, undo) {
+    var s = $("#status");
+    s.innerHTML = esc(text) + (undo ? ' <button class="undo" type="button">Put it back</button>' : "");
+    s.className = "status" + (kind ? " status--" + kind : "");
+    if (undo) s._undo = undo;
+    clearTimeout(sayT);
+    if (kind !== "bad") sayT = setTimeout(function () {
+      s.textContent = "All saved"; s.className = "status";
+    }, undo ? 12000 : 2400);
   }
 
-  /* ---------- rows ---------- */
-  function rowHTML(spec, row, listId) {
-    var media = spec.media ? row[spec.media] : "";
-    var thumb = spec.media && /image/.test(spec.fields.map(function (f) { return f.type; }).join())
-      ? (media ? '<img src="' + esc(media) + '" alt="" />' : "<span>no image</span>")
-      : "<span>" + (media ? "audio" : "empty") + "</span>";
-    return '<article class="row" data-id="' + row.id + '" data-table="' + spec.table + '" data-list="' + listId + '" draggable="true">' +
-      '<div class="row__grip" title="drag to reorder">⠿</div>' +
-      '<div class="row__thumb">' + thumb + "</div>" +
-      '<div class="row__main">' +
-      '<div class="row__head">' +
-      '<strong>' + esc(row.title || row.name || "Untitled") + "</strong>" +
-      '<div class="row__acts">' +
-      '<label class="switch"><input type="checkbox" data-k="published"' + (row.published ? " checked" : "") +
-        ' /><span>' + (row.published ? "live" : "hidden") + "</span></label>" +
-      '<button class="btn btn--ghost btn--open" type="button">edit</button>' +
-      '<button class="btn btn--ghost btn--del" type="button" aria-label="delete">delete</button>' +
-      "</div></div>" +
-      '<div class="row__form" hidden>' +
-      spec.fields.map(function (f) { return fieldHTML(f, row[f.k] == null ? "" : row[f.k], spec.table + ":" + row.id); }).join("") +
-      "</div></div></article>";
+  /* ---------- talking to the page ---------- */
+  function tell(msg) {
+    if (!frame || !frame.contentWindow) return;
+    msg.from = "cherry-desk";
+    frame.contentWindow.postMessage(msg, location.origin);
+  }
+  function openPage(pageFile) {
+    var now = (frame.getAttribute("src") || "").split("/").pop();
+    if (now === pageFile) return;               // already there: never reload under her
+    frame.src = pageFile;                       // only ever on a page change
   }
 
-  function listHTML(listId) {
-    var spec = LISTS[listId];
-    var rows = data[spec.table === "cherry_works" ? "works"
-      : spec.table === "cherry_pieces" ? "pieces"
-      : spec.table === "cherry_portals" ? "portals" : "tracks"] || [];
-    if (spec.filter) {
-      Object.keys(spec.filter).forEach(function (k) {
-        rows = rows.filter(function (r) { return spec.filter[k].indexOf(r[k]) > -1; });
-      });
-    }
-    var groups = {};
-    if (spec.grouped) {
-      rows.forEach(function (r) { (groups[r[spec.grouped]] = groups[r[spec.grouped]] || []).push(r); });
-    } else {
-      groups[""] = rows;
-    }
-    var order = spec.grouped === "phase" ? C.phases : Object.keys(groups);
-    return order.map(function (g) {
-      var items = (groups[g] || []).sort(function (a, b) { return (a.sort | 0) - (b.sort | 0); });
-      return '<section class="group" data-group="' + esc(g) + '" data-list="' + listId + '">' +
-        (g ? '<h3 class="group__name">' + esc(g) + ' <em>' + items.length + "</em></h3>" : "") +
-        (items.length ? items.map(function (r) { return rowHTML(spec, r, listId); }).join("")
-                      : '<p class="none">nothing here yet</p>') +
-        "</section>";
-    }).join("") +
-      '<button class="btn btn--add" type="button" data-add="' + listId + '">add ' + spec.label.toLowerCase() + "</button>" +
-      (spec.adds === "image" || spec.adds === "audio"
-        ? '<div class="drop" data-drop="' + listId + '"><strong>or drop files here</strong>' +
-          "<span>they arrive as new " + spec.label.toLowerCase() + "s</span></div>" : "");
-  }
-
-  /* ---------- painting a section ---------- */
-  function paint(id) {
-    var sec = SCHEMA.filter(function (s) { return s.id === id; })[0];
-    if (!sec) return;
-    current = id;
-    try { localStorage.setItem(LAST, id); } catch (e) {}
-
-    $$("#rail a").forEach(function (a) { a.classList.toggle("is-on", a.dataset.go === id); });
-
-    var html = '<header class="sheet__head">' +
-      '<p class="sheet__num">' + esc(sec.num) + "</p>" +
-      '<h2 class="sheet__name">' + esc(sec.name) + "</h2>" +
-      '<p class="sheet__blurb">' + esc(sec.blurb) + "</p>" +
-      '<a class="sheet__see" href="' + esc(sec.page) + '" target="_blank" rel="noopener">see the page &rarr;</a>' +
-      "</header>";
-
-    if (sec.fields) {
-      html += '<div class="sheet__fields">' + sec.fields.map(function (f) {
-        return fieldHTML(f, data.settings[f.k] == null ? "" : data.settings[f.k], "setting");
-      }).join("") + "</div>";
-    }
-    if (sec.list) html += '<div class="sheet__list">' + listHTML(sec.list) + "</div>";
-
-    $("#sheet").innerHTML = html;
-    window.scrollTo(0, 0);
-  }
-
-  /* ---------- reading everything ---------- */
+  /* ---------- reading ---------- */
   function loadAll() {
-    $("#sheet").innerHTML = '<p class="loading">opening the archive…</p>';
     return Promise.all([
       rest("cherry_settings?select=key,value"),
       rest("cherry_works?select=*&order=phase,sort"),
@@ -268,277 +144,613 @@
       (r[0] || []).forEach(function (s) { data.settings[s.key] = s.value; });
       data.works = r[1] || []; data.pieces = r[2] || [];
       data.tracks = r[3] || []; data.portals = r[4] || [];
-      dirty = {}; dirtyRows = {}; markDirty();
-      var last = null;
-      try { last = localStorage.getItem(LAST); } catch (e) {}
-      paint(last && SCHEMA.some(function (s) { return s.id === last; }) ? last : "landing");
-    }).catch(function (e) {
-      $("#sheet").innerHTML = '<p class="loading">' + esc(e.message) + "</p>";
     });
   }
 
-  /* ---------- saving ---------- */
-  function saveAll() {
-    var jobs = [];
-    Object.keys(dirty).forEach(function (k) {
-      jobs.push(rest("cherry_settings?on_conflict=key", {
-        method: "POST",
-        headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
-        body: [{ key: k, value: dirty[k] }]
-      }));
+  function rowsFor(listId) {
+    var spec = LISTS[listId];
+    var pool = spec.table === "cherry_works" ? data.works
+      : spec.table === "cherry_pieces" ? data.pieces
+      : spec.table === "cherry_portals" ? data.portals : data.tracks;
+    var rows = pool.slice();
+    Object.keys(spec.where || {}).forEach(function (k) {
+      rows = rows.filter(function (r) { return r[k] === spec.where[k]; });
     });
-    Object.keys(dirtyRows).forEach(function (ref) {
-      var parts = ref.split(":"), table = parts[0], id = parts[1];
-      jobs.push(rest(table + "?id=eq." + id, {
-        method: "PATCH", headers: { Prefer: "return=minimal" }, body: dirtyRows[ref]
-      }));
-    });
-    if (!jobs.length) return Promise.resolve();
-    $("#saveBtn").disabled = true;
-    return Promise.all(jobs).then(function () {
-      toast("Saved. The site has it.", "ok");
-      return loadAll();
-    }).catch(function (e) {
-      toast(e.message, "bad");
-    }).then(function () { $("#saveBtn").disabled = false; });
+    return rows.sort(function (a, b) { return (a.sort | 0) - (b.sort | 0); });
+  }
+  function findRow(table, id) {
+    var pool = table === "cherry_works" ? data.works : table === "cherry_pieces" ? data.pieces
+      : table === "cherry_portals" ? data.portals : data.tracks;
+    for (var i = 0; i < pool.length; i++) if (String(pool[i].id) === String(id)) return pool[i];
+    return null;
   }
 
-  function revert() {
-    if (!countDirty()) return;
-    if (!confirm("Throw away " + countDirty() + " unsaved change(s)?")) return;
-    loadAll();
+  /* ---------- writing, one field at a time ---------- */
+  var timers = {};
+  function saveSetting(key, value) {
+    data.settings[key] = value;
+    clearTimeout(timers[key]);
+    say("Saving…");
+    timers[key] = setTimeout(function () {
+      rest("cherry_settings?on_conflict=key", {
+        method: "POST", headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
+        body: [{ key: key, value: value }]
+      }).then(function () { say("Saved just now"); })
+        .catch(function (e) { say(humanise(e), "bad"); });
+    }, 700);
+  }
+  function saveRow(table, id, patch, quiet) {
+    var row = findRow(table, id);
+    if (row) Object.keys(patch).forEach(function (k) { row[k] = patch[k]; });
+    var ref = table + id + Object.keys(patch).join();
+    clearTimeout(timers[ref]);
+    if (!quiet) say("Saving…");
+    timers[ref] = setTimeout(function () {
+      rest(table + "?id=eq." + id, { method: "PATCH",
+        headers: { Prefer: "return=minimal" }, body: patch })
+        .then(function () { if (!quiet) say("Saved just now"); })
+        .catch(function (e) { say(humanise(e), "bad"); });
+    }, 500);
   }
 
-  /* ---------- uploading ---------- */
+  /* ---------- the trash: nothing says "permanently" ---------- */
+  function remove(table, id) {
+    var row = findRow(table, id);
+    if (!row) return;
+    var trash = [];
+    try { trash = JSON.parse(data.settings.desk_trash || "[]"); } catch (e) { trash = []; }
+    trash.unshift({ table: table, row: row, at: Date.now() });
+    trash = trash.slice(0, 20);
+    var blob = JSON.stringify(trash);
+    data.settings.desk_trash = blob;
+
+    rest("cherry_settings?on_conflict=key", {
+      method: "POST", headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
+      body: [{ key: "desk_trash", value: blob }]
+    }).then(function () {
+      return rest(table + "?id=eq." + id, { method: "DELETE", headers: { Prefer: "return=minimal" } });
+    }).then(function () {
+      var pool = table === "cherry_works" ? "works" : table === "cherry_pieces" ? "pieces"
+        : table === "cherry_portals" ? "portals" : "tracks";
+      data[pool] = data[pool].filter(function (r) { return String(r.id) !== String(id); });
+      paint(); repaintFrame();
+      say("Removed", "ok", function () { putBack(table, row); });
+    }).catch(function (e) { say(humanise(e), "bad"); });
+  }
+  function putBack(table, row) {
+    var body = {};
+    Object.keys(row).forEach(function (k) {
+      if (k !== "created_at" && k !== "updated_at") body[k] = row[k];
+    });
+    rest(table, { method: "POST", headers: { Prefer: "return=representation" }, body: body })
+      .then(function () { return loadAll(); })
+      .then(function () { paint(); repaintFrame(); say("Put back"); })
+      .catch(function (e) { say(humanise(e), "bad"); });
+  }
+
+  /* ---------- adding ---------- */
+  function nextSort(listId, room) {
+    var rows = rowsFor(listId).filter(function (r) { return !room || r.phase === room; });
+    return rows.reduce(function (m, r) { return Math.max(m, r.sort | 0); }, -1) + 1;
+  }
+  function addRow(listId, room, extra) {
+    var spec = LISTS[listId];
+    var body = { sort: nextSort(listId, room), published: false };
+    Object.keys(spec.where || {}).forEach(function (k) { body[k] = spec.where[k]; });
+    if (spec.room) body[spec.room] = room || "water";
+    if (spec.table === "cherry_pieces") { body.title = "Untitled"; body.kind = "poem"; }
+    else if (spec.table === "cherry_portals") body.name = "New link";
+    else body.title = "Untitled";
+    Object.keys(extra || {}).forEach(function (k) { body[k] = extra[k]; });
+    return rest(spec.table, { method: "POST", headers: { Prefer: "return=representation" }, body: body })
+      .then(function () { return loadAll(); })
+      .then(function () { paint(); say("Added. Only you can see it, switch it on when you are ready."); });
+  }
+
   function upload(file) {
     var clean = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, "-").replace(/^-|-$/g, "");
     var path = Date.now() + "-" + clean;
     return fetch(C.url + "/storage/v1/object/" + C.bucket + "/" + path, {
-      method: "POST",
-      headers: { apikey: C.key, Authorization: "Bearer " + token(), "x-upsert": "true",
-                 "Content-Type": file.type || "application/octet-stream" },
+      method: "POST", headers: { apikey: C.key, Authorization: "Bearer " + token(),
+        "x-upsert": "true", "Content-Type": file.type || "application/octet-stream" },
       body: file
     }).then(function (r) {
-      if (!r.ok) return r.text().then(function (t) { throw new Error(t.slice(0, 140) || "upload failed"); });
+      if (!r.ok) return r.text().then(function (t) { throw new Error(t.slice(0, 160) || "upload failed"); });
       return C.url + "/storage/v1/object/public/" + C.bucket + "/" + path;
     });
   }
+  /* she should never have to time her own recordings with a stopwatch */
+  function audioLength(file) {
+    return new Promise(function (done) {
+      if (!/^audio\//.test(file.type || "")) return done("");
+      var url = URL.createObjectURL(file), a = new Audio();
+      var finish = function (v) { URL.revokeObjectURL(url); done(v); };
+      a.preload = "metadata";
+      a.onloadedmetadata = function () {
+        var s = Math.round(a.duration || 0);
+        finish(s ? Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2) : "");
+      };
+      a.onerror = function () { finish(""); };
+      setTimeout(function () { finish(""); }, 8000);
+      a.src = url;
+    });
+  }
 
-  function addRows(listId, files) {
-    var spec = LISTS[listId];
+  function addFiles(listId, room, files) {
     var list = [].slice.call(files);
     if (!list.length) return;
-    toast("Uploading " + list.length + " file(s)…");
+    var spec = LISTS[listId];
+    say("Adding " + list.length + (list.length === 1 ? " file…" : " files…"));
     (function next(i) {
-      if (i >= list.length) { toast("Added.", "ok"); loadAll(); return; }
-      upload(list[i]).then(function (url) {
-        var body = { title: list[i].name.replace(/\.[a-z0-9]+$/i, ""), sort: 90, published: true };
-        if (spec.media) body[spec.media] = url;
-        Object.keys(spec.defaults || {}).forEach(function (k) { body[k] = spec.defaults[k]; });
-        if (spec.grouped === "phase") body.phase = "water";
-        if (spec.table === "cherry_tracks" && !body.voice) body.voice = "cherry";
-        return rest(spec.table, { method: "POST", headers: { Prefer: "return=minimal" }, body: body });
+      if (i >= list.length) { say("Added. Only you can see them yet."); return; }
+      Promise.all([upload(list[i]), audioLength(list[i])]).then(function (got) {
+        var extra = { title: list[i].name.replace(/\.[a-z0-9]+$/i, "") };
+        extra[spec.media] = got[0];
+        if (got[1]) extra.length = got[1];
+        return addRow(listId, room, extra);
       }).then(function () { next(i + 1); })
-        .catch(function (e) { toast(e.message, "bad"); });
+        .catch(function (e) { say(humanise(e), "bad"); });
     })(0);
   }
 
-  function addBlank(listId) {
+  /* ---------- drawing the shelf ---------- */
+  function fieldHTML(f, value, scope) {
+    var hint = f.hint ? '<em class="hint">' + esc(f.hint) + "</em>" : "";
+    var em = f.em ? '<em class="hint">the &lt;em&gt; marks make a word italic, leave them as they are.</em>' : "";
+    var head = '<span class="lab">' + esc(f.label) + hint + em + "</span>";
+    var attrs = 'data-k="' + esc(f.k) + '" data-scope="' + esc(scope) + '"';
+
+    if (f.type === "image" || f.type === "audio") {
+      var isImg = f.type === "image";
+      return '<div class="fld fld--media">' + head +
+        '<div class="mediabox' + (value ? " has" : "") + '" ' + attrs + ' data-accept="' +
+          (isImg ? "image/*" : "audio/*") + '">' +
+        (isImg && value ? '<img src="' + esc(value) + '" alt="" />'
+                        : '<span class="mediabox__none">' + (value ? "Recording added" : "No " + (isImg ? "photo" : "recording") + " yet") + "</span>") +
+        '<span class="mediabox__do">' + (value ? "Change" : "Choose") + (isImg ? " a photo" : " a recording") + "…</span>" +
+        "</div></div>";
+    }
+    if (f.type === "choice") {
+      return '<div class="fld">' + head + '<div class="pills" ' + attrs + ">" +
+        f.options.map(function (o) {
+          return '<button type="button" class="pill' + (o[0] === value ? " on" : "") +
+            '" data-v="' + esc(o[0]) + '">' + esc(o[1]) + "</button>";
+        }).join("") + "</div></div>";
+    }
+    if (f.type === "page") {
+      return '<label class="fld">' + head + "<select " + attrs + ">" +
+        PAGES.map(function (p) {
+          return '<option value="' + esc(p[0]) + '"' + (p[0] === value ? " selected" : "") + ">" + esc(p[1]) + "</option>";
+        }).join("") + "</select></label>";
+    }
+    /* anything she may want to break across lines has to be a box she can
+       press Enter inside; a one-line input silently swallows the key */
+    if (f.type === "long" || f.enter) {
+      return '<label class="fld">' + head + '<textarea rows="' +
+        (f.rows || (f.type === "long" ? 4 : 2)) + '" ' + attrs + ">" +
+        esc(toBox(value)) + "</textarea></label>";
+    }
+    return '<label class="fld">' + head + '<input type="text" ' + attrs + ' value="' +
+      esc(toBox(value).replace(/\n/g, " ")) + '" /></label>';
+  }
+
+  function roomChooser(row) {
+    return '<div class="fld"><span class="lab">Which room does it live in?</span>' +
+      '<div class="rooms" data-k="phase" data-scope="' + row._scope + '">' +
+      ROOMS.map(function (r) {
+        return '<button type="button" class="room' + (r.k === row.phase ? " on" : "") + '" data-v="' + r.k + '">' +
+          "<strong>" + r.name + "</strong><span>" + r.says + "</span></button>";
+      }).join("") + "</div></div>";
+  }
+
+  function cardHTML(listId, row) {
     var spec = LISTS[listId];
-    var body = { sort: 90, published: false };
-    if (spec.table === "cherry_pieces") { body.title = "Untitled"; body.kind = "poem"; body.phase = "water"; }
-    if (spec.table === "cherry_portals") { body.name = "New door"; body.kind = "portal"; }
-    if (spec.table === "cherry_works") { body.title = "Untitled"; body.phase = "water"; }
-    if (spec.table === "cherry_tracks") { body.title = "Untitled"; body.voice = spec.defaults ? spec.defaults.voice : "cherry"; }
-    Object.keys(spec.defaults || {}).forEach(function (k) { body[k] = spec.defaults[k]; });
-    rest(spec.table, { method: "POST", headers: { Prefer: "return=minimal" }, body: body })
-      .then(function () { toast("Added, hidden until you publish it.", "ok"); loadAll(); })
-      .catch(function (e) { toast(e.message, "bad"); });
+    var scope = spec.table + ":" + row.id;
+    row._scope = scope;
+    var media = spec.media ? row[spec.media] : "";
+    var thumb = spec.media && spec.accept === "image/*"
+      ? (media ? '<img src="' + esc(media) + '" alt="" />' : '<span>No photo</span>')
+      : "";
+    return '<article class="card" data-scope="' + scope + '" data-list="' + listId + '">' +
+      '<button class="card__top" type="button">' +
+      (thumb ? '<span class="card__thumb">' + thumb + "</span>" : "") +
+      '<span class="card__name">' + esc(row.title || row.name || "Untitled") + "</span>" +
+      (row.published ? "" : '<span class="card__hid">only you</span>') +
+      '<span class="card__chev">›</span></button>' +
+      '<div class="card__body" hidden>' +
+      spec.fields.map(function (f) { return fieldHTML(f, row[f.k], scope); }).join("") +
+      (spec.room ? roomChooser(row) : "") +
+      '<div class="card__foot">' +
+      '<label class="onoff"><input type="checkbox" data-k="published" data-scope="' + scope + '"' +
+        (row.published ? " checked" : "") + ' /><span>' +
+        (row.published ? "On the site" : "Only you can see it") + "</span></label>" +
+      '<div class="card__move"><button class="mini" type="button" data-move="up">Move up</button>' +
+      '<button class="mini" type="button" data-move="down">Move down</button></div>' +
+      "</div>" +
+      '<div class="card__danger"><button class="mini mini--red" type="button" data-remove="1">Remove this ' +
+        esc(spec.one) + "</button></div>" +
+      "</div></article>";
+  }
+
+  function listHTML(listId, title) {
+    var spec = LISTS[listId];
+    var rows = rowsFor(listId);
+    var hidden = rows.filter(function (r) { return !r.published; }).length;
+    return '<section class="block" data-list="' + listId + '">' +
+      '<h3 class="block__name">' + esc(title) +
+        ' <em>' + (rows.length - hidden) + " on the site" + (hidden ? " · " + hidden + " only you" : "") + "</em></h3>" +
+      (rows.length ? rows.map(function (r) { return cardHTML(listId, r); }).join("")
+                   : '<p class="none">Nothing here yet.</p>') +
+      '<button class="add" type="button" data-add="' + listId + '">' + esc(spec.add) + "</button>" +
+      (spec.drop ? '<div class="drop" data-drop="' + listId + '">' + esc(spec.drop) + "</div>" : "") +
+      "</section>";
+  }
+
+  function roomsHTML(listId) {
+    var spec = LISTS[listId];
+    return ROOMS.map(function (room) {
+      var rows = rowsFor(listId).filter(function (r) { return r.phase === room.k; });
+      var hidden = rows.filter(function (r) { return !r.published; }).length;
+      return '<section class="block" data-list="' + listId + '" data-room="' + room.k + '">' +
+        '<h3 class="block__name">' + room.name +
+          ' <em>' + (rows.length - hidden) + " on the site" + (hidden ? " · " + hidden + " only you" : "") + "</em></h3>" +
+        fieldHTML({ k: "phase_" + room.k + "_theme", label: "The words under " + room.name,
+                    hint: "This line also shows on the other page." },
+                  data.settings["phase_" + room.k + "_theme"], "setting") +
+        (rows.length ? rows.map(function (r) { return cardHTML(listId, r); }).join("")
+                     : '<p class="none">Nothing in this room yet.</p>') +
+        '<button class="add" type="button" data-add="' + listId + '" data-room="' + room.k + '">' +
+          esc(spec.add) + "</button>" +
+        (spec.drop ? '<div class="drop" data-drop="' + listId + '" data-room="' + room.k + '">' +
+          esc(spec.drop) + "</div>" : "") +
+        "</section>";
+    }).join("");
+  }
+
+  function hiddenHTML() {
+    var out = "", any = 0;
+    ["works", "pieces", "tracks", "portals"].forEach(function (pool) {
+      data[pool].filter(function (r) { return !r.published; }).forEach(function (r) {
+        any++;
+        var table = pool === "works" ? "cherry_works" : pool === "pieces" ? "cherry_pieces"
+          : pool === "portals" ? "cherry_portals" : "cherry_tracks";
+        out += '<article class="card card--flat" data-scope="' + table + ":" + r.id + '">' +
+          '<span class="card__name">' + esc(r.title || r.name || "Untitled") + "</span>" +
+          '<button class="mini" type="button" data-publish="' + table + ":" + r.id + '">Put it on the site</button>' +
+          "</article>";
+      });
+    });
+    var trash = [];
+    try { trash = JSON.parse(data.settings.desk_trash || "[]"); } catch (e) {}
+    var back = trash.map(function (t, i) {
+      return '<article class="card card--flat">' +
+        '<span class="card__name">' + esc(t.row.title || t.row.name || "Untitled") + "</span>" +
+        '<button class="mini" type="button" data-restore="' + i + '">Put it back</button></article>';
+    }).join("");
+    return '<section class="block"><h3 class="block__name">Not on the site yet</h3>' +
+      (any ? out : '<p class="none">Everything you have made is on the site.</p>') + "</section>" +
+      '<section class="block"><h3 class="block__name">Removed</h3>' +
+      (back || '<p class="none">Nothing removed.</p>') + "</section>";
+  }
+
+  /* ---------- painting the shelf ---------- */
+  function paint(keepOpen) {
+    var open = keepOpen || $$(".card__body:not([hidden])").map(function (b) {
+      return b.parentNode.dataset.scope;
+    });
+    var sec = SCHEMA.filter(function (s) { return s.id === here; })[0] || SCHEMA[0];
+    $$("#pages button").forEach(function (b) { b.classList.toggle("on", b.dataset.page === sec.id); });
+
+    var html = '<header class="shelf__head"><h2>' + esc(sec.name) + "</h2>" +
+      '<p>' + esc(sec.blurb) + "</p></header>";
+
+    if (sec.special === "hidden") html += hiddenHTML();
+    else {
+      if (sec.fields) html += '<section class="block">' +
+        sec.fields.map(function (f) { return fieldHTML(f, data.settings[f.k], "setting"); }).join("") + "</section>";
+      if (sec.rooms) html += roomsHTML(sec.rooms);
+      (sec.lists || []).forEach(function (l) { html += listHTML(l.id, l.title); });
+    }
+    $("#shelf").innerHTML = html;
+    open.forEach(function (scope) {
+      var card = $('.card[data-scope="' + scope + '"]');
+      if (card) { $(".card__body", card).hidden = false; card.classList.add("open"); }
+    });
+  }
+
+  /* push everything she has locally into the frame, without reloading it */
+  function repaintFrame() {
+    Object.keys(data.settings).forEach(function (k) {
+      if (k !== "desk_trash") tell({ type: "set", key: k, value: data.settings[k] });
+    });
   }
 
   /* ---------- events ---------- */
-  document.addEventListener("input", function (e) {
-    var i = e.target;
-    if (!i.dataset || !i.dataset.k) return;
-    var row = i.closest(".row");
-    if (row) {
-      var ref = row.dataset.table + ":" + row.dataset.id;
-      dirtyRows[ref] = dirtyRows[ref] || {};
-      dirtyRows[ref][i.dataset.k] = i.type === "checkbox" ? i.checked
-        : (i.dataset.k === "sort" ? parseInt(i.value, 10) || 0 : i.value);
-      var head = $(".row__head strong", row);
-      if (i.dataset.k === "title" || i.dataset.k === "name") head.textContent = i.value || "Untitled";
-      var thumb = $(".row__thumb img", row);
-      if (thumb && (i.dataset.k === "image_url")) thumb.src = i.value;
-    } else if ($("#sheet").contains(i)) {
-      dirty[i.dataset.k] = i.value;
-    }
-    markDirty();
-  });
-
-  document.addEventListener("change", function (e) {
-    var i = e.target;
-    if (i.type === "checkbox" && i.dataset.k === "published") {
-      var lab = i.closest(".switch").querySelector("span");
-      if (lab) lab.textContent = i.checked ? "live" : "hidden";
-      var row = i.closest(".row");
-      if (row) {
-        var ref = row.dataset.table + ":" + row.dataset.id;
-        dirtyRows[ref] = dirtyRows[ref] || {};
-        dirtyRows[ref].published = i.checked;
-        markDirty();
-      }
-    }
-    if (i.tagName === "SELECT" && i.dataset.k) {
-      var r2 = i.closest(".row");
-      if (r2) {
-        var ref2 = r2.dataset.table + ":" + r2.dataset.id;
-        dirtyRows[ref2] = dirtyRows[ref2] || {};
-        dirtyRows[ref2][i.dataset.k] = i.value;
-      } else { dirty[i.dataset.k] = i.value; }
-      markDirty();
-    }
-  });
-
   document.addEventListener("click", function (e) {
-    var go = e.target.closest("[data-go]");
-    if (go) { e.preventDefault(); paint(go.dataset.go); $("#rail").classList.remove("is-open"); return; }
+    var page = e.target.closest("#pages button");
+    if (page) {
+      here = page.dataset.page;
+      try { localStorage.setItem(LAST, here); } catch (err) {}
+      var sec = SCHEMA.filter(function (s) { return s.id === here; })[0];
+      paint();
+      $("#shelf").scrollTop = 0;
+      if (sec) openPage(sec.page);
+      document.body.classList.remove("show-pages");
+      return;
+    }
+    if (e.target.closest("#pagesBtn")) { document.body.classList.toggle("show-pages"); return; }
+    if (!e.target.closest("#pages")) document.body.classList.remove("show-pages");
+    if (e.target.closest("#seeBtn")) { document.body.classList.toggle("show-frame"); return; }
 
-    var open = e.target.closest(".btn--open");
-    if (open) {
-      var row = open.closest(".row");
-      var form = $(".row__form", row);
-      form.hidden = !form.hidden;
-      open.textContent = form.hidden ? "edit" : "done";
-      row.classList.toggle("is-open", !form.hidden);
+    var top = e.target.closest(".card__top");
+    if (top) {
+      var card = top.parentNode, body = $(".card__body", card);
+      body.hidden = !body.hidden;
+      card.classList.toggle("open", !body.hidden);
+      if (!body.hidden) tellRow(card.dataset.scope);
       return;
     }
 
-    var del = e.target.closest(".btn--del");
-    if (del) {
-      var r = del.closest(".row");
-      var name = $(".row__head strong", r).textContent;
-      if (!confirm("Delete “" + name + "” permanently?")) return;
-      rest(r.dataset.table + "?id=eq." + r.dataset.id, { method: "DELETE", headers: { Prefer: "return=minimal" } })
-        .then(function () { toast("Deleted.", "ok"); loadAll(); })
-        .catch(function (err) { toast(err.message, "bad"); });
+    var pill = e.target.closest(".pill, .room");
+    if (pill) {
+      var wrap = pill.parentNode;
+      $$(".pill, .room", wrap).forEach(function (p) { p.classList.remove("on"); });
+      pill.classList.add("on");
+      var parts = wrap.dataset.scope.split(":");
+      saveRow(parts[0], parts[1], keyed(wrap.dataset.k, pill.dataset.v));
+      if (wrap.dataset.k === "phase") setTimeout(function () { paint(); }, 600);
       return;
     }
 
-    var pick = e.target.closest(".btn--pick");
-    if (pick) {
-      var input = $("#filePicker");
-      input.accept = pick.dataset.accept || "";
-      input.onchange = function () {
-        var f = input.files[0];
+    var media = e.target.closest(".mediabox");
+    if (media) {
+      var picker = $("#picker");
+      picker.accept = media.dataset.accept || "";
+      picker.onchange = function () {
+        var f = picker.files[0]; picker.value = "";
         if (!f) return;
-        toast("Uploading " + f.name + "…");
-        upload(f).then(function (url) {
-          var text = $('input[type="text"]', pick.closest(".media"));
-          text.value = url;
-          text.dispatchEvent(new Event("input", { bubbles: true }));
-          var t = $(".media__thumb", pick.closest(".media"));
-          t.innerHTML = /audio/.test(pick.dataset.accept) ? "<span>audio</span>" : '<img src="' + url + '" alt="" />';
-          toast("Uploaded. Save to keep it.", "ok");
-        }).catch(function (err) { toast(err.message, "bad"); });
-        input.value = "";
+        say("Adding your file…");
+        Promise.all([upload(f), audioLength(f)]).then(function (got) {
+          var url = got[0];
+          if (media.dataset.scope === "setting") {
+            saveSetting(media.dataset.k, url);
+            tell({ type: "set", key: media.dataset.k, value: url, reveal: true });
+          } else {
+            var p = media.dataset.scope.split(":");
+            var patch = keyed(media.dataset.k, url);
+            if (got[1]) patch.length = got[1];
+            saveRow(p[0], p[1], patch);
+            tell({ type: "setRow", scope: media.dataset.scope, key: media.dataset.k, value: url });
+            if (got[1]) tell({ type: "setRow", scope: media.dataset.scope, key: "length", value: got[1] });
+          }
+          paint();
+        }).catch(function (err) { say(humanise(err), "bad"); });
       };
-      input.click();
+      picker.click();
+      return;
+    }
+
+    var mv = e.target.closest("[data-move]");
+    if (mv) { move(mv.closest(".card"), mv.dataset.move); return; }
+
+    var rm = e.target.closest("[data-remove]");
+    if (rm) {
+      var c = rm.closest(".card");
+      if (rm.dataset.confirm) {
+        var p2 = c.dataset.scope.split(":");
+        remove(p2[0], p2[1]);
+      } else {
+        rm.dataset.confirm = "1";
+        rm.textContent = "Really remove it?";
+        setTimeout(function () { delete rm.dataset.confirm; rm.textContent = "Remove this"; }, 4000);
+      }
+      return;
+    }
+
+    var pub = e.target.closest("[data-publish]");
+    if (pub) {
+      var pp = pub.dataset.publish.split(":");
+      saveRow(pp[0], pp[1], { published: true });
+      setTimeout(function () { paint(); repaintRows(); }, 600);
+      return;
+    }
+
+    var res = e.target.closest("[data-restore]");
+    if (res) {
+      var trash = [];
+      try { trash = JSON.parse(data.settings.desk_trash || "[]"); } catch (err) {}
+      var item = trash[+res.dataset.restore];
+      if (item) putBack(item.table, item.row);
       return;
     }
 
     var add = e.target.closest("[data-add]");
     if (add) {
-      var lid = add.dataset.add;
-      if (LISTS[lid].adds === "blank") addBlank(lid);
-      else {
-        var fp = $("#filePicker");
-        fp.accept = LISTS[lid].adds === "audio" ? "audio/*" : "image/*";
-        fp.onchange = function () { addRows(lid, fp.files); fp.value = ""; };
+      var lid = add.dataset.add, spec = LISTS[lid];
+      if (spec.accept && spec.media) {
+        var fp = $("#picker");
+        fp.accept = spec.accept;
+        fp.onchange = function () { addFiles(lid, add.dataset.room, fp.files); fp.value = ""; };
         fp.click();
+      } else {
+        addRow(lid, add.dataset.room).catch(function (err) { say(humanise(err), "bad"); });
       }
       return;
     }
 
-    if (e.target.closest("#saveBtn")) { saveAll(); return; }
-    if (e.target.closest("#revertBtn")) { revert(); return; }
-    if (e.target.closest("#menuBtn")) { $("#rail").classList.toggle("is-open"); return; }
+    var undo = e.target.closest(".undo");
+    if (undo && $("#status")._undo) { $("#status")._undo(); return; }
+
     if (e.target.closest("#signout")) {
-      fetch(C.url + "/auth/v1/logout", { method: "POST",
-        headers: { apikey: C.key, Authorization: "Bearer " + token() } }).catch(function () {});
       forget(); location.reload();
     }
   });
 
-  /* drag to reorder inside a group */
-  var dragging = null;
-  document.addEventListener("dragstart", function (e) {
-    var row = e.target.closest(".row");
-    if (!row) return;
-    dragging = row;
-    row.classList.add("is-dragging");
-    e.dataTransfer.effectAllowed = "move";
-  });
-  document.addEventListener("dragend", function () {
-    if (!dragging) return;
-    dragging.classList.remove("is-dragging");
-    var group = dragging.closest(".group");
-    dragging = null;
-    if (!group) return;
-    $$(".row", group).forEach(function (r, i) {
-      var ref = r.dataset.table + ":" + r.dataset.id;
-      dirtyRows[ref] = dirtyRows[ref] || {};
-      dirtyRows[ref].sort = i;
+  function keyed(k, v) { var o = {}; o[k] = v; return o; }
+
+  function move(card, dir) {
+    var block = card.closest(".block");
+    var cards = $$(".card", block);
+    var i = cards.indexOf(card);
+    var j = dir === "up" ? i - 1 : i + 1;
+    if (j < 0 || j >= cards.length) return;
+    block.insertBefore(dir === "up" ? card : cards[j], dir === "up" ? cards[j] : card);
+    $$(".card", block).forEach(function (c, n) {
+      var p = c.dataset.scope.split(":");
+      saveRow(p[0], p[1], { sort: n }, true);
     });
-    markDirty();
-    toast("Order changed. Save to keep it.");
-  });
-  document.addEventListener("dragover", function (e) {
-    if (!dragging) return;
-    var over = e.target.closest(".row");
-    if (!over || over === dragging) return;
-    if (over.closest(".group") !== dragging.closest(".group")) return;
-    e.preventDefault();
-    var box = over.getBoundingClientRect();
-    var after = (e.clientY - box.top) / box.height > 0.5;
-    over.parentNode.insertBefore(dragging, after ? over.nextSibling : over);
+    say("Moved");
+    setTimeout(repaintRows, 700);
+  }
+
+  /* rows need the page reloaded to re-render; do it quietly and rarely */
+  var rowT;
+  function repaintRows() {
+    clearTimeout(rowT);
+    rowT = setTimeout(function () {
+      if (frame && frame.contentWindow) frame.contentWindow.location.reload();
+    }, 900);
+  }
+
+  document.addEventListener("input", function (e) {
+    var i = e.target;
+    if (!i.dataset || !i.dataset.k || !i.dataset.scope) return;
+    var raw = i.value;
+    if (i.dataset.scope === "setting") {
+      var value = (i.tagName === "TEXTAREA" || i.dataset.enter) ? toSite(raw) : raw;
+      saveSetting(i.dataset.k, value);
+      tell({ type: "set", key: i.dataset.k, value: value });
+    } else {
+      var p = i.dataset.scope.split(":");
+      var v2 = i.tagName === "TEXTAREA" ? toSite(raw) : raw;
+      saveRow(p[0], p[1], keyed(i.dataset.k, v2));
+      var card = i.closest(".card");
+      if (card && (i.dataset.k === "title" || i.dataset.k === "name")) {
+        $(".card__name", card).textContent = raw || "Untitled";
+      }
+      /* paint it straight into the page: a reload while she is still
+         typing would throw her back to the top of her own poem */
+      tell({ type: "setRow", scope: i.dataset.scope, key: i.dataset.k, value: v2 });
+    }
   });
 
-  /* dropping files onto a list */
-  document.addEventListener("dragenter", function (e) {
-    var d = e.target.closest("[data-drop]");
-    if (d) { e.preventDefault(); d.classList.add("is-over"); }
+  document.addEventListener("change", function (e) {
+    var i = e.target;
+    if (i.type === "checkbox" && i.dataset.k === "published") {
+      var p = i.dataset.scope.split(":");
+      saveRow(p[0], p[1], { published: i.checked });
+      var lab = i.parentNode.querySelector("span");
+      if (lab) lab.textContent = i.checked ? "On the site" : "Only you can see it";
+      repaintRows();
+      setTimeout(function () { paint(); }, 700);
+    }
+    if (i.tagName === "SELECT" && i.dataset.scope && i.dataset.scope !== "setting") {
+      var q = i.dataset.scope.split(":");
+      saveRow(q[0], q[1], keyed(i.dataset.k, i.value));
+      repaintRows();
+    }
+  });
+
+  /* dropping photos straight into a room */
+  ["dragenter", "dragover"].forEach(function (ev) {
+    document.addEventListener(ev, function (e) {
+      var d = e.target.closest("[data-drop]");
+      if (d) { e.preventDefault(); d.classList.add("over"); }
+    });
   });
   document.addEventListener("dragleave", function (e) {
     var d = e.target.closest("[data-drop]");
-    if (d) d.classList.remove("is-over");
+    if (d) d.classList.remove("over");
   });
   document.addEventListener("drop", function (e) {
     var d = e.target.closest("[data-drop]");
     if (!d) return;
-    e.preventDefault();
-    d.classList.remove("is-over");
-    addRows(d.dataset.drop, e.dataTransfer.files);
+    e.preventDefault(); d.classList.remove("over");
+    addFiles(d.dataset.drop, d.dataset.room, e.dataTransfer.files);
   });
 
-  document.addEventListener("keydown", function (e) {
-    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s") { e.preventDefault(); saveAll(); }
-  });
-  window.addEventListener("beforeunload", function (e) {
-    if (countDirty()) { e.preventDefault(); e.returnValue = ""; }
+  /* ---------- hearing the page ---------- */
+  function tellRow(scope) { tell({ type: "revealRow", scope: scope }); }
+
+  window.addEventListener("message", function (e) {
+    if (e.origin !== location.origin) return;
+    if (!e.data || e.data.from !== "cherry-page") return;
+    var m = e.data;
+
+    if (m.type === "ready") { repaintFrame(); tell({ type: "marks", on: true }); }
+
+    if (m.type === "pick") {
+      var field = $('[data-k="' + m.key + '"][data-scope="setting"]');
+      if (!field) {
+        /* the words she tapped belong to another part of the shelf: go and
+           get them for her, but leave the page in the frame where it is */
+        var holder = SCHEMA.filter(function (s) {
+          return (s.fields || []).some(function (f) { return f.k === m.key; });
+        })[0];
+        if (!holder) { say("You cannot change that one from here."); return; }
+        here = holder.id;
+        try { localStorage.setItem(LAST, here); } catch (err2) {}
+        paint();
+        $("#shelf").scrollTop = 0;
+        field = $('[data-k="' + m.key + '"][data-scope="setting"]');
+        if (!field) return;
+      }
+      field.scrollIntoView({ block: "center", behavior: "smooth" });
+      if (field.focus) field.focus();
+      field.classList.add("lit");
+      setTimeout(function () { field.classList.remove("lit"); }, 1200);
+      document.body.classList.remove("show-frame");
+    }
+
+    if (m.type === "pickRow") {
+      var card = $('.card[data-scope="' + m.scope + '"]');
+      if (!card) { say("Open the page that holds it to edit that."); return; }
+      $$(".card__body").forEach(function (b) { b.hidden = true; b.parentNode.classList.remove("open"); });
+      $(".card__body", card).hidden = false;
+      card.classList.add("open");
+      card.scrollIntoView({ block: "center", behavior: "smooth" });
+      document.body.classList.remove("show-frame");
+    }
   });
 
   /* ---------- boot ---------- */
-  if (session) {
-    $("#gate").hidden = true;
-    $("#shell").hidden = false;
-    $("#rail").innerHTML = SCHEMA.map(function (s) {
-      return '<a href="#" data-go="' + s.id + '"><em>' + esc(s.num) + "</em>" + esc(s.name) + "</a>";
-    }).join("");
-    loadAll();
-  } else {
-    $("#gate").hidden = false;
-    $("#shell").hidden = true;
+  if (!session) {
+    $("#gate").hidden = false; $("#studio").hidden = true;
     $("#gateForm").addEventListener("submit", signIn);
+    return;
   }
+
+  $("#gate").hidden = true;
+  $("#studio").hidden = false;
+  frame = $("#frame");
+  $("#pages").innerHTML = SCHEMA.map(function (s) {
+    return '<button type="button" data-page="' + s.id + '">' + esc(s.name) + "</button>";
+  }).join("");
+
+  try { here = localStorage.getItem(LAST); } catch (e) {}
+  if (!here || !SCHEMA.some(function (s) { return s.id === here; })) here = "home";
+
+  /* the frame carries the looking glass, injected after each load so the
+     public pages never ship it */
+  function dressFrame() {
+    try {
+      var doc = frame.contentDocument;
+      if (!doc || !doc.body || doc.querySelector("script[data-glass]")) return;
+      var s = doc.createElement("script");
+      s.src = "js/cherry-preview.js?v=3";
+      s.setAttribute("data-glass", "1");
+      doc.body.appendChild(s);
+    } catch (err) { console.error(err); }
+  }
+  frame.addEventListener("load", dressFrame);
+  dressFrame();   // in case the first page finished before we got here
+
+  say("All saved");
+  loadAll().then(function () {
+    paint();
+    var sec = SCHEMA.filter(function (s) { return s.id === here; })[0];
+    openPage(sec ? sec.page : "index.html");
+  }).catch(function (e) {
+    $("#shelf").innerHTML = '<p class="none">' + esc(humanise(e)) + "</p>";
+  });
 })();
