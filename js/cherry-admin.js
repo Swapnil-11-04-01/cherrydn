@@ -1,8 +1,9 @@
 /* ============================================================
    THE ARCHIVE — Cherry's own way in.
-   No framework, no build step, no password held anywhere: she asks for
-   a link, the link signs her in, and the database itself refuses every
-   write that does not carry her session.
+   No framework, no build step, and no credential in this file: the
+   password is checked by the auth service, and the database itself
+   refuses every write that does not carry her signed-in session. There
+   is no way to sign up; the only accounts that exist were made for her.
    ============================================================ */
 (function () {
   "use strict";
@@ -16,18 +17,28 @@
   function load() { try { return JSON.parse(localStorage.getItem(SESSION) || "null"); } catch (e) { return null; } }
   function forget() { try { localStorage.removeItem(SESSION); } catch (e) {} }
 
-  function fromHash() {
-    if (!location.hash || location.hash.indexOf("access_token") === -1) return null;
-    var p = new URLSearchParams(location.hash.slice(1));
-    var s = { access_token: p.get("access_token"), refresh_token: p.get("refresh_token") };
-    history.replaceState(null, "", location.pathname);
-    return s.access_token ? s : null;
-  }
-  var session = fromHash() || load();
-  if (session) save(session);
+  var session = load();
 
   function token() { return session ? session.access_token : C.key; }
-  function rest(path, opts) {
+
+  /* Sessions last an hour. Rather than throwing her out mid-sentence,
+     trade the refresh token for a fresh one and repeat the request. */
+  function refresh() {
+    if (!session || !session.refresh_token) return Promise.reject(new Error("no session"));
+    return fetch(C.url + "/auth/v1/token?grant_type=refresh_token", {
+      method: "POST", headers: { apikey: C.key, "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh_token: session.refresh_token })
+    }).then(function (r) {
+      if (!r.ok) throw new Error("refresh failed");
+      return r.json();
+    }).then(function (s) {
+      session = { access_token: s.access_token, refresh_token: s.refresh_token };
+      save(session);
+      return session;
+    });
+  }
+
+  function rest(path, opts, retried) {
     opts = opts || {};
     var h = { apikey: C.key, Authorization: "Bearer " + token(), "Content-Type": "application/json" };
     Object.keys(opts.headers || {}).forEach(function (k) { h[k] = opts.headers[k]; });
@@ -35,28 +46,63 @@
       method: opts.method || "GET", headers: h,
       body: opts.body ? JSON.stringify(opts.body) : undefined
     }).then(function (r) {
-      if (r.status === 401 || r.status === 403) throw new Error("Your session has expired. Ask for a new link.");
+      if ((r.status === 401 || r.status === 403) && !retried && session) {
+        return refresh()
+          .then(function () { return rest(path, opts, true); })
+          .catch(function () {
+            forget();
+            throw new Error("You have been signed out. Sign in again to keep editing.");
+          });
+      }
+      if (r.status === 401 || r.status === 403) throw new Error("You are not signed in.");
       if (!r.ok) return r.text().then(function (t) { throw new Error(t.slice(0, 160) || ("Error " + r.status)); });
-      return r.status === 204 ? null : r.json();
+      /* a minimal write answers 200 or 204 with an empty body, so read the
+         text first and only parse when there is something to parse */
+      return r.text().then(function (t) { return t ? JSON.parse(t) : null; });
     });
   }
 
   /* ---------- the door ---------- */
-  function askForLink(e) {
+  function signIn(e) {
     e.preventDefault();
     var email = $("#email").value.trim();
-    if (!email) return;
+    var password = $("#password").value;
     var msg = $("#gateMsg");
-    msg.textContent = "Sending your link…";
-    fetch(C.url + "/auth/v1/otp", {
+    var btn = $("#gateBtn");
+    if (!email || !password) return;
+    btn.disabled = true;
+    msg.textContent = "Opening…";
+
+    fetch(C.url + "/auth/v1/token?grant_type=password", {
       method: "POST", headers: { apikey: C.key, "Content-Type": "application/json" },
-      body: JSON.stringify({ email: email, create_user: false,
-        options: { email_redirect_to: location.origin + location.pathname } })
+      body: JSON.stringify({ email: email, password: password })
     }).then(function (r) {
-      if (!r.ok) return r.text().then(function (t) { throw new Error(t); });
-      msg.textContent = "Check your inbox. The link opens this page, already signed in.";
-    }).catch(function () {
-      msg.textContent = "That did not send. Check the address, or try again in a minute.";
+      return r.json().then(function (body) { return { ok: r.ok, body: body }; });
+    }).then(function (res) {
+      if (!res.ok || !res.body.access_token) {
+        throw new Error(/invalid/i.test(JSON.stringify(res.body))
+          ? "That email and password do not match."
+          : "Could not sign in. Try again in a moment.");
+      }
+      session = { access_token: res.body.access_token, refresh_token: res.body.refresh_token };
+      save(session);
+      /* a valid account is not the same as permission to edit her archive */
+      return fetch(C.url + "/rest/v1/rpc/cherry_is_admin", {
+        method: "POST",
+        headers: { apikey: C.key, Authorization: "Bearer " + session.access_token,
+                   "Content-Type": "application/json" },
+        body: "{}"
+      }).then(function (r) { return r.ok ? r.json() : false; });
+    }).then(function (isAdmin) {
+      if (isAdmin !== true) {
+        forget(); session = null;
+        throw new Error("This account cannot edit the archive.");
+      }
+      location.reload();
+    }).catch(function (err) {
+      msg.textContent = err.message;
+      btn.disabled = false;
+      $("#password").value = "";
     });
   }
 
@@ -493,6 +539,6 @@
   } else {
     $("#gate").hidden = false;
     $("#shell").hidden = true;
-    $("#gateForm").addEventListener("submit", askForLink);
+    $("#gateForm").addEventListener("submit", signIn);
   }
 })();

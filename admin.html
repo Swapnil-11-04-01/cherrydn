@@ -33,7 +33,7 @@
     .gate p { font-family: var(--poetic); font-style: italic; color: var(--muted); font-size: 1.12rem; margin-bottom: 2.1rem; }
     #gateMsg { min-height: 1.5em; margin-top: 1.2rem; font-family: var(--poetic); font-style: italic; color: var(--red-t); }
 
-    input[type=text], input[type=email], textarea, select {
+    input[type=text], input[type=email], input[type=password], textarea, select {
       width: 100%; background: var(--bg2); color: var(--ink);
       border: 1px solid var(--line); padding: 0.7rem 0.85rem;
       font-family: var(--ui); font-size: 0.92rem; border-radius: 2px;
@@ -163,12 +163,15 @@
   <section class="gate" id="gate" hidden>
     <p class="gate__mark">CHERRY&nbsp;DN</p>
     <h1>THE ARCHIVE</h1>
-    <p>This door is yours alone. Enter your address and a link will arrive that signs you in. There is no password to remember, or lose.</p>
-    <form id="gateForm">
-      <label class="f"><span class="f__label">your email</span>
-        <input id="email" type="email" autocomplete="email" placeholder="you@example.com" required />
+    <p>This door is yours alone.</p>
+    <form id="gateForm" autocomplete="on">
+      <label class="f"><span class="f__label">email</span>
+        <input id="email" name="email" type="email" autocomplete="username" placeholder="you@example.com" required />
       </label>
-      <div style="margin-top:1.1rem"><button class="btn" type="submit">send me the link</button></div>
+      <label class="f" style="margin-top:0.9rem"><span class="f__label">password</span>
+        <input id="password" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required />
+      </label>
+      <div style="margin-top:1.3rem"><button class="btn" id="gateBtn" type="submit">enter</button></div>
     </form>
     <p id="gateMsg"></p>
   </section>
@@ -202,6 +205,6 @@
 
   <script src="js/cherry-config.js?v=2"></script>
   <script src="js/cherry-schema.js?v=1"></script>
-  <script src="js/cherry-admin.js?v=2"></script>
+  <script src="js/cherry-admin.js?v=4"></script>
 </body>
 </html>
