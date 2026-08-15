@@ -39,9 +39,11 @@
     cherry_pieces:  { title: ".wl__title", kind: ".wl__kind",
                       excerpt: ".wl__excerpt", body: ".wl__body" },
     cherry_tracks:  { title: ".trk__name", length: ".trk__len",
-                      audio_url: "@data-src" },
+                      audio_url: "@data-src", lyrics: ".trk__lyrics" },
     cherry_portals: { name: ".portal__name", blurb: ".portal__desc",
-                      image_url: "@img", href: "@href" }
+                      image_url: "@img", href: "@href" },
+    cherry_films:   { title: ".film__title", note: ".film__note",
+                      poster_url: "@img", video_url: "@data-video" }
   };
 
   function paintRow(scope, key, value) {
@@ -134,7 +136,7 @@
 
   document.addEventListener("click", function (e) {
     var hit = e.target.closest("[data-cms], [data-cms-src]");
-    var item = e.target.closest(".vitem, .wl, .trk, .portal");
+    var item = e.target.closest(".vitem, .wl, .trk, .portal, .film");
 
     if (hit) {
       e.preventDefault(); e.stopPropagation();

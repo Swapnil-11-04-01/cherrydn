@@ -151,24 +151,39 @@
     stopAll();
   });
 
-  var rows = [];
+  /* This runs twice: once over the rows shipped in the HTML, and again
+     over the rows the archive renders in their place. The second run has
+     to be able to take back what the first one concluded, or a page whose
+     songs are all live keeps telling visitors they are not. `flight`
+     makes the newest run the only one whose verdict counts. */
+  var rows = [], flight = 0;
   function preflight() {
+  var mine = ++flight;
   rows = [].slice.call(document.querySelectorAll("[data-src]"));
-  var liveCount = 0, checked = 0;
+  var live = 0, checked = 0, total = rows.length;
+
+  function verdict() {
+    if (mine !== flight) return;
+    var quiet = live === 0;
+    document.querySelectorAll("[data-media-note]").forEach(function (n) { n.hidden = !quiet; });
+    if (playerBtn) {
+      if (quiet) playerBtn.setAttribute("aria-disabled", "true");
+      else playerBtn.removeAttribute("aria-disabled");
+    }
+  }
+  function ghost(row) {
+    if (mine !== flight) return;
+    row.classList.add("is-ghost");
+    row.classList.remove("is-current");
+  }
+
+  if (!total) { verdict(); return; }
   rows.forEach(function (row) {
     fetch(row.dataset.src, { method: "HEAD" }).then(function (r) {
-      if (!r.ok) { row.classList.add("is-ghost"); row.classList.remove("is-current"); }
-      else { liveCount++; }
-    }).catch(function () {
-      row.classList.add("is-ghost");
-      row.classList.remove("is-current");
-    }).finally(function () {
-      checked++;
-      if (checked === rows.length && liveCount === 0) {
-        document.querySelectorAll("[data-media-note]").forEach(function (n) { n.hidden = false; });
-        if (playerBtn) playerBtn.setAttribute("aria-disabled", "true");
-      }
-    });
+      if (mine !== flight) return;
+      if (!r.ok) ghost(row); else live++;
+    }).catch(function () { ghost(row); })
+      .finally(function () { checked++; if (checked === total) verdict(); });
   });
   }
   function bindRows() {
@@ -181,7 +196,8 @@
     row.addEventListener("keydown", function (e) {
       if (e.key === "Enter" || e.key === " ") { e.preventDefault(); row.click(); }
     });
-    row.addEventListener("click", function () {
+    row.addEventListener("click", function (e) {
+      if (e.target.closest(".trk__words, .trk__lyrics")) return;   /* reading, not listening */
       if (row.classList.contains("is-ghost")) return;
       if (currentRow === row) { stopAll(); return; }
       stopAll();
@@ -299,6 +315,98 @@
     });
   }
 
+  /* ---------- her words, under her songs ---------- */
+  function bindLyrics() {
+    document.querySelectorAll(".trk__words").forEach(function (btn) {
+      if (btn.dataset.bound) return;
+      btn.dataset.bound = "1";
+      btn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        var sheet = btn.parentNode.querySelector(".trk__lyrics");
+        if (!sheet) return;
+        var open = sheet.hidden;
+        sheet.hidden = !open;
+        btn.setAttribute("aria-expanded", String(open));
+        btn.textContent = open ? "close" : "words";
+      });
+    });
+  }
+  bindLyrics();
+
+  /* ---------- the projector ----------
+     A film either lives in the archive as a file, or it lives on YouTube
+     or Vimeo and we point at it. Nothing third-party is fetched until she
+     or a visitor actually presses play. */
+  function readsAs(raw) {
+    var u = String(raw || "").trim();
+    if (!u || /^javascript:/i.test(u)) return null;
+    var yt = u.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|v\/)|youtu\.be\/)([\w-]{6,})/i);
+    if (yt) return { kind: "embed",
+      src: "https://www.youtube-nocookie.com/embed/" + yt[1] + "?autoplay=1&rel=0&modestbranding=1" };
+    var vm = u.match(/vimeo\.com\/(?:video\/)?(\d{6,})/i);
+    if (vm) return { kind: "embed", src: "https://player.vimeo.com/video/" + vm[1] + "?autoplay=1" };
+    if (/^(data|vbscript|file):/i.test(u)) return null;
+    return { kind: "file", src: u };   /* the archive, or any direct link she has */
+  }
+
+  function shutProjector(except) {
+    document.querySelectorAll(".film__frame.is-playing").forEach(function (fr) {
+      if (fr === except) return;
+      var p = fr.querySelector(".film__player");
+      if (p) { if (p.pause) { try { p.pause(); } catch (e) {} } p.remove(); }
+      fr.classList.remove("is-playing");
+    });
+  }
+
+  function bindFilms() {
+    document.querySelectorAll(".film").forEach(function (card) {
+      if (card.dataset.bound) return;
+      card.dataset.bound = "1";
+      var frame = card.querySelector(".film__frame");
+      var btn = card.querySelector(".film__play");
+      if (!frame || !btn) return;
+
+      var found = readsAs(card.dataset.video);
+      if (!found) { frame.classList.add("is-empty"); btn.disabled = true; return; }
+
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        if (frame.classList.contains("is-playing")) return;
+        shutProjector(frame);
+        stopAll();                       /* a song and a film do not share a room */
+
+        var player;
+        if (found.kind === "file") {
+          player = document.createElement("video");
+          player.src = found.src;
+          player.controls = true;
+          player.autoplay = true;
+          player.setAttribute("playsinline", "");
+          var face = card.querySelector(".film__poster");
+          if (face && face.getAttribute("src")) player.poster = face.getAttribute("src");
+          player.addEventListener("error", function () {
+            frame.classList.remove("is-playing");
+            frame.classList.add("is-empty");
+            player.remove();
+          });
+        } else {
+          player = document.createElement("iframe");
+          player.src = found.src;
+          player.allow = "accelerometer; autoplay; encrypted-media; picture-in-picture";
+          player.allowFullscreen = true;
+          player.referrerPolicy = "no-referrer";
+          var t = card.querySelector(".film__title");
+          player.title = t ? t.textContent : "Film";
+        }
+        player.className = "film__player";
+        frame.classList.add("is-playing");
+        frame.appendChild(player);
+        if (player.play) { var go = player.play(); if (go && go.catch) go.catch(function () {}); }
+      });
+    });
+  }
+  bindFilms();
+
   /* ---------- restore sanity on back/forward ---------- */
   window.addEventListener("pageshow", function (e) {
     if (!e.persisted) return;
@@ -310,6 +418,7 @@
     }
     releaseAllLocks();
     stopAll();
+    shutProjector();
   });
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && menu && menu.classList.contains("is-open")) {
@@ -325,6 +434,8 @@
     bindReadToggles();
     bindRows();
     preflight();
+    bindFilms();
+    bindLyrics();
     if (typeof bindWorks === "function") bindWorks();
   };
 

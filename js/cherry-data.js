@@ -141,9 +141,14 @@
     var len = '<span class="trk__len">' + clean(t.length || "--:--") + "</span>";
     var name = '<span class="trk__name">' + clean(t.title) + "</span>";
     var no = '<span class="trk__no">' + (t._n < 10 ? "0" + t._n : t._n) + "</span>";
+    /* the words are only offered when she has written them */
+    var words = String(t.lyrics || "").trim()
+      ? '<button class="trk__words" type="button" aria-expanded="false">words</button>' +
+        '<div class="trk__lyrics" hidden>' + clean(t.lyrics) + "</div>"
+      : "";
     return '<li class="trk" data-cms-row="cherry_tracks:' + t.id + '" data-src="' + plain(t.audio_url).replace(/"/g, "&quot;") +
       '" data-title="' + plain(t.title).replace(/"/g, "&quot;") + '">' +
-      (mirrored ? len + name + no : no + name + len) + "</li>";
+      (mirrored ? len + name + no : no + name + len) + words + "</li>";
   }
   function renderTracks(rows) {
     var touched = 0;
@@ -158,6 +163,29 @@
       touched++;
     });
     return touched;
+  }
+
+  /* ---------- the projection room ---------- */
+  function renderFilms(rows) {
+    var reel = document.querySelector(".reel");
+    if (!reel) return 0;
+    reel.innerHTML = bySort(rows).map(function (f) {
+      var poster = plain(f.poster_url).trim();
+      var name = plain(f.title).replace(/"/g, "&quot;");
+      return '<article class="film" data-cms-row="cherry_films:' + f.id +
+        '" data-video="' + plain(f.video_url).replace(/"/g, "&quot;") + '" data-r>' +
+        '<div class="film__frame">' +
+        '<img class="film__poster"' + (poster ? ' src="' + poster.replace(/"/g, "&quot;") + '"' : "") +
+          ' alt="" loading="lazy" onerror="this.removeAttribute(\'src\')" />' +
+        '<button class="film__play" type="button" aria-label="Play ' + (name || "this film") + '"></button>' +
+        "</div>" +
+        '<h2 class="film__title">' + clean(f.title) + "</h2>" +
+        '<p class="film__note">' + clean(f.note) + "</p>" +
+        "</article>";
+    }).join("");
+    /* the placeholder strip has done its job */
+    document.querySelectorAll("[data-film-empty]").forEach(function (n) { n.remove(); });
+    return 1;
   }
 
   /* ---------- the doors on the landing ---------- */
@@ -196,9 +224,11 @@
   jobs.push(page === "written"
     ? api("cherry_pieces?select=id,title,kind,phase,excerpt,body,sort&published=eq.true") : null);
   jobs.push(document.querySelector(".dlist--cherry, .tracklist")
-    ? api("cherry_tracks?select=id,title,voice,length,audio_url,sort&published=eq.true") : null);
+    ? api("cherry_tracks?select=id,title,voice,length,audio_url,lyrics,sort&published=eq.true") : null);
   jobs.push(document.querySelector(".portals")
     ? api("cherry_portals?select=id,name,blurb,href,image_url,kind,sort&published=eq.true") : null);
+  jobs.push(document.querySelector(".reel")
+    ? api("cherry_films?select=id,title,note,poster_url,video_url,sort&published=eq.true") : null);
 
   Promise.all(jobs.map(function (j) { return j ? j.catch(function () { return null; }) : null; }))
     .then(function (res) {
@@ -208,6 +238,7 @@
       if (res[2] && res[2].length) touched += renderPieces(res[2]);
       if (res[3] && res[3].length) touched += renderTracks(res[3]);
       if (res[4] && res[4].length) touched += renderPortals(res[4]);
+      if (res[5] && res[5].length) touched += renderFilms(res[5]);
       if (touched && typeof window.CherryRebind === "function") window.CherryRebind();
     })
     .catch(function () { /* the page already has everything it needs */ });

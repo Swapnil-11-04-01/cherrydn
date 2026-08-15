@@ -2915,3 +2915,119 @@ body[data-persona="dn"] .dstage__half--cherry .dstage__name::after {
     .phase__head { position: static; background: none; }
   }
 }
+
+/* ============================================================
+   THE PROJECTION ROOM
+   Her films, hung like the artworks and played where they hang.
+   One frame at a time: the projector stops the last film before it
+   starts the next. Nothing from YouTube or Vimeo is fetched until
+   somebody actually presses play.
+   ============================================================ */
+.reel { display: grid; gap: clamp(3.4rem, 8vw, 6.5rem); }
+.reel:empty { display: none; }
+.film { display: grid; gap: 1.15rem; }
+
+.film__frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 70%, rgba(142, 31, 45, 0.34), transparent 58%),
+    linear-gradient(170deg, #101a1c, #0a1112);
+}
+.film__poster {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  filter: saturate(0.86) contrast(1.06) brightness(0.92);
+  transition: transform 1.4s cubic-bezier(0.16, 1, 0.3, 1), filter 0.7s ease;
+}
+.film__poster:not([src]) { display: none; }
+.film:hover .film__poster { transform: scale(1.035); filter: saturate(1) contrast(1.06) brightness(1); }
+
+/* the ring, borrowed from the strip above it */
+.film__play {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  display: grid; place-items: center;
+  background: none; border: 0; cursor: pointer;
+  color: var(--ink);
+}
+.film__play::before {
+  content: "";
+  width: clamp(62px, 9vw, 86px); height: clamp(62px, 9vw, 86px);
+  border: 1px solid rgba(231, 222, 212, 0.6);
+  border-radius: 50%;
+  background: rgba(10, 17, 18, 0.28);
+  backdrop-filter: blur(4px);
+  transition: border-color 0.45s ease, box-shadow 0.45s ease, transform 0.45s ease;
+}
+.film__play::after {
+  content: "";
+  position: absolute;
+  border-style: solid;
+  border-width: 10px 0 10px 17px;
+  border-color: transparent transparent transparent var(--ink);
+  transform: translateX(3px);
+}
+.film:hover .film__play::before,
+.film__play:focus-visible::before {
+  border-color: var(--red);
+  box-shadow: 0 0 34px rgba(142, 31, 45, 0.38);
+  transform: scale(1.06);
+}
+.film__play[disabled] { cursor: default; opacity: 0.35; }
+
+.film__player { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #000; display: block; }
+.film__frame.is-playing .film__play,
+.film__frame.is-playing .film__poster { display: none; }
+.film__frame.is-empty .film__play::before { border-color: rgba(231, 222, 212, 0.2); }
+
+.film__title {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(1.4rem, 3vw, 2.1rem);
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+}
+.film__title:empty { display: none; }
+.film__note {
+  font-family: var(--poetic);
+  font-style: italic;
+  font-size: clamp(1.02rem, 1.6vw, 1.2rem);
+  color: var(--muted);
+  max-width: 56ch;
+}
+.film__note:empty { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .film__poster, .film__play::before { transition: none; }
+  .film:hover .film__poster { transform: none; }
+}
+
+/* ============================================================
+   HER WORDS, UNDER HER SONGS
+   The lyric sheet folds out of the track row itself, so a song and
+   its words are never in two different places. The row is a flex
+   line; the sheet takes a whole line of its own.
+   ============================================================ */
+.trk { flex-wrap: wrap; }
+.trk__words {
+  background: none; border: 0; padding: 0.2rem 0.35rem;
+  font-family: var(--ui); font-size: 0.6rem; font-weight: 400;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--red-t); cursor: pointer;
+  transition: color 0.3s ease;
+}
+.trk__words:hover { color: var(--ink); }
+.trk__lyrics {
+  flex-basis: 100%; width: 100%;
+  padding: 0.9rem 0 0.3rem;
+  font-family: var(--poetic); font-style: italic;
+  font-size: clamp(1rem, 1.5vw, 1.12rem); line-height: 1.9;
+  letter-spacing: 0; text-transform: none;
+  color: var(--muted); cursor: auto;
+}
+.trk__lyrics[hidden] { display: none; }
+.dlist--cherry .trk__lyrics { text-align: right; }

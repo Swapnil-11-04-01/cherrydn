@@ -45,7 +45,11 @@
     console.error("[archive]", raw);
     if (/signed out|refresh|JWT|401|403/i.test(raw))
       return "You have been signed out. Sign in again; your words are still on this screen.";
-    if (/too large|413|exceeded/i.test(raw)) return "That file is too big. Try one under 20 MB.";
+    if (/too large|413|exceeded|maximum allowed size/i.test(raw))
+      return "That file is bigger than 50 MB, which is all the archive can hold. " +
+             "Put it on YouTube or Vimeo and paste the link instead.";
+    if (/mime type|not supported/i.test(raw))
+      return "The archive does not know that kind of file. Films work best as MP4.";
     if (/Failed to fetch|NetworkError|offline/i.test(raw))
       return "The archive did not answer. Nothing is lost, try again in a moment.";
     return "Something went wrong saving that. Your words are still on screen.";
@@ -96,8 +100,18 @@
   }
 
   /* ---------- state ---------- */
-  var data = { settings: {}, works: [], pieces: [], tracks: [], portals: [] };
+  var data = { settings: {}, works: [], pieces: [], tracks: [], portals: [], films: [] };
   var here = null, frame = null, picked = null;
+
+  /* one place that knows which table lives in which drawer */
+  var POOL = {
+    cherry_works: "works", cherry_pieces: "pieces",
+    cherry_portals: "portals", cherry_tracks: "tracks", cherry_films: "films"
+  };
+
+  /* the archive holds what it can hold: past this, a film belongs on
+     YouTube or Vimeo and the site just points at it */
+  var MAX_FILE = 50 * 1024 * 1024;
 
   function esc(v) {
     return String(v == null ? "" : v).replace(/&/g, "&amp;").replace(/</g, "&lt;")
@@ -138,29 +152,27 @@
       rest("cherry_works?select=*&order=phase,sort"),
       rest("cherry_pieces?select=*&order=phase,sort"),
       rest("cherry_tracks?select=*&order=voice,sort"),
-      rest("cherry_portals?select=*&order=kind,sort")
+      rest("cherry_portals?select=*&order=kind,sort"),
+      rest("cherry_films?select=*&order=sort")
     ]).then(function (r) {
       data.settings = {};
       (r[0] || []).forEach(function (s) { data.settings[s.key] = s.value; });
       data.works = r[1] || []; data.pieces = r[2] || [];
       data.tracks = r[3] || []; data.portals = r[4] || [];
+      data.films = r[5] || [];
     });
   }
 
   function rowsFor(listId) {
     var spec = LISTS[listId];
-    var pool = spec.table === "cherry_works" ? data.works
-      : spec.table === "cherry_pieces" ? data.pieces
-      : spec.table === "cherry_portals" ? data.portals : data.tracks;
-    var rows = pool.slice();
+    var rows = data[POOL[spec.table]].slice();
     Object.keys(spec.where || {}).forEach(function (k) {
       rows = rows.filter(function (r) { return r[k] === spec.where[k]; });
     });
     return rows.sort(function (a, b) { return (a.sort | 0) - (b.sort | 0); });
   }
   function findRow(table, id) {
-    var pool = table === "cherry_works" ? data.works : table === "cherry_pieces" ? data.pieces
-      : table === "cherry_portals" ? data.portals : data.tracks;
+    var pool = data[POOL[table]] || [];
     for (var i = 0; i < pool.length; i++) if (String(pool[i].id) === String(id)) return pool[i];
     return null;
   }
@@ -210,8 +222,7 @@
     }).then(function () {
       return rest(table + "?id=eq." + id, { method: "DELETE", headers: { Prefer: "return=minimal" } });
     }).then(function () {
-      var pool = table === "cherry_works" ? "works" : table === "cherry_pieces" ? "pieces"
-        : table === "cherry_portals" ? "portals" : "tracks";
+      var pool = POOL[table];
       data[pool] = data[pool].filter(function (r) { return String(r.id) !== String(id); });
       paint(); repaintFrame();
       say("Removed", "ok", function () { putBack(table, row); });
@@ -233,7 +244,7 @@
     var rows = rowsFor(listId).filter(function (r) { return !room || r.phase === room; });
     return rows.reduce(function (m, r) { return Math.max(m, r.sort | 0); }, -1) + 1;
   }
-  function addRow(listId, room, extra) {
+  function addRow(listId, room, extra, quiet) {
     var spec = LISTS[listId];
     var body = { sort: nextSort(listId, room), published: false };
     Object.keys(spec.where || {}).forEach(function (k) { body[k] = spec.where[k]; });
@@ -244,19 +255,74 @@
     Object.keys(extra || {}).forEach(function (k) { body[k] = extra[k]; });
     return rest(spec.table, { method: "POST", headers: { Prefer: "return=representation" }, body: body })
       .then(function () { return loadAll(); })
-      .then(function () { paint(); say("Added. Only you can see it, switch it on when you are ready."); });
+      .then(function () {
+        if (quiet) return;
+        paint(); say("Added. Only you can see it, switch it on when you are ready.");
+      });
   }
 
-  function upload(file) {
-    var clean = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, "-").replace(/^-|-$/g, "");
-    var path = Date.now() + "-" + clean;
-    return fetch(C.url + "/storage/v1/object/" + C.bucket + "/" + path, {
-      method: "POST", headers: { apikey: C.key, Authorization: "Bearer " + token(),
-        "x-upsert": "true", "Content-Type": file.type || "application/octet-stream" },
-      body: file
-    }).then(function (r) {
-      if (!r.ok) return r.text().then(function (t) { throw new Error(t.slice(0, 160) || "upload failed"); });
-      return C.url + "/storage/v1/object/public/" + C.bucket + "/" + path;
+  /* films are heavy: she needs to see the bar move, so this is XHR and
+     not fetch, which cannot report how far a body has got */
+  function put(file, name, onward, retried) {
+    return new Promise(function (ok, no) {
+      var tidy = String(name || file.name).toLowerCase()
+        .replace(/[^a-z0-9.]+/g, "-").replace(/^-|-$/g, "");
+      var path = Date.now() + "-" + tidy;
+      var x = new XMLHttpRequest();
+      x.open("POST", C.url + "/storage/v1/object/" + C.bucket + "/" + path);
+      x.setRequestHeader("apikey", C.key);
+      x.setRequestHeader("Authorization", "Bearer " + token());
+      x.setRequestHeader("x-upsert", "true");
+      x.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+      if (onward) x.upload.onprogress = function (e) {
+        if (e.lengthComputable) onward(e.loaded / e.total);
+      };
+      x.onload = function () {
+        if (x.status >= 200 && x.status < 300) {
+          ok(C.url + "/storage/v1/object/public/" + C.bucket + "/" + path);
+        } else if ((x.status === 401 || x.status === 403) && !retried && session) {
+          /* a long upload can outlive the session that started it */
+          refresh().then(function () { return put(file, name, onward, true); })
+            .then(ok, function () { no(new Error("signed out")); });
+        } else {
+          no(new Error(String(x.responseText || "").slice(0, 160) || ("upload " + x.status)));
+        }
+      };
+      x.onerror = function () { no(new Error("Failed to fetch")); };
+      x.send(file);
+    });
+  }
+  function upload(file, onward) {
+    if (file.size > MAX_FILE) {
+      return Promise.reject(new Error("too large: " + file.name));
+    }
+    return put(file, file.name, onward);
+  }
+
+  /* the first frame of her film, so a film that has not been opened yet
+     still has a face on the page */
+  function posterFrom(file) {
+    return new Promise(function (done) {
+      if (!/^video\//.test(file.type || "")) return done(null);
+      var url = URL.createObjectURL(file), v = document.createElement("video");
+      var give = function (blob) { URL.revokeObjectURL(url); done(blob); };
+      var guard = setTimeout(function () { give(null); }, 15000);
+      v.preload = "metadata"; v.muted = true; v.playsInline = true;
+      v.onloadeddata = function () {
+        try { v.currentTime = Math.min(1.5, (v.duration || 4) / 4); } catch (e) { give(null); }
+      };
+      v.onseeked = function () {
+        clearTimeout(guard);
+        try {
+          var c = document.createElement("canvas");
+          c.width = v.videoWidth; c.height = v.videoHeight;
+          if (!c.width || !c.height) return give(null);
+          c.getContext("2d").drawImage(v, 0, 0, c.width, c.height);
+          c.toBlob(function (b) { give(b); }, "image/jpeg", 0.82);
+        } catch (e) { give(null); }
+      };
+      v.onerror = function () { clearTimeout(guard); give(null); };
+      v.src = url;
     });
   }
   /* she should never have to time her own recordings with a stopwatch */
@@ -279,21 +345,56 @@
   function addFiles(listId, room, files) {
     var list = [].slice.call(files);
     if (!list.length) return;
-    var spec = LISTS[listId];
-    say("Adding " + list.length + (list.length === 1 ? " file…" : " files…"));
+    var spec = LISTS[listId], skipped = [];
     (function next(i) {
-      if (i >= list.length) { say("Added. Only you can see them yet."); return; }
-      Promise.all([upload(list[i]), audioLength(list[i])]).then(function (got) {
-        var extra = { title: list[i].name.replace(/\.[a-z0-9]+$/i, "") };
+      if (i >= list.length) {
+        paint();
+        if (skipped.length) {
+          say(skipped.length + (skipped.length === 1 ? " file was" : " files were") +
+            " bigger than 50 MB, so it stayed on your computer. Put those on YouTube " +
+            "or Vimeo and paste the links.", "bad");
+        } else {
+          say("Added. Only you can see " + (list.length === 1 ? "it" : "them") + " yet.");
+        }
+        return;
+      }
+      var f = list[i];
+      var of = list.length > 1 ? " (" + (i + 1) + " of " + list.length + ")" : "";
+      if (f.size > MAX_FILE) { skipped.push(f.name); return next(i + 1); }
+      say("Sending " + f.name + "…" + of);
+      Promise.all([
+        upload(f, function (frac) {
+          say("Sending " + f.name + "… " + Math.round(frac * 100) + "%" + of);
+        }),
+        audioLength(f), posterFrom(f)
+      ]).then(function (got) {
+        var extra = { title: f.name.replace(/\.[a-z0-9]+$/i, "") };
         extra[spec.media] = got[0];
         if (got[1]) extra.length = got[1];
-        return addRow(listId, room, extra);
-      }).then(function () { next(i + 1); })
+        if (!got[2]) return extra;
+        return put(got[2], extra.title + "-frame.jpg")
+          .then(function (url) { extra.poster_url = url; return extra; })
+          .catch(function () { return extra; });     /* no face is not a failure */
+      }).then(function (extra) { return addRow(listId, room, extra, true); })
+        .then(function () { next(i + 1); })
         .catch(function (e) { say(humanise(e), "bad"); });
     })(0);
   }
 
   /* ---------- drawing the shelf ---------- */
+  function filmKind(url) {
+    var u = String(url || "").trim();
+    if (!u) return "";
+    if (/youtube\.com|youtu\.be/i.test(u)) return "youtube";
+    if (/vimeo\.com/i.test(u)) return "vimeo";
+    return "file";
+  }
+  /* a link she pastes should bring its own picture with it */
+  function posterForLink(url) {
+    var m = String(url).match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{6,})/i);
+    return m ? "https://img.youtube.com/vi/" + m[1] + "/maxresdefault.jpg" : "";
+  }
+
   function fieldHTML(f, value, scope) {
     var hint = f.hint ? '<em class="hint">' + esc(f.hint) + "</em>" : "";
     var em = f.em ? '<em class="hint">the &lt;em&gt; marks make a word italic, leave them as they are.</em>' : "";
@@ -309,6 +410,27 @@
                         : '<span class="mediabox__none">' + (value ? "Recording added" : "No " + (isImg ? "photo" : "recording") + " yet") + "</span>") +
         '<span class="mediabox__do">' + (value ? "Change" : "Choose") + (isImg ? " a photo" : " a recording") + "…</span>" +
         "</div></div>";
+    }
+    /* two ways in, because a whole film rarely fits in a database:
+       hand it the file, or hand it a link to where it already lives */
+    if (f.type === "film") {
+      var kind = filmKind(value);
+      var said = kind === "file" ? "A film you uploaded"
+        : kind === "youtube" ? "A film on YouTube"
+        : kind === "vimeo" ? "A film on Vimeo"
+        : "No film yet";
+      return '<div class="fld">' + head +
+        '<div class="mediabox mediabox--film' + (value ? " has" : "") + '" ' + attrs +
+          ' data-accept="video/mp4,video/webm,video/quicktime,video/x-m4v">' +
+        '<span class="mediabox__none">' + said + "</span>" +
+        '<span class="mediabox__do">' + (value ? "Choose a different film" : "Choose a film from this computer") + "…</span>" +
+        "</div>" +
+        '<input type="text" class="linkbox" ' + attrs +
+          ' value="' + esc(kind === "file" ? "" : (value || "")) + '"' +
+          ' placeholder="or paste a YouTube or Vimeo link" />' +
+        '<em class="hint">Anything longer than a few minutes belongs on YouTube or Vimeo. ' +
+        'Paste the link here and it plays on your page just the same.</em>' +
+        "</div>";
     }
     if (f.type === "choice") {
       return '<div class="fld">' + head + '<div class="pills" ' + attrs + ">" +
@@ -409,11 +531,10 @@
 
   function hiddenHTML() {
     var out = "", any = 0;
-    ["works", "pieces", "tracks", "portals"].forEach(function (pool) {
+    Object.keys(POOL).forEach(function (table) {
+      var pool = POOL[table];
       data[pool].filter(function (r) { return !r.published; }).forEach(function (r) {
         any++;
-        var table = pool === "works" ? "cherry_works" : pool === "pieces" ? "cherry_pieces"
-          : pool === "portals" ? "cherry_portals" : "cherry_tracks";
         out += '<article class="card card--flat" data-scope="' + table + ":" + r.id + '">' +
           '<span class="card__name">' + esc(r.title || r.name || "Untitled") + "</span>" +
           '<button class="mini" type="button" data-publish="' + table + ":" + r.id + '">Put it on the site</button>' +
@@ -465,6 +586,42 @@
     });
   }
 
+  /* one file into one slot she is already looking at */
+  function takeFile(media, f) {
+    if (f.size > MAX_FILE) { say(humanise(new Error("too large")), "bad"); return; }
+    say("Sending " + f.name + "… 0%");
+    Promise.all([
+      upload(f, function (frac) { say("Sending " + f.name + "… " + Math.round(frac * 100) + "%"); }),
+      audioLength(f), posterFrom(f)
+    ]).then(function (got) {
+      var url = got[0], shot = got[2];
+      if (media.dataset.scope === "setting") {
+        saveSetting(media.dataset.k, url);
+        tell({ type: "set", key: media.dataset.k, value: url, reveal: true });
+        paint(); return;
+      }
+      var p = media.dataset.scope.split(":");
+      var patch = keyed(media.dataset.k, url);
+      if (got[1]) patch.length = got[1];
+
+      var land = function () {
+        saveRow(p[0], p[1], patch);
+        Object.keys(patch).forEach(function (k) {
+          tell({ type: "setRow", scope: media.dataset.scope, key: k, value: patch[k] });
+        });
+        paint();
+      };
+      var row = findRow(p[0], p[1]);
+      if (shot && row && !row.poster_url) {
+        return put(shot, f.name.replace(/\.[a-z0-9]+$/i, "") + "-frame.jpg")
+          .then(function (u) { patch.poster_url = u; })
+          .catch(function () {})
+          .then(land);
+      }
+      land();
+    }).catch(function (err) { say(humanise(err), "bad"); });
+  }
+
   /* ---------- events ---------- */
   document.addEventListener("click", function (e) {
     var page = e.target.closest("#pages button");
@@ -508,23 +665,7 @@
       picker.accept = media.dataset.accept || "";
       picker.onchange = function () {
         var f = picker.files[0]; picker.value = "";
-        if (!f) return;
-        say("Adding your file…");
-        Promise.all([upload(f), audioLength(f)]).then(function (got) {
-          var url = got[0];
-          if (media.dataset.scope === "setting") {
-            saveSetting(media.dataset.k, url);
-            tell({ type: "set", key: media.dataset.k, value: url, reveal: true });
-          } else {
-            var p = media.dataset.scope.split(":");
-            var patch = keyed(media.dataset.k, url);
-            if (got[1]) patch.length = got[1];
-            saveRow(p[0], p[1], patch);
-            tell({ type: "setRow", scope: media.dataset.scope, key: media.dataset.k, value: url });
-            if (got[1]) tell({ type: "setRow", scope: media.dataset.scope, key: "length", value: got[1] });
-          }
-          paint();
-        }).catch(function (err) { say(humanise(err), "bad"); });
+        if (f) takeFile(media, f);
       };
       picker.click();
       return;
@@ -631,6 +772,17 @@
       /* paint it straight into the page: a reload while she is still
          typing would throw her back to the top of her own poem */
       tell({ type: "setRow", scope: i.dataset.scope, key: i.dataset.k, value: v2 });
+
+      /* a pasted link arrives with its own picture; take it, unless she
+         has already chosen one herself */
+      if (i.dataset.k === "video_url") {
+        var row2 = findRow(p[0], p[1]), face = posterForLink(v2);
+        if (face && row2 && !row2.poster_url) {
+          saveRow(p[0], p[1], { poster_url: face }, true);
+          tell({ type: "setRow", scope: i.dataset.scope, key: "poster_url", value: face });
+          setTimeout(function () { paint(); }, 900);
+        }
+      }
     }
   });
 
@@ -737,7 +889,7 @@
       var doc = frame.contentDocument;
       if (!doc || !doc.body || doc.querySelector("script[data-glass]")) return;
       var s = doc.createElement("script");
-      s.src = "js/cherry-preview.js?v=3";
+      s.src = "js/cherry-preview.js?v=5";
       s.setAttribute("data-glass", "1");
       doc.body.appendChild(s);
     } catch (err) { console.error(err); }

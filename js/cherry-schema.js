@@ -82,10 +82,12 @@ window.CHERRY_SCHEMA = [
     id: "film", name: "Film", page: "film.html",
     blurb: "Moving image.",
     fields: TOP("film").concat([
-      { k: "film_frame_image", label: "The still from your film", type: "image" },
+      { k: "film_frame_image", label: "The still from your film", type: "image",
+        hint: "This whole block disappears once you add your first film." },
       { k: "film_line", label: "The line under the picture" },
       { k: "film_note", label: "The words that appear when someone taps the picture" }
-    ])
+    ]),
+    lists: [{ id: "films", title: "Your films" }]
   },
   {
     id: "music", name: "Music", page: "music.html",
@@ -193,13 +195,27 @@ window.CHERRY_LISTS = {
       { k: "href", label: "Where it goes", type: "page" }
     ]
   },
+  films: {
+    table: "cherry_films", one: "film", add: "Add a film",
+    accept: "video/mp4,video/webm,video/quicktime,video/x-m4v", media: "video_url",
+    drop: "Drop films here, or choose them from your computer.",
+    fields: [
+      { k: "title", label: "Its name" },
+      { k: "note", label: "A few words about it", type: "long", enter: true },
+      { k: "video_url", label: "The film itself", type: "film" },
+      { k: "poster_url", label: "The picture people see before they press play", type: "image",
+        hint: "Made for you from the film. Change it whenever you like." }
+    ]
+  },
   cherrysongs: {
     table: "cherry_tracks", one: "song", add: "Add a song",
     accept: "audio/*", media: "audio_url", where: { voice: "cherry" },
     fields: [
       { k: "title", label: "Its name" },
       { k: "length", label: "How long it is", hint: "Read from the recording, change it if you like." },
-      { k: "audio_url", label: "The recording", type: "audio" }
+      { k: "audio_url", label: "The recording", type: "audio" },
+      { k: "lyrics", label: "The words to this song", type: "long", rows: 12, enter: true,
+        hint: "Write them as they should look. Leave it empty and no one is offered them." }
     ]
   },
   dnsongs: {
@@ -208,7 +224,9 @@ window.CHERRY_LISTS = {
     fields: [
       { k: "title", label: "Its name" },
       { k: "length", label: "How long it is", hint: "Read from the recording, change it if you like." },
-      { k: "audio_url", label: "The recording", type: "audio" }
+      { k: "audio_url", label: "The recording", type: "audio" },
+      { k: "lyrics", label: "The words to this song", type: "long", rows: 12, enter: true,
+        hint: "Write them as they should look. Leave it empty and no one is offered them." }
     ]
   },
   spoken: {
