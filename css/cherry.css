@@ -1843,38 +1843,34 @@ body[data-persona] .mist--merge { opacity: 0.55; }
 .dstage__name--cherry { transform-origin: right center; }
 .dstage__name--dn { transform-origin: left center; }
 
-/* details of the unattended side fall silent */
-.dstage:has(.dstage__half--cherry:hover) .dstage__half--dn .dstage__eyebrow,
-.dstage:has(.dstage__half--cherry:hover) .dstage__half--dn .dstage__desc,
-.dstage:has(.dstage__half--cherry:hover) .dstage__half--dn .dlist,
-.dstage.sim-cherry .dstage__half--dn .dstage__eyebrow,
-.dstage.sim-cherry .dstage__half--dn .dstage__desc,
-.dstage.sim-cherry .dstage__half--dn .dlist,
-body[data-persona="cherry"] .dstage__half--dn .dstage__eyebrow,
-body[data-persona="cherry"] .dstage__half--dn .dstage__desc,
-body[data-persona="cherry"] .dstage__half--dn .dlist,
-.dstage:has(.dstage__half--dn:hover) .dstage__half--cherry .dstage__eyebrow,
-.dstage:has(.dstage__half--dn:hover) .dstage__half--cherry .dstage__desc,
-.dstage:has(.dstage__half--dn:hover) .dstage__half--cherry .dlist,
-.dstage.sim-dn .dstage__half--cherry .dstage__eyebrow,
-.dstage.sim-dn .dstage__half--cherry .dstage__desc,
-.dstage.sim-dn .dstage__half--cherry .dlist,
-body[data-persona="dn"] .dstage__half--cherry .dstage__eyebrow,
-body[data-persona="dn"] .dstage__half--cherry .dstage__desc,
-body[data-persona="dn"] .dstage__half--cherry .dlist {
-  opacity: 0;
-  transform: translateY(12px);
-  pointer-events: none;
+/* The name follows the hand: reach for one and it comes forward, the
+   other steps back. This ran the other way round at first, the side you
+   were NOT on rising monumental, and it read as backwards to everyone
+   who tried it. Nothing here hides the other side's songs: both lists
+   stay lit enough to read and always stay clickable.
+
+   Do not try to scale .dstage__inner as well: it carries the entrance
+   animation with fill-mode both, so its transform is animation-owned
+   for the life of the page and any rule here loses silently. */
+
+/* the one she is on */
+.dstage:has(.dstage__half--cherry:hover) .dstage__half--cherry .dstage__name,
+.dstage.sim-cherry .dstage__half--cherry .dstage__name,
+body[data-persona="cherry"] .dstage__half--cherry .dstage__name,
+.dstage:has(.dstage__half--dn:hover) .dstage__half--dn .dstage__name,
+.dstage.sim-dn .dstage__half--dn .dstage__name,
+body[data-persona="dn"] .dstage__half--dn .dstage__name {
+  transform: scale(1.16);
 }
 
-/* ...while its name rises, monumental */
+/* the one she is not on */
 .dstage:has(.dstage__half--cherry:hover) .dstage__half--dn .dstage__name,
 .dstage.sim-cherry .dstage__half--dn .dstage__name,
 body[data-persona="cherry"] .dstage__half--dn .dstage__name,
 .dstage:has(.dstage__half--dn:hover) .dstage__half--cherry .dstage__name,
 .dstage.sim-dn .dstage__half--cherry .dstage__name,
 body[data-persona="dn"] .dstage__half--cherry .dstage__name {
-  transform: scale(1.6);
+  transform: scale(0.84);
 }
 .dstage:has(.dstage__half--cherry:hover) .dstage__half--dn .dstage__name::after,
 .dstage.sim-cherry .dstage__half--dn .dstage__name::after,
