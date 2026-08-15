@@ -141,6 +141,7 @@
     if (playerBtn) playerBtn.classList.remove("is-playing");
     currentRow = null;
     delete document.body.dataset.persona;
+    if (window.CherryAttend) window.CherryAttend.settle();
   }
   audio.addEventListener("ended", stopAll);
   audio.addEventListener("timeupdate", function () {
@@ -171,17 +172,23 @@
       else playerBtn.removeAttribute("aria-disabled");
     }
   }
-  function ghost(row) {
+  function ghost(row, dead) {
     if (mine !== flight) return;
-    row.classList.add("is-ghost");
-    row.classList.remove("is-current");
+    row.classList.toggle("is-ghost", dead !== false);
+    if (dead === false) row.classList.remove("is-ghost");
+    else row.classList.remove("is-current");
+    var go = row.querySelector(".trk__go");
+    if (go) {
+      if (dead === false) go.removeAttribute("aria-disabled");
+      else go.setAttribute("aria-disabled", "true");
+    }
   }
 
   if (!total) { verdict(); return; }
   rows.forEach(function (row) {
     fetch(row.dataset.src, { method: "HEAD" }).then(function (r) {
       if (mine !== flight) return;
-      if (!r.ok) ghost(row); else live++;
+      if (!r.ok) ghost(row); else { ghost(row, false); live++; }
     }).catch(function () { ghost(row); })
       .finally(function () { checked++; if (checked === total) verdict(); });
   });
@@ -191,13 +198,20 @@
   rows.forEach(function (row) {
     if (row.dataset.bound) return;
     row.dataset.bound = "1";
-    row.tabIndex = 0;
-    row.setAttribute("role", "button");
-    row.addEventListener("keydown", function (e) {
-      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); row.click(); }
-    });
-    row.addEventListener("click", function (e) {
-      if (e.target.closest(".trk__words, .trk__lyrics")) return;   /* reading, not listening */
+
+    /* The row used to be the button itself: role="button" on the li. That
+       makes everything inside it presentational, which hid the lyrics
+       button from screen readers entirely, and Enter on that button played
+       the song instead of opening the words. So the play control is a real
+       button of its own, lying under the row, and the li goes back to
+       being a listitem with a button or two inside it. */
+    var go = document.createElement("button");
+    go.type = "button";
+    go.className = "trk__go";
+    go.setAttribute("aria-label", "Play " + (row.dataset.title || "this song"));
+    row.insertBefore(go, row.firstChild);
+
+    go.addEventListener("click", function () {
       if (row.classList.contains("is-ghost")) return;
       if (currentRow === row) { stopAll(); return; }
       stopAll();
@@ -207,14 +221,15 @@
         row.classList.add("is-current");
         var half = row.closest(".dstage__half, .duality__half");
         if (half) {
-          document.body.dataset.persona =
-            /--dn/.test(half.className) ? "dn" : "cherry";
+          document.body.dataset.persona = /--dn/.test(half.className) ? "dn" : "cherry";
+          if (window.CherryAttend) window.CherryAttend.settle();
         }
         if (playerBtn) playerBtn.classList.add("is-playing");
         if (playerNow) playerNow.textContent = row.dataset.title || row.textContent.trim();
       }).catch(function (err) {
         if (err && err.name === "AbortError") return;
         row.classList.add("is-ghost");
+        go.setAttribute("aria-disabled", "true");
       });
     });
   });
@@ -315,6 +330,110 @@
     });
   }
 
+  /* ---------- which half she is attending ----------
+     Pointer, keyboard focus and the playing persona all want a say in
+     which half comes forward. They are resolved here, in one place, into
+     one attribute: .dstage[data-attend="cherry"|"dn"]. The stylesheet
+     never has to guess which of them wins, and a keyboard reaches the
+     same states a mouse does.
+
+     The float distance is a measurement, not something CSS can know, so
+     it is taken here and handed over as --drift-x / --drift-y. It is
+     measured from the RESTING page, at the moment she first arrives at
+     the stage: nothing is transformed then, so nothing has to be undone
+     to read it, and no running transition is disturbed. */
+  var stage = document.querySelector(".dstage");
+  if (stage) (function () {
+    var halves = [].slice.call(stage.querySelectorAll(".dstage__half"));
+    var still = window.matchMedia ? matchMedia("(prefers-reduced-motion: reduce)") : null;
+    var off = window.matchMedia ? matchMedia("(hover: none), (max-width: 860px)") : null;
+    var measured = false, pointer = "", focused = "";
+
+    function sideOf(half) { return /--cherry/.test(half.className) ? "cherry" : "dn"; }
+
+    /* the ink, not the box: the name is a stretched column flex item, so
+       its rect is the whole column and its letters sit against one edge
+       of it. A range over the contents gives the letters themselves. */
+    function inkOf(el) {
+      try {
+        var r = document.createRange();
+        r.selectNodeContents(el);
+        var box = r.getBoundingClientRect();
+        if (box.width && box.height) return box;
+      } catch (e) {}
+      return el.getBoundingClientRect();
+    }
+
+    function measure() {
+      if (measured || (off && off.matches)) return;
+      var away = parseFloat(getComputedStyle(stage).getPropertyValue("--away-scale")) || 0.84;
+      var quiet = still && still.matches;
+      halves.forEach(function (half) {
+        var name = half.querySelector(".dstage__name");
+        if (!name) return;
+        if (quiet) {           /* no journey at all: it shrinks where it stands */
+          half.style.setProperty("--drift-x", "0px");
+          half.style.setProperty("--drift-y", "0px");
+          return;
+        }
+        var n = inkOf(name), h = half.getBoundingClientRect();
+        /* the name is anchored by its outer edge, so shrinking moves its
+           centre inward by half of what it loses */
+        var toLeft = sideOf(half) === "cherry";
+        var cx = toLeft ? n.right - (n.width * away) / 2 : n.left + (n.width * away) / 2;
+        var cy = n.top + n.height / 2;
+        half.style.setProperty("--drift-x", Math.round(h.left + h.width / 2 - cx) + "px");
+        half.style.setProperty("--drift-y", Math.round(h.top + h.height / 2 - cy) + "px");
+      });
+      measured = true;
+    }
+    /* anything that can move the type invalidates the measurement; the
+       next arrival takes it again */
+    function forget() { measured = false; }
+
+    function settle() {
+      if (off && off.matches) { stage.removeAttribute("data-attend"); return; }
+      var who = pointer || focused || document.body.dataset.persona || "";
+      if (who) measure();
+      if (who) stage.dataset.attend = who; else stage.removeAttribute("data-attend");
+      /* nothing invisible may be reached by Tab */
+      halves.forEach(function (half) {
+        var hidden = who && sideOf(half) !== who;
+        half.querySelectorAll(".trk__go, .trk__words").forEach(function (b) {
+          b.tabIndex = hidden ? -1 : 0;
+        });
+        var list = half.querySelector(".dlist");
+        if (list) list.setAttribute("aria-hidden", hidden ? "true" : "false");
+      });
+    }
+
+    halves.forEach(function (half) {
+      var side = sideOf(half);
+      half.addEventListener("pointerenter", function () { pointer = side; settle(); });
+      half.addEventListener("pointerleave", function () {
+        if (pointer === side) pointer = "";
+        settle();
+      });
+      half.addEventListener("focusin", function () { focused = side; settle(); });
+      half.addEventListener("focusout", function (e) {
+        if (half.contains(e.relatedTarget)) return;
+        if (focused === side) focused = "";
+        settle();
+      });
+    });
+
+    var reT;
+    addEventListener("resize", function () {
+      clearTimeout(reT);
+      forget();
+      reT = setTimeout(settle, 180);
+    });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(forget);
+    if (off && off.addEventListener) off.addEventListener("change", function () { forget(); settle(); });
+
+    window.CherryAttend = { settle: settle, forget: forget };
+  })();
+
   /* ---------- her words, under her songs ---------- */
   function bindLyrics() {
     document.querySelectorAll(".trk__words").forEach(function (btn) {
@@ -326,6 +445,7 @@
         if (!sheet) return;
         var open = sheet.hidden;
         sheet.hidden = !open;
+        if (window.CherryAttend) window.CherryAttend.forget();
         btn.setAttribute("aria-expanded", String(open));
         btn.textContent = open ? "close" : "words";
       });
@@ -436,6 +556,9 @@
     preflight();
     bindFilms();
     bindLyrics();
+    /* new rows need their play buttons reachable, and the archive can
+       change how tall a half is, so the measurement is retaken */
+    if (window.CherryAttend) { window.CherryAttend.forget(); window.CherryAttend.settle(); }
     if (typeof bindWorks === "function") bindWorks();
   };
 

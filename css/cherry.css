@@ -1854,119 +1854,100 @@ body[data-persona] .mist--merge { opacity: 0.55; }
 .dstage__name--dn { transform-origin: left center; }
 
 /* THE ATTENDED SIDE
-   Reach for one and it comes forward: its name grows, its letters open,
-   it takes on a breath of its own colour, and its songs are the only
-   songs on the page. The other steps back and keeps its face, but its
-   songs go.
+   Reach for one half and it comes forward: its name grows, its letters
+   open, it takes a breath of its own colour, and its songs are the only
+   songs on the page. The other keeps nothing but its name, and that name
+   floats to the middle of its own half.
 
-   Two things that are easy to get wrong here, both learned the hard way:
+   One attribute decides all of it. js/cherry.js resolves pointer, keyboard
+   focus and the playing persona into .dstage[data-attend="cherry"|"dn"],
+   so precedence is settled in one place instead of by specificity accident
+   across six selector groups. Adding a state here means adding it once.
+
+   Two things that are easy to get wrong, both learned the hard way:
    · this ran inside out at first, the side you were NOT on rising
      monumental. It has to follow the hand.
-   · .dstage__inner cannot be scaled from here. It carries the entrance
-     animation with fill-mode both, so its transform is animation-owned
-     for the life of the page and any rule loses silently. */
+   · .dstage__inner cannot be scaled or offset from here. It carries the
+     entrance animation with fill-mode both, so its transform is
+     animation-owned for the life of the page and any rule loses silently. */
+.dstage { --away-scale: 0.84; }
 
 .dstage__name { transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1),
   letter-spacing 0.9s cubic-bezier(0.22, 1, 0.36, 1),
   margin 0.9s cubic-bezier(0.22, 1, 0.36, 1),
   text-shadow 0.8s ease, color 0.6s; }
-.dstage__eyebrow { transition: color 0.6s ease, letter-spacing 0.7s ease, opacity 0.5s ease; }
-.dstage__half .dlist { transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
-.dstage__half .dlist .trk { transition: opacity 0.55s ease,
+.dstage__eyebrow { transition: color 0.6s ease, opacity 0.5s ease, transform 0.5s ease; }
+.dstage__desc { transition: opacity 0.45s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1); }
+.dstage__half .dlist { transition: border-color 0.4s ease; }
+.dstage__half .trk { transition: opacity 0.5s ease,
   transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s, background 0.3s; }
 
 /* ---- the one she is on ---- */
-.dstage:has(.dstage__half--cherry:hover) .dstage__half--cherry .dstage__name,
-.dstage.sim-cherry .dstage__half--cherry .dstage__name,
-body[data-persona="cherry"] .dstage__half--cherry .dstage__name,
-.dstage:has(.dstage__half--dn:hover) .dstage__half--dn .dstage__name,
-.dstage.sim-dn .dstage__half--dn .dstage__name,
-body[data-persona="dn"] .dstage__half--dn .dstage__name {
+.dstage[data-attend="cherry"] .dstage__half--cherry .dstage__name,
+.dstage[data-attend="dn"] .dstage__half--dn .dstage__name {
   transform: scale(1.16);
 }
-/* its letters open, and it takes a breath of its own colour */
-.dstage:has(.dstage__half--cherry:hover) .dstage__half--cherry .dstage__name--cherry,
-.dstage.sim-cherry .dstage__half--cherry .dstage__name--cherry,
-body[data-persona="cherry"] .dstage__half--cherry .dstage__name--cherry {
+.dstage[data-attend="cherry"] .dstage__half--cherry .dstage__name--cherry {
   letter-spacing: 0.19em;
   margin-right: -0.19em;
   text-shadow: 0 0 42px rgba(176, 56, 70, 0.5), 0 0 14px rgba(176, 56, 70, 0.28);
 }
-.dstage:has(.dstage__half--dn:hover) .dstage__half--dn .dstage__name--dn,
-.dstage.sim-dn .dstage__half--dn .dstage__name--dn,
-body[data-persona="dn"] .dstage__half--dn .dstage__name--dn {
+.dstage[data-attend="dn"] .dstage__half--dn .dstage__name--dn {
   letter-spacing: 0.38em;
   text-shadow: 0 0 42px rgba(175, 192, 192, 0.34), 0 0 14px rgba(175, 192, 192, 0.2);
 }
-/* the rule beneath it draws out */
-.dstage:has(.dstage__half--cherry:hover) .dstage__half--cherry .dstage__name::after,
-.dstage.sim-cherry .dstage__half--cherry .dstage__name::after,
-body[data-persona="cherry"] .dstage__half--cherry .dstage__name::after,
-.dstage:has(.dstage__half--dn:hover) .dstage__half--dn .dstage__name::after,
-.dstage.sim-dn .dstage__half--dn .dstage__name::after,
-body[data-persona="dn"] .dstage__half--dn .dstage__name::after {
+.dstage[data-attend="cherry"] .dstage__half--cherry .dstage__name::after,
+.dstage[data-attend="dn"] .dstage__half--dn .dstage__name::after {
   width: 74px;
 }
-/* and the little line above it comes up out of the grey */
-.dstage:has(.dstage__half--cherry:hover) .dstage__half--cherry .dstage__eyebrow,
-.dstage.sim-cherry .dstage__half--cherry .dstage__eyebrow,
-body[data-persona="cherry"] .dstage__half--cherry .dstage__eyebrow,
-.dstage:has(.dstage__half--dn:hover) .dstage__half--dn .dstage__eyebrow,
-.dstage.sim-dn .dstage__half--dn .dstage__eyebrow,
-body[data-persona="dn"] .dstage__half--dn .dstage__eyebrow {
+.dstage[data-attend="cherry"] .dstage__half--cherry .dstage__eyebrow,
+.dstage[data-attend="dn"] .dstage__half--dn .dstage__eyebrow {
   color: var(--ink);
 }
 
-/* ---- the one she is not on ---- */
-.dstage:has(.dstage__half--cherry:hover) .dstage__half--dn .dstage__name,
-.dstage.sim-cherry .dstage__half--dn .dstage__name,
-body[data-persona="cherry"] .dstage__half--dn .dstage__name,
-.dstage:has(.dstage__half--dn:hover) .dstage__half--cherry .dstage__name,
-.dstage.sim-dn .dstage__half--cherry .dstage__name,
-body[data-persona="dn"] .dstage__half--cherry .dstage__name {
-  transform: scale(0.84);
+/* ---- the one she is not on ----
+   The drift is measured in cherry.js and handed here as --drift-x /
+   --drift-y: the distance from the name to the middle of its half is a
+   measurement, not something a stylesheet can know. With no JS the
+   properties are absent, the name shrinks in place, and nothing breaks. */
+.dstage[data-attend="cherry"] .dstage__half--dn .dstage__name,
+.dstage[data-attend="dn"] .dstage__half--cherry .dstage__name {
+  transform: translate(var(--drift-x, 0px), var(--drift-y, 0px)) scale(var(--away-scale));
 }
-.dstage:has(.dstage__half--cherry:hover) .dstage__half--dn .dstage__name::after,
-.dstage.sim-cherry .dstage__half--dn .dstage__name::after,
-body[data-persona="cherry"] .dstage__half--dn .dstage__name::after,
-.dstage:has(.dstage__half--dn:hover) .dstage__half--cherry .dstage__name::after,
-.dstage.sim-dn .dstage__half--cherry .dstage__name::after,
-body[data-persona="dn"] .dstage__half--cherry .dstage__name::after {
+.dstage[data-attend="cherry"] .dstage__half--dn .dstage__name::after,
+.dstage[data-attend="dn"] .dstage__half--cherry .dstage__name::after {
   width: 0;
   opacity: 0;
 }
-
-/* ---- only the attended songs are on the page ---- */
-.dstage:has(.dstage__half--cherry:hover) .dstage__half--dn .dlist,
-.dstage.sim-cherry .dstage__half--dn .dlist,
-body[data-persona="cherry"] .dstage__half--dn .dlist,
-.dstage:has(.dstage__half--dn:hover) .dstage__half--cherry .dlist,
-.dstage.sim-dn .dstage__half--cherry .dlist,
-body[data-persona="dn"] .dstage__half--cherry .dlist {
+.dstage[data-attend="cherry"] .dstage__half--dn .dstage__eyebrow,
+.dstage[data-attend="cherry"] .dstage__half--dn .dstage__desc,
+.dstage[data-attend="dn"] .dstage__half--cherry .dstage__eyebrow,
+.dstage[data-attend="dn"] .dstage__half--cherry .dstage__desc {
   opacity: 0;
-  transform: translateY(16px);
+  transform: translateY(10px);
   pointer-events: none;
 }
 
-/* Hover has to beat the playing persona, or a DN song playing would
-   lock Cherry's songs off the page while the cursor sits on them.
-   Specificity does the work: :has() counts as its argument. */
-.dstage:has(.dstage__half--cherry:hover) .dstage__half--cherry .dlist,
-.dstage:has(.dstage__half--dn:hover) .dstage__half--dn .dlist {
-  opacity: 1;
-  transform: none;
-  pointer-events: auto;
+/* Only the attended songs are on the page. The rows carry the fade, not
+   the list, so the stagger below has something to move; the list keeps
+   the pointer-events so nothing invisible can be clicked. */
+.dstage[data-attend="cherry"] .dstage__half--dn .dlist,
+.dstage[data-attend="dn"] .dstage__half--cherry .dlist {
+  pointer-events: none;
+  /* the rows carry the fade, so the list's own hairline has to be told
+     separately: otherwise a rule hangs in the air under a lone name */
+  border-top-color: transparent;
+}
+.dstage[data-attend="cherry"] .dstage__half--dn .trk,
+.dstage[data-attend="dn"] .dstage__half--cherry .trk {
+  opacity: 0;
+  transform: translateY(16px);
+  transition-delay: 0s;          /* leaving is one movement, not a queue */
 }
 
-/* Coming back, the songs arrive one after another, the way a needle
-   finds the groove. The delays live only in the attended rule, so
-   leaving is immediate and nothing staggers on the way out. */
-.dstage:has(.dstage__half--cherry:hover) .dstage__half--cherry .trk,
-.dstage.sim-cherry .dstage__half--cherry .trk,
-body[data-persona="cherry"] .dstage__half--cherry .trk,
-.dstage:has(.dstage__half--dn:hover) .dstage__half--dn .trk,
-.dstage.sim-dn .dstage__half--dn .trk,
-body[data-persona="dn"] .dstage__half--dn .trk { opacity: 1; transform: none; }
+/* Coming back, the songs arrive one after another, the way a needle finds
+   the groove. The delays sit on the resting state, so they apply as the
+   rows return and never on the way out. */
 .dstage .dstage__half .trk:nth-child(1) { transition-delay: 0.02s; }
 .dstage .dstage__half .trk:nth-child(2) { transition-delay: 0.07s; }
 .dstage .dstage__half .trk:nth-child(3) { transition-delay: 0.12s; }
@@ -1975,28 +1956,32 @@ body[data-persona="dn"] .dstage__half--dn .trk { opacity: 1; transform: none; }
 .dstage .dstage__half .trk:nth-child(6) { transition-delay: 0.27s; }
 .dstage .dstage__half .trk:nth-child(7) { transition-delay: 0.32s; }
 .dstage .dstage__half .trk:nth-child(8) { transition-delay: 0.37s; }
-/* leaving is one movement, not a queue */
-.dstage:has(.dstage__half--cherry:hover) .dstage__half--dn .trk,
-.dstage.sim-cherry .dstage__half--dn .trk,
-body[data-persona="cherry"] .dstage__half--dn .trk,
-.dstage:has(.dstage__half--dn:hover) .dstage__half--cherry .trk,
-.dstage.sim-dn .dstage__half--cherry .trk,
-body[data-persona="dn"] .dstage__half--cherry .trk { transition-delay: 0s; }
 
-/* the hinge leans while a song plays, not only under the cursor */
-.dstage.sim-cherry .dstage__amp,
-body[data-persona="cherry"] .dstage__amp {
+/* the hinge leans toward whoever is attended */
+.dstage[data-attend="cherry"] .dstage__amp {
   transform: var(--amp-place) rotate(-12deg) scale(1.18);
   color: var(--red-display);
 }
-.dstage.sim-dn .dstage__amp,
-body[data-persona="dn"] .dstage__amp {
+.dstage[data-attend="dn"] .dstage__amp {
   transform: var(--amp-place) rotate(12deg) scale(1.18);
   color: #AFC0C0;
 }
 
-/* touch / reduced motion: everything stays visible */
-@media (hover: none) {
+/* the play control, so a song is a real button and not a listitem
+   pretending to be one */
+.trk__go {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  background: none; border: 0; padding: 0;
+  cursor: pointer; font: inherit; color: inherit;
+}
+.trk { position: relative; }
+.trk__words, .trk__lyrics { position: relative; z-index: 1; }
+
+/* Nothing hides where it cannot be brought back, and nothing floats to
+   the middle of a half that is no longer beside anything: on touch, and
+   once the two halves stack, the whole mechanic stands down. */
+@media (hover: none), (max-width: 860px) {
   .dstage__eyebrow, .dstage__desc, .dstage__half .dlist,
   .dstage__half .trk { opacity: 1 !important; transform: none !important; pointer-events: auto !important; }
   .dstage__name { transform: none !important; }
@@ -2005,6 +1990,9 @@ body[data-persona="dn"] .dstage__amp {
   .dstage__eyebrow, .dstage__desc, .dstage__half .dlist,
   .dstage__half .trk, .dstage__name { transition: none; }
   .dstage__half .trk { transition-delay: 0s !important; }
+  /* the drift itself is zeroed in cherry.js: it writes inline custom
+     properties, and inline always beats a stylesheet, so a rule here
+     could never win */
 }
 
 /* ============================================================
