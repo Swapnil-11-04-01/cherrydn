@@ -150,18 +150,48 @@
       '" data-title="' + plain(t.title).replace(/"/g, "&quot;") + '">' +
       (mirrored ? len + name + no : no + name + len) + words + "</li>";
   }
-  function renderTracks(rows) {
+  /* The chapters can be one plain list, or the groups she has named for
+     herself. Groups win only when she has made them; a recording that
+     belongs to no group is never dropped, it just keeps its own place at
+     the end under no heading. */
+  function renderChapters(mine, groups) {
+    var box = document.querySelector(".chapters");
+    if (!box) return 0;
+    var named = groups.filter(function (g) {
+      return mine.some(function (t) { return t.section === g; });
+    });
+    var loose = mine.filter(function (t) { return named.indexOf(t.section) < 0; });
+
+    function listOf(rows) {
+      return '<ul class="tracklist" data-r>' +
+        rows.map(function (t) { return trackRow(t, false); }).join("") + "</ul>";
+    }
+    var html = named.map(function (g) {
+      return '<section class="chgroup" data-r><h2 class="chgroup__name">' + clean(g) + "</h2>" +
+        listOf(mine.filter(function (t) { return t.section === g; })) + "</section>";
+    }).join("");
+    if (loose.length) html += listOf(loose);
+
+    box.innerHTML = html;
+    return 1;
+  }
+
+  function renderTracks(rows, groups) {
     var touched = 0;
-    [["cherry", ".dlist--cherry", true], ["dn", ".dlist--dn", false],
-     ["spoken", ".tracklist", false]].forEach(function (spec) {
+    [["cherry", ".dlist--cherry", true], ["dn", ".dlist--dn", false]].forEach(function (spec) {
       var list = document.querySelector(spec[1]);
       if (!list) return;
       var mine = bySort(rows.filter(function (r) { return r.voice === spec[0]; }));
-
       mine.forEach(function (t, i) { t._n = i + 1; });
       list.innerHTML = mine.map(function (t) { return trackRow(t, spec[2]); }).join("");
       touched++;
     });
+
+    var spoken = bySort(rows.filter(function (r) { return r.voice === "spoken"; }));
+    if (spoken.length) {
+      spoken.forEach(function (t, i) { t._n = i + 1; });
+      touched += renderChapters(spoken, groups || []);
+    }
     return touched;
   }
 
@@ -224,7 +254,7 @@
   jobs.push(page === "written"
     ? api("cherry_pieces?select=id,title,kind,phase,excerpt,body,sort&published=eq.true") : null);
   jobs.push(document.querySelector(".dlist--cherry, .tracklist")
-    ? api("cherry_tracks?select=id,title,voice,length,audio_url,lyrics,sort&published=eq.true") : null);
+    ? api("cherry_tracks?select=id,title,voice,length,audio_url,lyrics,section,sort&published=eq.true") : null);
   jobs.push(document.querySelector(".portals")
     ? api("cherry_portals?select=id,name,blurb,href,image_url,kind,sort&published=eq.true") : null);
   jobs.push(document.querySelector(".reel")
@@ -234,9 +264,15 @@
     .then(function (res) {
       var touched = 0;
       if (res[0] && res[0].length) applySettings(res[0]);
+      /* the order she has put her chapter groups in */
+      var groups = [];
+      (res[0] || []).forEach(function (s) {
+        if (s.key !== "spoken_groups") return;
+        try { groups = JSON.parse(s.value) || []; } catch (e) { groups = []; }
+      });
       if (res[1] && res[1].length) touched += renderWorks(res[1]);
       if (res[2] && res[2].length) touched += renderPieces(res[2]);
-      if (res[3] && res[3].length) touched += renderTracks(res[3]);
+      if (res[3] && res[3].length) touched += renderTracks(res[3], groups);
       if (res[4] && res[4].length) touched += renderPortals(res[4]);
       if (res[5] && res[5].length) touched += renderFilms(res[5]);
       if (touched && typeof window.CherryRebind === "function") window.CherryRebind();

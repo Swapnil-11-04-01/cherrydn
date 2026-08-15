@@ -76,7 +76,7 @@ window.CHERRY_SCHEMA = [
       { k: "sw_gift_title", label: "The gift box: its heading" },
       { k: "sw_gift_text", label: "The gift box: the words inside", type: "long", enter: true, em: true }
     ]),
-    lists: [{ id: "spoken", title: "The chapters" }]
+    groups: "spoken"
   },
   {
     id: "film", name: "Film", page: "film.html",
@@ -232,6 +232,7 @@ window.CHERRY_LISTS = {
   spoken: {
     table: "cherry_tracks", one: "chapter", add: "Add a chapter",
     accept: "audio/*", media: "audio_url", where: { voice: "spoken" },
+    groups: true, newGroup: "Name it, for instance The Audiobook",
     fields: [
       { k: "title", label: "Its name" },
       { k: "length", label: "How long it is", hint: "Read from the recording, change it if you like." },

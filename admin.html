@@ -99,6 +99,17 @@
     .mediabox--film .mediabox__none { font-family:var(--display); letter-spacing:.08em; font-size:.95rem; color:var(--ink); }
     .linkbox { font-size:.88rem; }
 
+    /* groups she names herself */
+    .gname { flex:1; min-width:9rem; max-width:22rem; background:none; border:0; border-bottom:1px solid transparent;
+      color:var(--ink); font-family:var(--display); font-size:1.15rem; letter-spacing:.14em;
+      text-transform:uppercase; padding:.1rem 0; }
+    .gname:hover { border-bottom-color:var(--line); }
+    .gname:focus { border-bottom-color:var(--red-t); outline:none; }
+    .gmove { display:flex; gap:.4rem; flex-wrap:wrap; margin-left:auto; }
+    .gnew { display:flex; gap:.6rem; align-items:stretch; flex-wrap:wrap; }
+    .gnew input { flex:1; min-width:12rem; }
+    .gnew .add { width:auto; margin-top:0; white-space:nowrap; }
+
     .pills, .rooms { display:flex; gap:.5rem; flex-wrap:wrap; }
     .pill, .room { background:none; border:1px solid var(--line); color:var(--muted);
       padding:.6rem .95rem; min-height:44px; border-radius:2px; font-size:.85rem; text-align:left; }
@@ -218,7 +229,7 @@
   <input id="picker" type="file" hidden />
 
   <script src="js/cherry-config.js?v=2"></script>
-  <script src="js/cherry-schema.js?v=5"></script>
-  <script src="js/cherry-admin.js?v=11"></script>
+  <script src="js/cherry-schema.js?v=6"></script>
+  <script src="js/cherry-admin.js?v=12"></script>
 </body>
 </html>

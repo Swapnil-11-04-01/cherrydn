@@ -3031,3 +3031,17 @@ body[data-persona="dn"] .dstage__half--cherry .dstage__name::after {
 }
 .trk__lyrics[hidden] { display: none; }
 .dlist--cherry .trk__lyrics { text-align: right; }
+
+/* the heading over a group of chapters, in her own words */
+.chapters { display: grid; gap: clamp(2.2rem, 5vw, 3.4rem); }
+.chgroup__name {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(1.15rem, 2vw, 1.5rem);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink);
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--line);
+}
+.chgroup .tracklist { margin-top: 0; }

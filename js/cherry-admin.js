@@ -342,7 +342,7 @@
     });
   }
 
-  function addFiles(listId, room, files) {
+  function addFiles(listId, room, files, base) {
     var list = [].slice.call(files);
     if (!list.length) return;
     var spec = LISTS[listId], skipped = [];
@@ -369,6 +369,7 @@
         audioLength(f), posterFrom(f)
       ]).then(function (got) {
         var extra = { title: f.name.replace(/\.[a-z0-9]+$/i, "") };
+        Object.keys(base || {}).forEach(function (k) { extra[k] = base[k]; });
         extra[spec.media] = got[0];
         if (got[1]) extra.length = got[1];
         if (!got[2]) return extra;
@@ -456,6 +457,72 @@
       esc(toBox(value).replace(/\n/g, " ")) + '" /></label>';
   }
 
+  /* ---------- the groups she names for herself ---------- */
+  function groupNames() {
+    try {
+      var a = JSON.parse(data.settings.spoken_groups || "[]");
+      return Array.isArray(a) ? a : [];
+    } catch (e) { return []; }
+  }
+  function saveGroups(list) {
+    saveSetting("spoken_groups", JSON.stringify(list));
+  }
+
+  function sectionChooser(row) {
+    var names = groupNames();
+    if (!names.length) return "";
+    return '<div class="fld"><span class="lab">Which part of the page?</span>' +
+      '<div class="rooms" data-k="section" data-scope="' + row._scope + '">' +
+      names.map(function (g) {
+        return '<button type="button" class="room' + (g === row.section ? " on" : "") +
+          '" data-v="' + esc(g) + '"><strong>' + esc(g) + "</strong></button>";
+      }).join("") +
+      '<button type="button" class="room' + (names.indexOf(row.section) < 0 ? " on" : "") +
+        '" data-v=""><strong>No group</strong></button>' +
+      "</div></div>";
+  }
+
+  function countLine(rows) {
+    var hidden = rows.filter(function (r) { return !r.published; }).length;
+    return "<em>" + (rows.length - hidden) + " on the site" +
+      (hidden ? " · " + hidden + " only you" : "") + "</em>";
+  }
+
+  function groupsHTML(listId) {
+    var spec = LISTS[listId], names = groupNames(), rows = rowsFor(listId);
+    var out = names.map(function (g) {
+      var mine = rows.filter(function (r) { return r.section === g; });
+      return '<section class="block" data-groupblock="' + esc(g) + '">' +
+        '<h3 class="block__name"><input class="gname" type="text" value="' + esc(g) + '" ' +
+          'aria-label="The name of this group" /> ' + countLine(mine) +
+        '<span class="gmove"><button class="mini" type="button" data-gmove="up">Move up</button>' +
+        '<button class="mini" type="button" data-gmove="down">Move down</button>' +
+        '<button class="mini mini--red" type="button" data-gdrop="1">Remove the group</button></span></h3>' +
+        (mine.length ? mine.map(function (r) { return cardHTML(listId, r); }).join("")
+                     : '<p class="none">Nothing in this group yet.</p>') +
+        '<button class="add" type="button" data-add="' + listId + '" data-group="' + esc(g) + '">' +
+          esc(spec.add) + "</button>" +
+        "</section>";
+    }).join("");
+
+    var loose = rows.filter(function (r) { return names.indexOf(r.section) < 0; });
+    if (loose.length || !names.length) {
+      out += '<section class="block">' +
+        '<h3 class="block__name">' + (names.length ? "Not in any group" : "The chapters") +
+          " " + countLine(loose) + "</h3>" +
+        (loose.length ? loose.map(function (r) { return cardHTML(listId, r); }).join("")
+                      : '<p class="none">Nothing here yet.</p>') +
+        '<button class="add" type="button" data-add="' + listId + '" data-group="">' +
+          esc(spec.add) + "</button></section>";
+    }
+
+    out += '<section class="block"><h3 class="block__name">A new group</h3>' +
+      '<div class="gnew"><input id="gnew" type="text" placeholder="' + esc(spec.newGroup || "Name it") + '" />' +
+      '<button class="add" id="gnewBtn" type="button" data-list="' + listId + '">Make the group</button></div>' +
+      "</section>";
+    return out;
+  }
+
   function roomChooser(row) {
     return '<div class="fld"><span class="lab">Which room does it live in?</span>' +
       '<div class="rooms" data-k="phase" data-scope="' + row._scope + '">' +
@@ -482,6 +549,7 @@
       '<div class="card__body" hidden>' +
       spec.fields.map(function (f) { return fieldHTML(f, row[f.k], scope); }).join("") +
       (spec.room ? roomChooser(row) : "") +
+      (spec.groups ? sectionChooser(row) : "") +
       '<div class="card__foot">' +
       '<label class="onoff"><input type="checkbox" data-k="published" data-scope="' + scope + '"' +
         (row.published ? " checked" : "") + ' /><span>' +
@@ -570,6 +638,7 @@
       if (sec.fields) html += '<section class="block">' +
         sec.fields.map(function (f) { return fieldHTML(f, data.settings[f.k], "setting"); }).join("") + "</section>";
       if (sec.rooms) html += roomsHTML(sec.rooms);
+      if (sec.groups) html += groupsHTML(sec.groups);
       (sec.lists || []).forEach(function (l) { html += listHTML(l.id, l.title); });
     }
     $("#shelf").innerHTML = html;
@@ -655,7 +724,10 @@
       pill.classList.add("on");
       var parts = wrap.dataset.scope.split(":");
       saveRow(parts[0], parts[1], keyed(wrap.dataset.k, pill.dataset.v));
-      if (wrap.dataset.k === "phase") setTimeout(function () { paint(); }, 600);
+      if (wrap.dataset.k === "phase" || wrap.dataset.k === "section") {
+        setTimeout(function () { paint(); }, 600);
+        repaintRows();
+      }
       return;
     }
 
@@ -705,16 +777,59 @@
       return;
     }
 
+    /* making a group is just naming it */
+    var gnew = e.target.closest("#gnewBtn");
+    if (gnew) {
+      var box = $("#gnew"), name = box.value.trim();
+      if (!name) { box.focus(); say("Give the group a name first."); return; }
+      var all = groupNames();
+      if (all.indexOf(name) >= 0) { say("You already have a group called that."); return; }
+      all.push(name);
+      saveGroups(all);
+      paint();
+      say("Made. Put your recordings into it whenever you like.");
+      return;
+    }
+
+    var gm = e.target.closest("[data-gmove]");
+    if (gm) {
+      var here2 = gm.closest("[data-groupblock]").dataset.groupblock;
+      var list = groupNames(), at = list.indexOf(here2);
+      var to = gm.dataset.gmove === "up" ? at - 1 : at + 1;
+      if (at < 0 || to < 0 || to >= list.length) return;
+      list.splice(to, 0, list.splice(at, 1)[0]);
+      saveGroups(list);
+      paint(); repaintRows(); say("Moved");
+      return;
+    }
+
+    var gd = e.target.closest("[data-gdrop]");
+    if (gd) {
+      var gone = gd.closest("[data-groupblock]").dataset.groupblock;
+      if (gd.dataset.confirm) {
+        /* only the heading goes: the recordings fall out of it, whole */
+        saveGroups(groupNames().filter(function (n) { return n !== gone; }));
+        paint(); repaintRows();
+        say("The group is gone. Nothing inside it was removed.");
+      } else {
+        gd.dataset.confirm = "1";
+        gd.textContent = "Really remove the group?";
+        setTimeout(function () { delete gd.dataset.confirm; gd.textContent = "Remove the group"; }, 4000);
+      }
+      return;
+    }
+
     var add = e.target.closest("[data-add]");
     if (add) {
       var lid = add.dataset.add, spec = LISTS[lid];
+      var into = add.dataset.group != null ? { section: add.dataset.group } : null;
       if (spec.accept && spec.media) {
         var fp = $("#picker");
         fp.accept = spec.accept;
-        fp.onchange = function () { addFiles(lid, add.dataset.room, fp.files); fp.value = ""; };
+        fp.onchange = function () { addFiles(lid, add.dataset.room, fp.files, into); fp.value = ""; };
         fp.click();
       } else {
-        addRow(lid, add.dataset.room).catch(function (err) { say(humanise(err), "bad"); });
+        addRow(lid, add.dataset.room, into).catch(function (err) { say(humanise(err), "bad"); });
       }
       return;
     }
@@ -788,6 +903,23 @@
 
   document.addEventListener("change", function (e) {
     var i = e.target;
+
+    /* renaming a group carries everything inside it along */
+    if (i.classList && i.classList.contains("gname")) {
+      var was = i.closest("[data-groupblock]").dataset.groupblock, now = i.value.trim();
+      if (!now || now === was) { i.value = was; return; }
+      var all = groupNames();
+      if (all.indexOf(now) >= 0) { i.value = was; say("You already have a group called that."); return; }
+      all[all.indexOf(was)] = now;
+      saveGroups(all);
+      rowsFor("spoken").forEach(function (r) {
+        if (r.section === was) saveRow("cherry_tracks", r.id, { section: now }, true);
+      });
+      setTimeout(function () { paint(); }, 800);
+      repaintRows();
+      say("Renamed");
+      return;
+    }
     if (i.type === "checkbox" && i.dataset.k === "published") {
       var p = i.dataset.scope.split(":");
       saveRow(p[0], p[1], { published: i.checked });
