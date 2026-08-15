@@ -146,8 +146,12 @@
       ? '<button class="trk__words" type="button" aria-expanded="false">words</button>' +
         '<div class="trk__lyrics" hidden>' + clean(t.lyrics) + "</div>"
       : "";
-    return '<li class="trk" data-cms-row="cherry_tracks:' + t.id + '" data-src="' + plain(t.audio_url).replace(/"/g, "&quot;") +
-      '" data-title="' + plain(t.title).replace(/"/g, "&quot;") + '">' +
+    /* no recording yet means no data-src at all: an empty one would be
+       fetched as the page itself, come back 200, and count as live */
+    var src = plain(t.audio_url).trim();
+    return '<li class="trk" data-cms-row="cherry_tracks:' + t.id + '"' +
+      (src ? ' data-src="' + src.replace(/"/g, "&quot;") + '"' : "") +
+      ' data-title="' + plain(t.title).replace(/"/g, "&quot;") + '">' +
       (mirrored ? len + name + no : no + name + len) + words + "</li>";
   }
   /* The chapters can be one plain list, or the groups she has named for
