@@ -142,9 +142,6 @@
     currentRow = null;
     delete document.body.dataset.persona;
     if (window.CherryAttend) window.CherryAttend.settle();
-    /* the audio element lives outside the document, so nothing can hear it
-       stop unless it says so */
-    document.dispatchEvent(new CustomEvent("cherry:media", { detail: { playing: false } }));
   }
   audio.addEventListener("ended", stopAll);
   audio.addEventListener("timeupdate", function () {
@@ -229,7 +226,6 @@
         }
         if (playerBtn) playerBtn.classList.add("is-playing");
         if (playerNow) playerNow.textContent = row.dataset.title || row.textContent.trim();
-        document.dispatchEvent(new CustomEvent("cherry:media", { detail: { playing: true } }));
       }).catch(function (err) {
         if (err && err.name === "AbortError") return;
         row.classList.add("is-ghost");
@@ -479,7 +475,6 @@
       var p = fr.querySelector(".film__player");
       if (p) { if (p.pause) { try { p.pause(); } catch (e) {} } p.remove(); }
       fr.classList.remove("is-playing");
-      document.dispatchEvent(new CustomEvent("cherry:media", { detail: { playing: false } }));
     });
   }
 
@@ -525,7 +520,6 @@
         }
         player.className = "film__player";
         frame.classList.add("is-playing");
-        document.dispatchEvent(new CustomEvent("cherry:media", { detail: { playing: true } }));
         frame.appendChild(player);
         if (player.play) { var go = player.play(); if (go && go.catch) go.catch(function () {}); }
       });
