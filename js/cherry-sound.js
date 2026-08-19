@@ -155,8 +155,8 @@
     eNoise.loop = true;
     var etherBand = ac.createBiquadFilter();
     etherBand.type = "bandpass";
-    etherBand.frequency.value = 500;
-    etherBand.Q.value = 1.4;
+    etherBand.frequency.value = 200;
+    etherBand.Q.value = 0.6;
     var etherGain = ac.createGain();
     etherGain.gain.value = 0;
     eNoise.connect(etherBand);
@@ -164,18 +164,8 @@
     etherGain.connect(ether);
     eNoise.start();
 
-    var shimmer = ac.createOscillator();
-    shimmer.type = "sine";
-    shimmer.frequency.value = 2200;
-    var shimmerGain = ac.createGain();
-    shimmerGain.gain.value = 0;
-    shimmer.connect(shimmerGain);
-    shimmerGain.connect(ether);
-    shimmer.start();
-
     return { ac: ac, master: master, meter: meter, space: space, bed: bed,
-             voices: voices, etherGain: etherGain, etherBand: etherBand,
-             shimmer: shimmer, shimmerGain: shimmerGain };
+             voices: voices, etherGain: etherGain, etherBand: etherBand };
   }
 
   /* one small sound, struck into a graph at a given time */
@@ -242,12 +232,13 @@
     raf = 0;
     if (!on || !G) return;
     var t = G.ac.currentTime, quiet = ducked ? 0 : 1;
-    var reach = Math.min(1, speed / 26);
-    G.etherGain.gain.setTargetAtTime(0.048 * reach * quiet, t, 0.09);
-    G.etherBand.frequency.setTargetAtTime(280 + py * 1900 + reach * 900, t, 0.14);
-    G.shimmerGain.gain.setTargetAtTime(0.0075 * reach * reach * quiet, t, 0.12);
-    G.shimmer.frequency.setTargetAtTime(1500 + px * 2300, t, 0.18);
-    speed *= 0.86;
+    /* below a real gesture there is nothing at all: resting the hand,
+       reaching for a link, nudging the page must all be silent */
+    var reach = Math.max(0, Math.min(1, (speed - 9) / 34));
+    reach *= reach;                                   /* and it starts gently */
+    G.etherGain.gain.setTargetAtTime(0.020 * reach * quiet, t, reach > 0.02 ? 0.40 : 1.20);
+    G.etherBand.frequency.setTargetAtTime(90 + py * 430 + reach * 180, t, 0.55);
+    speed *= 0.90;
 
     if (t > chordT) {                     /* one voice steps to another degree */
       chordT = t + 16 + Math.random() * 18;
@@ -257,10 +248,7 @@
     }
 
     if (speed > 0.05) raf = requestAnimationFrame(follow);
-    else {
-      G.etherGain.gain.setTargetAtTime(0, t, 0.5);
-      G.shimmerGain.gain.setTargetAtTime(0, t, 0.5);
-    }
+    else G.etherGain.gain.setTargetAtTime(0, t, 1.2);   /* it takes its time leaving */
   }
 
   function moved(e) {
@@ -289,25 +277,13 @@
     if (!e.target.closest("a, button, [role=button], .trk, .vitem, .film__play, .portal, label, input, select")) return;
     pluck(G, room, degreeFor(e.target), 0.075, false);
   }, true);
-  document.addEventListener("pointerover", function (e) {
-    if (!on || !G || ducked || !e.target.closest) return;
-    if (!e.target.closest("a, button, .trk, .vitem, .portal")) return;
-    var t = G.ac.currentTime;
-    if (t - lastTick < 0.15) return;
-    lastTick = t;
-    pluck(G, room, room.mode[room.mode.length - 1], 0.016, true);
-  }, true);
-
   /* ---------- her work always wins ---------- */
   function duck(yes) {
     ducked = !!yes;
     if (!G || !on) return;
     var t = G.ac.currentTime;
     G.bed.gain.setTargetAtTime(ducked ? DUCKED : BED, t, ducked ? 0.25 : 1.4);
-    if (ducked) {
-      G.etherGain.gain.setTargetAtTime(0, t, 0.2);
-      G.shimmerGain.gain.setTargetAtTime(0, t, 0.2);
-    }
+    if (ducked) G.etherGain.gain.setTargetAtTime(0, t, 0.2);
   }
   document.addEventListener("cherry:media", function (e) {
     duck(!(e.detail && e.detail.playing === false));
@@ -380,26 +356,25 @@
     for (var i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
     return Math.sqrt(sum / buf.length);
   }
-  function render(which, seconds) {
+  function render(which, seconds, opts) {
     var r = ROOMS[which] || room, secs = seconds || 18;
+    opts = opts || {};
     var OC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
     var oc = new OC(2, 44100 * secs, 44100);
     var g = graph(oc, r);
+    if (opts.bed === false) g.bed.gain.value = 0;
     g.master.gain.setValueAtTime(0, 0);
     g.master.gain.linearRampToValueAtTime(1, 2.2);
     /* a hand crossing the page, twice, then two small sounds */
     [[3.0, 0.55, 0.30], [3.6, 0.9, 0.42], [4.4, 0.35, 0.7], [5.2, 0.8, 0.5],
      [9.0, 0.5, 0.25], [9.7, 0.95, 0.6], [10.5, 0.2, 0.8]].forEach(function (m) {
       var t = m[0], reach = m[1], y = m[2];
-      g.etherGain.gain.setTargetAtTime(0.048 * reach, t, 0.12);
-      g.etherBand.frequency.setTargetAtTime(280 + y * 1900 + reach * 900, t, 0.16);
-      g.shimmerGain.gain.setTargetAtTime(0.0075 * reach * reach, t, 0.14);
-      g.etherGain.gain.setTargetAtTime(0, t + 0.65, 0.4);
-      g.shimmerGain.gain.setTargetAtTime(0, t + 0.65, 0.4);
+      g.etherGain.gain.setTargetAtTime(0.020 * reach * reach, t, 0.40);
+      g.etherBand.frequency.setTargetAtTime(90 + y * 430 + reach * 180, t, 0.55);
+      g.etherGain.gain.setTargetAtTime(0, t + 0.9, 1.2);
     });
     pluck(g, r, r.mode[1], 0.075, false, 7.0);
     pluck(g, r, r.mode[2], 0.075, false, 7.5);
-    pluck(g, r, r.mode[4], 0.016, true, 12.0);
     g.voices[1].osc.frequency.setTargetAtTime(r.root * semi(r.mode[3]), 13, 5);
     return oc.startRendering();
   }
