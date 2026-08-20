@@ -1084,6 +1084,100 @@
     }, 260);
   }
 
+  /* ---------- the colour out of one of her own paintings ---------- */
+  /* She clicks a place in a picture she made. Only the HUE of that pixel is
+     kept: its lightness and its colourfulness are thrown away before the
+     number ever reaches the solver, which is why this can be completely
+     free and still completely safe. A muddy pixel and a screaming one give
+     the same result, and neither can darken her words. */
+  function herPictures() {
+    var seen = {}, out = [];
+    function add(src, name) {
+      src = String(src || "").trim();
+      if (!src || seen[src]) return;
+      seen[src] = 1; out.push({ src: src, name: name || "" });
+    }
+    add(data.settings.landing_hero_image, "the picture behind your name");
+    (data.works || []).forEach(function (w) { add(w.image_url, w.title); });
+    (data.portals || []).forEach(function (p2) { add(p2.image_url, p2.name); });
+    return out;
+  }
+
+  function dropperHTML() {
+    var pics = herPictures();
+    if (!pics.length) return "";
+    return '<section class="block"><h3 class="block__name">Take the colour from one of your pictures</h3>' +
+      '<p class="qr__lead">The whole site gets built out of one colour you choose. ' +
+      'Only the colour itself is taken, never how bright or how strong it is, so anything you pick is safe.</p>' +
+      '<div class="pics">' + pics.slice(0, 24).map(function (p2, i) {
+        return '<button class="pic" type="button" data-pic="' + i + '" ' +
+          'style="background-image:url(' + esc(p2.src).replace(/"/g, "&quot;") + ')" ' +
+          'title="' + esc(p2.name) + '"></button>';
+      }).join("") + "</div>" +
+      '<div class="dropper" id="dropper" hidden></div></section>';
+  }
+
+  var dropperPics = [];
+  function openPicture(i) {
+    var pic = dropperPics[i];
+    if (!pic) return;
+    var box = $("#dropper");
+    box.hidden = false;
+    box.innerHTML = '<p class="qr__lead"><b>Click anywhere in the painting.</b></p>' +
+      '<div class="dropper__stage"><canvas id="dropCv"></canvas></div>' +
+      '<p class="qr__lead" id="dropStones">The colours this painting is made of…</p>' +
+      '<div id="dropPick"></div>';
+    var img = new Image();
+    img.onload = function () {
+      var cv = $("#dropCv"), w = Math.min(560, img.naturalWidth);
+      var h = Math.round(img.naturalHeight * (w / img.naturalWidth));
+      cv.width = w; cv.height = h;
+      cv.getContext("2d").drawImage(img, 0, 0, w, h);
+      stonesFrom(cv);
+    };
+    img.onerror = function () { box.innerHTML = '<p class="none">That picture would not open.</p>'; };
+    img.src = pic.src;
+    box.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+
+  /* the handful of colours the picture is actually made of, so she does not
+     have to hunt for a pixel */
+  function stonesFrom(cv) {
+    var g = cv.getContext("2d");
+    var d2, bins = {};
+    try { d2 = g.getImageData(0, 0, cv.width, cv.height).data; } catch (e) { return; }
+    var step = Math.max(1, Math.floor(cv.width * cv.height / 12000));
+    for (var i = 0; i < d2.length; i += 4 * step) {
+      if (d2[i + 3] < 200) continue;
+      var o = window.CherrySolve.rgbToOklch(d2[i], d2[i + 1], d2[i + 2]);
+      if (o.C < 0.035) continue;
+      var b = Math.round(o.H / 12) * 12 % 360;
+      bins[b] = (bins[b] || 0) + o.C;
+    }
+    var top = Object.keys(bins).sort(function (a, b2) { return bins[b2] - bins[a]; }).slice(0, 5);
+    if (!top.length) return;
+    $("#dropStones").innerHTML = "The colours this painting is made of: " +
+      top.map(function (h) {
+        var c = window.CherrySolve.hex(window.CherrySolve.at(0.62, 0.11, +h));
+        return '<button class="stone" type="button" data-hue="' + h + '" style="background:' + c + '"></button>';
+      }).join("");
+  }
+
+  function tookHue(H, swatch) {
+    say("Got it. Now say where it goes.");
+    var fire = window.CherrySolve.hueToFire(H);
+    var burn = window.CherrySolve.hex(window.CherrySolve.at(0.62, 0.12, H));
+    $("#dropPick").innerHTML =
+      '<div class="took"><span class="took__chip" style="background:' + (swatch || burn) + '"></span>' +
+      '<p class="qr__lead">Where should this colour go?</p></div>' +
+      '<div class="took__ways">' +
+      '<button class="add" type="button" data-take="burn" data-hue="' + H + '">Let it burn' +
+        '<em>' + (fire.exact ? "this colour becomes the fire" :
+                  "some colours can only burn: this is the nearest one that can") + "</em></button>" +
+      '<button class="add" type="button" data-take="drown" data-hue="' + H + '">Let it drown' +
+        "<em>this colour becomes the water</em></button></div>";
+  }
+
   /* ---------- painting the shelf ---------- */
   function paint(keepOpen) {
     var open = keepOpen || $$(".card__body:not([hidden])").map(function (b) {
@@ -1100,14 +1194,14 @@
       if (sec.fields) html += '<section class="block">' +
         sec.fields.map(function (f) { return fieldHTML(f, data.settings[f.k], "setting"); }).join("") + "</section>";
       if (sec.tool === "qr") html += qrHTML();
-      if (sec.tool === "mood") html += moodHTML();
+      if (sec.tool === "mood") html += moodHTML() + dropperHTML();
       if (sec.rooms) html += roomsHTML(sec.rooms);
       if (sec.groups) html += groupsHTML(sec.groups);
       (sec.lists || []).forEach(function (l) { html += listHTML(l.id, l.title); });
     }
     $("#shelf").innerHTML = html;
     if (sec.tool === "qr") drawQR();
-    if (sec.tool === "mood") moodChanged(false);
+    if (sec.tool === "mood") { dropperPics = herPictures(); moodChanged(false); }
     open.forEach(function (scope) {
       var card = $('.card[data-scope="' + scope + '"]');
       if (card) { $(".card__body", card).hidden = false; card.classList.add("open"); }
@@ -1240,6 +1334,33 @@
       try { trash = JSON.parse(data.settings.desk_trash || "[]"); } catch (err) {}
       var item = trash[+res.dataset.restore];
       if (item) putBack(item.table, item.row);
+      return;
+    }
+
+    var pk = e.target.closest("[data-pic]");
+    if (pk) { openPicture(+pk.dataset.pic); return; }
+
+    var stone = e.target.closest("[data-hue]");
+    if (stone && !stone.dataset.take) {
+      tookHue(+stone.dataset.hue, stone.style.background);
+      return;
+    }
+    var take = e.target.closest("[data-take]");
+    if (take) {
+      var H = +take.dataset.hue;
+      var sl;
+      if (take.dataset.take === "drown") {
+        sl = $('[data-axis="hg"]');
+        sl.value = H;
+        say("The water is that colour now.");
+      } else {
+        var fire = window.CherrySolve.hueToFire(H);
+        sl = $('[data-axis="f"]');
+        sl.value = fire.f;
+        say(fire.exact ? "The fire is that colour now."
+                       : "Only the reds can burn, so it took the nearest one.");
+      }
+      moodChanged(true);
       return;
     }
 
@@ -1403,6 +1524,34 @@
       if (frame && frame.contentWindow) frame.contentWindow.location.reload();
     }, 900);
   }
+
+  /* a place in the painting: average a small patch so one stray pixel of
+     compression never decides the colour of her site */
+  document.addEventListener("click", function (e) {
+    var cv = e.target.closest && e.target.closest("#dropCv");
+    if (!cv) return;
+    var r = cv.getBoundingClientRect();
+    var x = Math.round((e.clientX - r.left) * cv.width / r.width);
+    var y = Math.round((e.clientY - r.top) * cv.height / r.height);
+    var g = cv.getContext("2d"), lr = 0, lg = 0, lb = 0, n = 0;
+    function un(c) { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
+    function re(c) { c = c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055; return Math.round(c * 255); }
+    try {
+      var d3 = g.getImageData(Math.max(0, x - 2), Math.max(0, y - 2), 5, 5).data;
+      for (var i = 0; i < d3.length; i += 4) {
+        if (d3[i + 3] < 200) continue;
+        lr += un(d3[i]); lg += un(d3[i + 1]); lb += un(d3[i + 2]); n++;
+      }
+    } catch (err) { say("That picture will not let me read its colours.", "bad"); return; }
+    if (!n) return;
+    var rgb = [re(lr / n), re(lg / n), re(lb / n)];
+    var o = window.CherrySolve.rgbToOklch(rgb[0], rgb[1], rgb[2]);
+    if (o.C < 0.035) {
+      say("That spot is almost colourless. The site needs a colour with some blood in it.", "bad");
+      return;
+    }
+    tookHue(o.H, window.CherrySolve.hex(rgb));
+  });
 
   document.addEventListener("input", function (e) {
     var i = e.target;

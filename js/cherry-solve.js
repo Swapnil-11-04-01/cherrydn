@@ -107,6 +107,34 @@ window.CherrySolve = (function () {
   }
   function at(L, C, H) { return rgb255(L, Math.min(C, gmax(L, H)), H); }
 
+  /* the way back: a pixel out of one of her paintings, into a hue */
+  function rgbToOklch(r, g, b) {
+    var R = lin1(r), G2 = lin1(g), B = lin1(b);
+    var l = Math.cbrt(0.4122214708 * R + 0.5363325363 * G2 + 0.0514459929 * B);
+    var m = Math.cbrt(0.2119034982 * R + 0.6806995451 * G2 + 0.1073969566 * B);
+    var s2 = Math.cbrt(0.0883024619 * R + 0.2817188376 * G2 + 0.6299787005 * B);
+    var L = 0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s2;
+    var A = 1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s2;
+    var Bb = 0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s2;
+    var C = Math.sqrt(A * A + Bb * Bb);
+    var H = (Math.atan2(Bb, A) * 180 / Math.PI + 360) % 360;
+    return { L: L, C: C, H: H };
+  }
+
+  /* The fire can only burn through the reds: 338 degrees round to 62. A hue
+     from her painting that falls outside that arc is put at whichever end is
+     nearer, and she is told, rather than being silently moved. */
+  var FIRE_FROM = 338, FIRE_SPAN = 84;
+  function hueToFire(H) {
+    var rel = ((H - FIRE_FROM) % 360 + 360) % 360;
+    if (rel <= FIRE_SPAN) return { f: rel / FIRE_SPAN, exact: true };
+    /* outside the arc: which end is closer, going the short way round */
+    var toStart = Math.min(((FIRE_FROM - H) % 360 + 360) % 360, ((H - FIRE_FROM) % 360 + 360) % 360);
+    var end = (FIRE_FROM + FIRE_SPAN) % 360;
+    var toEnd = Math.min(((end - H) % 360 + 360) % 360, ((H - end) % 360 + 360) % 360);
+    return { f: toStart <= toEnd ? 0 : 1, exact: false };
+  }
+
   var DEFAULTS = { d: 0.530, hg: 203.1, t: 0.835, f: 0.470, w: 0.557, a: 0.550, gr: 0.310 };
 
   function generate(seed) {
@@ -242,7 +270,8 @@ window.CherrySolve = (function () {
   }
 
   return { generate: generate, check: check, DEFAULTS: DEFAULTS,
-           CR: CR, hex: hex, at: at, gmax: gmax, over: over };
+           CR: CR, hex: hex, at: at, gmax: gmax, over: over,
+           rgbToOklch: rgbToOklch, hueToFire: hueToFire };
 })();
 
 if (typeof module !== "undefined" && module.exports) module.exports = window.CherrySolve;
