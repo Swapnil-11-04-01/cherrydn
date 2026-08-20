@@ -3216,6 +3216,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
      where her name lands. Nothing across the top: the nav has its own
      ground and should look here exactly as it looks everywhere else. */
   background:
+    radial-gradient(90% 78% at 96% 34%, rgba(9, 18, 19, 0.82) 0%, rgba(9, 18, 19, 0.45) 46%, transparent 78%),
     linear-gradient(to left,
       rgba(9, 18, 19, 0.94) 0%, rgba(9, 18, 19, 0.9) 18%, rgba(9, 18, 19, 0.74) 34%,
       rgba(9, 18, 19, 0.42) 52%, rgba(12, 23, 24, 0.12) 72%, rgba(12, 23, 24, 0.44) 100%),
@@ -3259,7 +3260,7 @@ body:has(.herstage) .nav__cta {
 .herstage__name {
   font-family: var(--display);
   font-weight: 400;
-  font-size: clamp(2.2rem, 7vw, 5rem);
+  font-size: clamp(2rem, min(7vw, 9.5svh), 5rem);
   letter-spacing: 0.12em;
   line-height: 1.05;
   color: var(--ink);
@@ -3319,7 +3320,12 @@ body:has(.herstage) .nav__cta {
 
 /* ---------- the travel ---------- */
 @supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
+  /* A held frame needs room for two things at once: all of her words, and
+     her name at full size in the corner. Below about 780px of height there
+     is not enough for both without them touching, so the frame stands down
+     and the page reads in ordinary flow instead. The same judgement as the
+     stacked layout: better a plain page than a crowded one. */
+  @media (prefers-reduced-motion: no-preference) and (min-height: 780px) {
     .herstage {
       /* two and a half screens: enough for the name to travel and the
          archive to arrive, and no dead scrolling after they have */
@@ -3363,7 +3369,7 @@ body:has(.herstage) .nav__cta {
     }
     @keyframes her-name {
       from { transform: translate(-50%, -50%); }
-      to   { transform: translate(-46vw, calc(40svh - 100%)); }
+      to   { transform: translate(-46vw, calc(43svh - 100%)); }
     }
     .herstage__sub {
       animation: her-sub linear both;
@@ -3386,7 +3392,7 @@ body:has(.herstage) .nav__cta {
        is the one thing an about page has to allow. */
     .herstage__read {
       position: absolute;
-      right: 0; left: auto; top: 50%;
+      right: 0; left: auto; top: 14svh;
       margin-right: clamp(1.4rem, 6vw, 7rem);
       margin-left: 0;
       padding: 0;
@@ -3395,9 +3401,9 @@ body:has(.herstage) .nav__cta {
       animation-range: contain 6% contain 42%;
     }
     @keyframes her-rise {
-      from { transform: translate(0, calc(-50% + 46svh)); opacity: 0; }
+      from { transform: translateY(46svh); opacity: 0; }
       22%  { opacity: 1; }
-      to   { transform: translate(0, -50%); opacity: 1; }
+      to   { transform: translateY(0); opacity: 1; }
     }
 
   }
