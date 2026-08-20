@@ -123,13 +123,15 @@
       var list = document.querySelector(".phase--" + phase + " .wlist");
       if (!list) return;
       list.innerHTML = groups[phase].map(function (p) {
-        return '<li class="wl wl--text" data-cms-row="cherry_pieces:' + p.id + '" data-r><div>' +
+        /* no wrapper: the fields are the grid, so her name can hold the
+           left column while the words take the whole right one */
+        return '<li class="wl wl--text" data-cms-row="cherry_pieces:' + p.id + '" data-r>' +
           '<h2 class="wl__title">' + clean(p.title) + "</h2>" +
           '<p class="wl__kind">' + clean(p.kind) + "</p>" +
           '<p class="wl__excerpt">' + clean(p.excerpt) + "</p>" +
           '<div class="wl__body">' + clean(p.body) + "</div>" +
           '<button class="rlink wl__read" type="button">read &rarr;</button>' +
-          "</div></li>";
+          "</li>";
       }).join("");
       touched++;
     });

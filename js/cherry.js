@@ -381,6 +381,8 @@
            centre inward by half of what it loses */
         var toLeft = sideOf(half) === "cherry";
         var cx = toLeft ? n.right - (n.width * away) / 2 : n.left + (n.width * away) / 2;
+        /* away === 1 leaves this as the ink's own centre, which is the point:
+           the unattended name travels without changing size */
         var cy = n.top + n.height / 2;
         half.style.setProperty("--drift-x", Math.round(h.left + h.width / 2 - cx) + "px");
         half.style.setProperty("--drift-y", Math.round(h.top + h.height / 2 - cy) + "px");
