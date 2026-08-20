@@ -122,6 +122,7 @@ window.CHERRY_SCHEMA = [
   },
   {
     id: "gift", name: "The QR-code page", page: "gift.html",
+    tool: "qr",
     blurb: "What the code inside the printed book opens: the book, read aloud, chapter by chapter.",
     fields: [
       { k: "gift_intro", label: "The opening paragraph", type: "long", enter: true, em: true },

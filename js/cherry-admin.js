@@ -628,6 +628,75 @@
       (back || '<p class="none">Nothing removed.</p>') + "</section>";
   }
 
+  /* ---------- the code that goes inside the printed book ---------- */
+  /* Made here, in her browser, from the address she types. Nothing is sent
+     anywhere to draw it, which matters for a picture that gets printed into
+     a book and has to keep working long after any free QR site has gone. */
+  function qrAddress() {
+    var saved = String(data.settings.gift_qr_url || "").trim();
+    if (saved) return saved;
+    try { return new URL("gift.html", location.href).href; } catch (e) { return "gift.html"; }
+  }
+
+  function qrHTML() {
+    return '<section class="block">' +
+      '<h3 class="block__name">The code for the printed book</h3>' +
+      '<p class="qr__lead">This is the picture that goes inside the cover. Anyone who scans it ' +
+      'arrives on this page, where the book is read aloud.</p>' +
+      '<label class="fld"><span class="lab">Where it should send them</span>' +
+      '<input id="qrurl" type="text" spellcheck="false" data-k="gift_qr_url" data-scope="setting" value="' +
+        esc(qrAddress()) + '" />' +
+      '<em class="hint">Once this is printed it cannot be changed, so use the address you mean to keep.</em>' +
+      "</label>" +
+      '<div class="qr"><div class="qr__paper" id="qrbox"></div>' +
+      '<div class="qr__side"><p class="qr__note" id="qrnote"></p>' +
+      '<button class="add" type="button" data-qr="svg">Download for printing</button>' +
+      '<button class="add" type="button" data-qr="png">Download as a picture</button>' +
+      '<p class="qr__test">Point your phone at the square on the left before you send anything ' +
+      'to the printer. If it opens the right page, the code is good.</p>' +
+      "</div></div></section>";
+  }
+
+  function drawQR() {
+    var box = $("#qrbox"), note = $("#qrnote");
+    if (!box || !window.CherryQR) return;
+    try {
+      var code = window.CherryQR.encode(qrAddress(), { ecc: "H" });
+      box.innerHTML = window.CherryQR.toSVG(code, { quiet: 4 });
+      note.className = "qr__note";
+      note.textContent = code.size + " squares across, with the strongest error correction, " +
+        "so it still reads when the ink smudges. Print it about 3 cm wide, never under 2 cm.";
+    } catch (e) {
+      box.innerHTML = "";
+      note.className = "qr__note qr__note--bad";
+      note.textContent = e.message;
+    }
+  }
+
+  function keep(blob, name) {
+    var u = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = u; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(u); }, 8000);
+    say("Saved to your downloads");
+  }
+
+  function downloadQR(kind) {
+    var code;
+    try { code = window.CherryQR.encode(qrAddress(), { ecc: "H" }); }
+    catch (e) { say(e.message, "bad"); return; }
+    if (kind === "svg") {
+      keep(new Blob([window.CherryQR.toSVG(code, { quiet: 4 })], { type: "image/svg+xml" }),
+           "cherry-dn-qr.svg");
+      return;
+    }
+    /* big enough that a printer never has to guess at an edge */
+    var span = code.size + 8;
+    var cv = window.CherryQR.toCanvas(code, { quiet: 4, scale: Math.max(8, Math.round(2400 / span)) });
+    if (cv.toBlob) cv.toBlob(function (b) { keep(b, "cherry-dn-qr.png"); }, "image/png");
+    else say("This browser cannot save the picture. Use the printing file instead.", "bad");
+  }
+
   /* ---------- painting the shelf ---------- */
   function paint(keepOpen) {
     var open = keepOpen || $$(".card__body:not([hidden])").map(function (b) {
@@ -643,11 +712,13 @@
     else {
       if (sec.fields) html += '<section class="block">' +
         sec.fields.map(function (f) { return fieldHTML(f, data.settings[f.k], "setting"); }).join("") + "</section>";
+      if (sec.tool === "qr") html += qrHTML();
       if (sec.rooms) html += roomsHTML(sec.rooms);
       if (sec.groups) html += groupsHTML(sec.groups);
       (sec.lists || []).forEach(function (l) { html += listHTML(l.id, l.title); });
     }
     $("#shelf").innerHTML = html;
+    if (sec.tool === "qr") drawQR();
     open.forEach(function (scope) {
       var card = $('.card[data-scope="' + scope + '"]');
       if (card) { $(".card__body", card).hidden = false; card.classList.add("open"); }
@@ -783,6 +854,9 @@
       return;
     }
 
+    var qrb = e.target.closest("[data-qr]");
+    if (qrb) { downloadQR(qrb.dataset.qr); return; }
+
     /* making a group is just naming it */
     var gnew = e.target.closest("#gnewBtn");
     if (gnew) {
@@ -879,6 +953,7 @@
 
   document.addEventListener("input", function (e) {
     var i = e.target;
+    if (i && i.id === "qrurl") drawQR();
     if (!i.dataset || !i.dataset.k || !i.dataset.scope) return;
     var raw = i.value;
     if (i.dataset.scope === "setting") {

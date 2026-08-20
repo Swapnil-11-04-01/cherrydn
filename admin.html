@@ -106,6 +106,16 @@
     .gname:hover { border-bottom-color:var(--line); }
     .gname:focus { border-bottom-color:var(--red-t); outline:none; }
     .gmove { display:flex; gap:.4rem; flex-wrap:wrap; margin-left:auto; }
+    .qr__lead { color:var(--muted); margin:.2rem 0 1rem; line-height:1.55; }
+    .qr { display:flex; gap:1.4rem; align-items:flex-start; flex-wrap:wrap; margin-top:1rem; }
+    .qr__paper { flex:none; width:214px; height:214px; background:#fff; border-radius:6px;
+                 padding:0; overflow:hidden; box-shadow:0 6px 24px rgba(0,0,0,.35); }
+    .qr__paper svg { display:block; width:100%; height:100%; }
+    .qr__side { flex:1; min-width:11.5rem; }
+    .qr__note { color:var(--muted); font-size:.86rem; line-height:1.5; margin:0 0 .9rem; }
+    .qr__note--bad { color:#E38C97; }
+    .qr__side .add { width:100%; margin-top:.5rem; }
+    .qr__test { color:var(--muted); font-size:.82rem; line-height:1.5; margin:.9rem 0 0; opacity:.85; }
     .gnew { display:flex; gap:.6rem; align-items:stretch; flex-wrap:wrap; }
     .gnew input { flex:1; min-width:12rem; }
     .gnew .add { width:auto; margin-top:0; white-space:nowrap; }
@@ -229,7 +239,8 @@
   <input id="picker" type="file" hidden />
 
   <script src="js/cherry-config.js?v=2"></script>
-  <script src="js/cherry-schema.js?v=7"></script>
-  <script src="js/cherry-admin.js?v=13"></script>
+  <script src="js/cherry-qr.js?v=1"></script>
+  <script src="js/cherry-schema.js?v=8"></script>
+  <script src="js/cherry-admin.js?v=14"></script>
 </body>
 </html>
