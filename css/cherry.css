@@ -10,8 +10,12 @@
   --bg: #0C1718;
   --bg2: #111E20;
   --red: #8E1F2D;
-  --red-t: #C05263;          /* small functional red text — legible on dark */
-  --red-display: #B03846;    /* display-size red — clears 3:1 on the dark ground */
+  --red-t: #CE6270;          /* small functional red text: 4.87 on --bg, 4.56 on --bg2,
+                                so it clears AA at body size on both grounds. It was
+                                #C05263, which measured 4.02 and 3.76 and did not. */
+  --red-display: #B03846;    /* display-size red only: 3.04 on --bg, which clears the 3:1
+                                bar for large text and nothing else. Anything at body size
+                                takes --red-t instead. */
   --ink: #E7DED4;
   --muted: #B9AEA3;
   --line: color-mix(in srgb, var(--muted) 16%, transparent);
@@ -933,7 +937,7 @@ html.js [data-r].is-in { opacity: 1; transform: none; }
 
 .landing .foot { border-top: 0; padding-top: 1.2rem; }
 .landing .foot__meta, .landing .foot__cherry { display: none; }
-.landing .foot__line { font-size: 0.66rem; color: var(--red-display); }
+.landing .foot__line { font-size: 0.66rem; color: var(--red-t); }
 
 @media (max-width: 780px) {
   .landing .hero { min-height: max(70svh, 480px); }
@@ -2113,7 +2117,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
 .landing .hero__body { padding: 7.5rem 1.5rem 2.6rem; }
 .landing .hero__title { font-size: clamp(2.8rem, 7.5vw, 5.6rem); letter-spacing: 0.12em; }
 .landing .hero__roles { font-size: 0.95rem; margin-top: 1rem; }
-.landing .hero__roles i { color: var(--red-display); font-style: normal; }
+.landing .hero__roles i { color: var(--red-t); font-style: normal; }
 .landing .hero__welcome { font-size: 1.15rem; }
 .landing .hero__row { margin-top: 1.9rem; }
 /* deeper corners, exactly the mock's dark frame; fade layer stays topmost */
@@ -2492,7 +2496,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
   font-family: var(--display);
   font-size: 0.72rem;
   letter-spacing: 0.3em;
-  color: var(--red-display);
+  color: var(--red-t);
 }
 .mv__name {
   font-family: var(--display);
@@ -2657,7 +2661,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
   font-size: 0.62rem;
   letter-spacing: 0.34em;
   text-transform: uppercase;
-  color: var(--red-display);
+  color: var(--red-t);
 }
 @media (max-width: 720px) {
   .bookhero { grid-template-columns: 1fr; justify-items: center; text-align: center; }
@@ -2708,7 +2712,10 @@ body[data-persona] .mist--merge { opacity: 0.55; }
   margin-top: 0.6rem;
 }
 .phase--water { --el: #6E9BA6; }
-.phase--fire  { --el: var(--red-display); }
+.phase--fire  { --el: var(--red-t); }   /* --el paints .phase__no at 0.72rem, which is
+                                           body size: --red-display is a display-size red
+                                           and measures 3.04 here, so this takes the
+                                           text-weight red instead. */
 .phase--earth { --el: #C0A275; }
 .phase--air   { --el: #C9C2B6; }
 .phase .wl:first-child { border-top: 1px solid var(--line); }
