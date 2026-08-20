@@ -3217,7 +3217,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
      ground and should look here exactly as it looks everywhere else. */
   background:
     linear-gradient(to left, rgba(12, 23, 24, 0.88) 0%, rgba(12, 23, 24, 0.62) 34%, rgba(12, 23, 24, 0.16) 66%, rgba(12, 23, 24, 0.4) 100%),
-    linear-gradient(to bottom, transparent 0%, transparent 58%, rgba(12, 23, 24, 0.86) 100%);
+    linear-gradient(to bottom, transparent 0%, transparent 52%, rgba(12, 23, 24, 0.72) 84%, var(--bg) 100%);
 }
 
 body:has(.herstage) .nav.is-scrolled {
@@ -3273,17 +3273,17 @@ body:has(.herstage) .nav__cta {
 
 .herstage__read {
   position: relative; z-index: 2;
-  width: min(46ch, 82vw);
-  margin: 0 clamp(1.4rem, 7vw, 8rem) 0 auto;
+  width: min(56ch, 46vw);
+  margin: 0 clamp(1.2rem, 5vw, 5.5rem) 0 auto;
   padding-bottom: 5rem;
 }
 .herstage__lines p {
   font-family: var(--poetic);
-  font-size: clamp(1.02rem, 1.35vw, 1.18rem);
-  line-height: 1.95;
+  font-size: clamp(0.94rem, 1.62svh, 1.1rem);
+  line-height: 1.78;
   color: var(--ink);
-  margin-bottom: 1.5rem;
-  text-shadow: 0 1px 22px rgba(12, 23, 24, 0.9);
+  margin-bottom: 1.05rem;
+  text-shadow: 0 1px 3px rgba(12, 23, 24, 0.95), 0 1px 22px rgba(12, 23, 24, 0.9);
 }
 .herstage__lines .about-duality {
   font-style: italic;
@@ -3291,10 +3291,22 @@ body:has(.herstage) .nav__cta {
 }
 .herstage__lines .about-sig {
   font-family: "Great Vibes", var(--poetic);
-  font-size: clamp(2.6rem, 5vw, 3.8rem);
+  font-size: clamp(1.9rem, 4.6svh, 3rem);
   color: var(--red-display);
-  margin-top: 2.2rem;
+  margin-top: 1.2rem;
   line-height: 1;
+}
+
+/* the frame closes into the page, so what follows is not a slab of dark
+   below a hard horizontal edge */
+.herstage + .page {
+  margin-top: 0;
+  padding-top: 0;
+}
+.herstage + .page .about-tags {
+  margin-top: 0;
+  padding-top: 2.2rem;
+  border-top: 0;
 }
 
 @media (max-width: 820px) {
@@ -3307,8 +3319,9 @@ body:has(.herstage) .nav__cta {
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
     .herstage {
-      /* the frame is held for four screens of scrolling; nothing else moves */
-      height: 420svh;
+      /* two and a half screens: enough for the name to travel and the
+         archive to arrive, and no dead scrolling after they have */
+      height: 250svh;
       view-timeline: --her block;
     }
     .herstage__pin {
@@ -3366,25 +3379,41 @@ body:has(.herstage) .nav__cta {
        corner at the same time, on top of each other. The band ends well
        above the corner, and its edges are masked so the words materialise
        and dissolve rather than being cut off by nothing. */
+    /* It rises once and then stays. Rolling it endlessly past meant there
+       was no moment in the whole scroll when all of it could be read, which
+       is the one thing an about page has to allow. */
     .herstage__read {
       position: absolute;
-      right: 0; left: auto; top: 9svh;
-      height: 64svh;
-      margin-right: clamp(1.4rem, 7vw, 8rem);
+      right: 0; left: auto; top: 50%;
+      margin-right: clamp(1.2rem, 5vw, 5.5rem);
       margin-left: 0;
-      padding-bottom: 0;
-      overflow: hidden;
-      -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 13%, #000 84%, transparent 100%);
-      mask-image: linear-gradient(to bottom, transparent 0, #000 13%, #000 84%, transparent 100%);
-    }
-    .herstage__lines {
-      animation: her-rise linear both;
+      padding: clamp(1rem, 2.4svh, 1.8rem) clamp(1rem, 2vw, 1.6rem);
+      padding-bottom: clamp(1rem, 2.4svh, 1.8rem);
+      animation: her-rise cubic-bezier(0.22, 1, 0.36, 1) both;
       animation-timeline: --her;
-      animation-range: contain 8% contain 100%;
+      animation-range: contain 6% contain 42%;
     }
     @keyframes her-rise {
-      from { transform: translateY(70svh); }
-      to   { transform: translateY(-124svh); }
+      from { transform: translate(0, calc(-50% + 46svh)); opacity: 0; }
+      22%  { opacity: 1; }
+      to   { transform: translate(0, -50%); opacity: 1; }
+    }
+
+    /* Her words get their own ground so they never compete with the
+       photograph, but it is carried on a layer of its own and masked at
+       every edge: a hard rectangle pasted over her face would be worse
+       than the problem it solves. */
+    .herstage__read::before {
+      content: "";
+      position: absolute;
+      inset: -2.4svh -1.6rem;
+      z-index: -1;
+      background: radial-gradient(120% 104% at 62% 50%,
+        rgba(9, 18, 19, 0.9) 0%, rgba(9, 18, 19, 0.74) 52%, rgba(9, 18, 19, 0.3) 84%, transparent 100%);
+      backdrop-filter: blur(4px) saturate(0.88);
+      -webkit-backdrop-filter: blur(4px) saturate(0.88);
+      -webkit-mask-image: radial-gradient(118% 102% at 62% 50%, #000 0%, #000 58%, transparent 100%);
+      mask-image: radial-gradient(118% 102% at 62% 50%, #000 0%, #000 58%, transparent 100%);
     }
   }
 }
