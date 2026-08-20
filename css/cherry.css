@@ -3216,7 +3216,9 @@ body[data-persona] .mist--merge { opacity: 0.55; }
      where her name lands. Nothing across the top: the nav has its own
      ground and should look here exactly as it looks everywhere else. */
   background:
-    linear-gradient(to left, rgba(12, 23, 24, 0.88) 0%, rgba(12, 23, 24, 0.62) 34%, rgba(12, 23, 24, 0.16) 66%, rgba(12, 23, 24, 0.4) 100%),
+    linear-gradient(to left,
+      rgba(9, 18, 19, 0.94) 0%, rgba(9, 18, 19, 0.9) 18%, rgba(9, 18, 19, 0.74) 34%,
+      rgba(9, 18, 19, 0.42) 52%, rgba(12, 23, 24, 0.12) 72%, rgba(12, 23, 24, 0.44) 100%),
     linear-gradient(to bottom, transparent 0%, transparent 52%, rgba(12, 23, 24, 0.72) 84%, var(--bg) 100%);
 }
 
@@ -3273,14 +3275,14 @@ body:has(.herstage) .nav__cta {
 
 .herstage__read {
   position: relative; z-index: 2;
-  width: min(56ch, 46vw);
+  width: min(60ch, 48vw);
   margin: 0 clamp(1.2rem, 5vw, 5.5rem) 0 auto;
   padding-bottom: 5rem;
 }
 .herstage__lines p {
   font-family: var(--poetic);
-  font-size: clamp(0.94rem, 1.62svh, 1.1rem);
-  line-height: 1.78;
+  font-size: clamp(1.02rem, 1.92svh, 1.3rem);
+  line-height: 1.72;
   color: var(--ink);
   margin-bottom: 1.05rem;
   text-shadow: 0 1px 3px rgba(12, 23, 24, 0.95), 0 1px 22px rgba(12, 23, 24, 0.9);
@@ -3291,7 +3293,7 @@ body:has(.herstage) .nav__cta {
 }
 .herstage__lines .about-sig {
   font-family: "Great Vibes", var(--poetic);
-  font-size: clamp(1.9rem, 4.6svh, 3rem);
+  font-size: clamp(2.1rem, 5.2svh, 3.4rem);
   color: var(--red-display);
   margin-top: 1.2rem;
   line-height: 1;
@@ -3385,10 +3387,9 @@ body:has(.herstage) .nav__cta {
     .herstage__read {
       position: absolute;
       right: 0; left: auto; top: 50%;
-      margin-right: clamp(1.2rem, 5vw, 5.5rem);
+      margin-right: clamp(1.4rem, 6vw, 7rem);
       margin-left: 0;
-      padding: clamp(1rem, 2.4svh, 1.8rem) clamp(1rem, 2vw, 1.6rem);
-      padding-bottom: clamp(1rem, 2.4svh, 1.8rem);
+      padding: 0;
       animation: her-rise cubic-bezier(0.22, 1, 0.36, 1) both;
       animation-timeline: --her;
       animation-range: contain 6% contain 42%;
@@ -3399,21 +3400,5 @@ body:has(.herstage) .nav__cta {
       to   { transform: translate(0, -50%); opacity: 1; }
     }
 
-    /* Her words get their own ground so they never compete with the
-       photograph, but it is carried on a layer of its own and masked at
-       every edge: a hard rectangle pasted over her face would be worse
-       than the problem it solves. */
-    .herstage__read::before {
-      content: "";
-      position: absolute;
-      inset: -2.4svh -1.6rem;
-      z-index: -1;
-      background: radial-gradient(120% 104% at 62% 50%,
-        rgba(9, 18, 19, 0.9) 0%, rgba(9, 18, 19, 0.74) 52%, rgba(9, 18, 19, 0.3) 84%, transparent 100%);
-      backdrop-filter: blur(4px) saturate(0.88);
-      -webkit-backdrop-filter: blur(4px) saturate(0.88);
-      -webkit-mask-image: radial-gradient(118% 102% at 62% 50%, #000 0%, #000 58%, transparent 100%);
-      mask-image: radial-gradient(118% 102% at 62% 50%, #000 0%, #000 58%, transparent 100%);
-    }
   }
 }
