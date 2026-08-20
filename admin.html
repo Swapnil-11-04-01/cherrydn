@@ -106,6 +106,23 @@
     .gname:hover { border-bottom-color:var(--line); }
     .gname:focus { border-bottom-color:var(--red-t); outline:none; }
     .gmove { display:flex; gap:.4rem; flex-wrap:wrap; margin-left:auto; }
+    .waiting { font-size:.8rem; color:#E0B24C; white-space:nowrap; }
+    .live { background:var(--red,#8E1F2D); color:#fff; border:0; border-radius:6px;
+            padding:.5rem 1rem; font:inherit; font-size:.85rem; cursor:pointer; white-space:nowrap; }
+    .live:hover { filter:brightness(1.12); }
+    .live[disabled] { opacity:.6; cursor:default; }
+    body.has-draft .bar { box-shadow:inset 0 -2px 0 #E0B24C; }
+    .pending { border-bottom:1px solid var(--line,#2a3a3c); background:var(--bg2,#111E20);
+               padding:1.1rem 1.4rem; max-height:44svh; overflow:auto; }
+    .pending__name { font-size:1rem; margin:0 0 .2rem; }
+    .pending__lead { color:var(--muted); font-size:.85rem; margin:0 0 .9rem; }
+    .pending__list { list-style:none; margin:0 0 1rem; padding:0; }
+    .pending__list li { display:flex; align-items:center; justify-content:space-between;
+                        gap:1rem; padding:.45rem 0; border-top:1px solid var(--line,#2a3a3c); }
+    .pending__what { font-size:.88rem; }
+    .pending__what b { font-weight:500; }
+    .pending__feet { display:flex; gap:.8rem; align-items:center; flex-wrap:wrap; }
+    .pending__feet .add { width:auto; margin:0; }
     .qr__lead { color:var(--muted); margin:.2rem 0 1rem; line-height:1.55; }
     .qr { display:flex; gap:1.4rem; align-items:flex-start; flex-wrap:wrap; margin-top:1rem; }
     .qr__paper { flex:none; width:214px; height:214px; background:#fff; border-radius:6px;
@@ -222,10 +239,15 @@
       <span class="bar__mark">CHERRY&nbsp;DN</span>
       <span class="bar__sp"></span>
       <p class="status" id="status">All saved</p>
+      <span class="waiting" id="waiting"></span>
+      <button class="ghost" id="pendingBtn" type="button" hidden>What is waiting</button>
+      <button class="live" id="liveBtn" type="button" hidden>Make it live</button>
       <button class="ghost" id="seeBtn" type="button">See it</button>
       <a class="ghost" href="index.html" target="_blank" rel="noopener">My live site</a>
       <button class="ghost" id="signout" type="button">Sign out</button>
     </header>
+
+    <section class="pending" id="pending" hidden></section>
 
     <div class="wrap">
       <nav id="pages" aria-label="Pages"></nav>
@@ -243,6 +265,6 @@
   <script src="js/cherry-config.js?v=2"></script>
   <script src="js/cherry-qr.js?v=1"></script>
   <script src="js/cherry-schema.js?v=9"></script>
-  <script src="js/cherry-admin.js?v=15"></script>
+  <script src="js/cherry-admin.js?v=16"></script>
 </body>
 </html>

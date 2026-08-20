@@ -179,30 +179,234 @@
 
   /* ---------- writing, one field at a time ---------- */
   var timers = {};
+  /* ============================================================
+     WHAT SHE HAS CHANGED, AND WHAT THE WORLD HAS SEEN
+
+     Everything she types is kept here first, in her own draft, and
+     her live site does not move until she says so. That is the whole
+     point: a person who is frightened of breaking something in public
+     edits timidly, and timid is the opposite of what this is for.
+
+     Her Studio and the preview beside it show the draft. Her live
+     site shows what she last made live. Nothing else changes.
+
+     Adding something already arrives switched off, so a new poem is
+     invisible until she turns it on and makes it live. Removing
+     something waits here too, and the trash still holds it either
+     way.
+     ============================================================ */
+  var draft = { settings: {}, rows: {}, gone: {} };
+
+  function loadDraft() {
+    try {
+      var d = JSON.parse(data.settings.desk_draft || "null");
+      if (d && typeof d === "object") {
+        draft = { settings: d.settings || {}, rows: d.rows || {}, gone: d.gone || {} };
+      }
+    } catch (e) { draft = { settings: {}, rows: {}, gone: {} }; }
+  }
+  /* the draft lives in her archive, not this browser, so a closed laptop
+     or a crashed tab never costs her an afternoon */
+  var draftTimer;
+  function saveDraft() {
+    clearTimeout(draftTimer);
+    draftTimer = setTimeout(function () {
+      var blob = JSON.stringify(draft);
+      data.settings.desk_draft = blob;
+      rest("cherry_settings?on_conflict=key", {
+        method: "POST", headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
+        body: [{ key: "desk_draft", value: blob }]
+      }).catch(function (e) { say(humanise(e), "bad"); });
+    }, 600);
+  }
+
+  function waiting() {
+    return Object.keys(draft.settings).length + Object.keys(draft.rows).length +
+           Object.keys(draft.gone).length;
+  }
+  /* her words for her own keys, so the waiting list reads like a diary */
+  function settingLabel(key) {
+    var found = key;
+    SCHEMA.forEach(function (sec) {
+      (sec.fields || []).forEach(function (f) { if (f.k === key) found = f.label; });
+    });
+    return found;
+  }
+  function rowLabel(table, id) {
+    var r = findRow(table, id);
+    return (r && (r.title || r.name)) || "something";
+  }
+  function markWaiting() {
+    var n = waiting(), btn = $("#liveBtn"), tag = $("#waiting");
+    if (tag) tag.textContent = n ? (n === 1 ? "1 change waiting" : n + " changes waiting") : "";
+    if (btn) { btn.hidden = !n; btn.textContent = "Make it live"; }
+    var pb = $("#pendingBtn");
+    if (pb) pb.hidden = !n;
+    if (!n && $("#pending")) $("#pending").hidden = true;
+    document.body.classList.toggle("has-draft", !!n);
+    if ($("#pending") && !$("#pending").hidden) paintPending();
+  }
+
+  /* the waiting list, in the order she made the changes, newest first */
+  function paintPending() {
+    var box = $("#pending");
+    if (!box) return;
+    var items = [];
+    Object.keys(draft.settings).forEach(function (k) {
+      var e = draft.settings[k];
+      items.push({ at: e.at, kind: "setting", ref: k, what: e.label || k, did: "rewrote" });
+    });
+    Object.keys(draft.rows).forEach(function (ref) {
+      var d = draft.rows[ref];
+      items.push({ at: d.at, kind: "row", ref: ref, what: d.label || "something", did: "changed" });
+    });
+    Object.keys(draft.gone).forEach(function (ref) {
+      var g = draft.gone[ref];
+      items.push({ at: g.at, kind: "gone", ref: ref, what: g.label || "something", did: "removed" });
+    });
+    items.sort(function (a, b) { return (b.at || 0) - (a.at || 0); });
+
+    box.innerHTML = items.length
+      ? '<h3 class="pending__name">Waiting to go live</h3>' +
+        '<p class="pending__lead">None of this is on your site yet. Nobody but you can see it.</p>' +
+        '<ul class="pending__list">' + items.map(function (i) {
+          return '<li><span class="pending__what"><b>' + esc(i.what) + "</b> " + esc(i.did) + "</span>" +
+            '<button class="mini" type="button" data-undo="' + i.kind + '" data-ref="' + esc(i.ref) +
+            '">Put it back</button></li>';
+        }).join("") + "</ul>" +
+        '<div class="pending__feet">' +
+        '<button class="add" id="liveBtn2" type="button">Make it live</button>' +
+        '<button class="mini mini--red" id="discardBtn" type="button">Undo everything</button></div>'
+      : '<h3 class="pending__name">Nothing is waiting</h3>' +
+        '<p class="pending__lead">Your site is showing everything you have made live.</p>';
+  }
+
   function saveSetting(key, value) {
-    data.settings[key] = value;
-    clearTimeout(timers[key]);
-    say("Saving…");
-    timers[key] = setTimeout(function () {
+    /* the desk's own bookkeeping is not content and never waits */
+    if (key === "desk_draft" || key === "desk_trash") {
+      data.settings[key] = value;
       rest("cherry_settings?on_conflict=key", {
         method: "POST", headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
         body: [{ key: key, value: value }]
-      }).then(function () { say("Saved just now"); })
-        .catch(function (e) { say(humanise(e), "bad"); });
-    }, 700);
+      }).catch(function (e) { say(humanise(e), "bad"); });
+      return;
+    }
+    var had = draft.settings[key];
+    var before = had ? had.before : (data.settings[key] === undefined ? "" : data.settings[key]);
+    data.settings[key] = value;
+    if (String(before) === String(value)) delete draft.settings[key];
+    else draft.settings[key] = { before: before, value: value, at: Date.now(), label: settingLabel(key) };
+    saveDraft(); markWaiting();
+    say("Kept in your draft");
   }
+
   function saveRow(table, id, patch, quiet) {
     var row = findRow(table, id);
-    if (row) Object.keys(patch).forEach(function (k) { row[k] = patch[k]; });
-    var ref = table + id + Object.keys(patch).join();
-    clearTimeout(timers[ref]);
-    if (!quiet) say("Saving…");
-    timers[ref] = setTimeout(function () {
-      rest(table + "?id=eq." + id, { method: "PATCH",
-        headers: { Prefer: "return=minimal" }, body: patch })
-        .then(function () { if (!quiet) say("Saved just now"); })
-        .catch(function (e) { say(humanise(e), "bad"); });
-    }, 500);
+    var ref = table + ":" + id;
+    var d = draft.rows[ref] || { table: table, id: id, before: {}, patch: {}, at: Date.now() };
+    Object.keys(patch).forEach(function (k) {
+      if (!(k in d.before)) d.before[k] = row ? row[k] : null;
+      d.patch[k] = patch[k];
+      if (row) row[k] = patch[k];
+    });
+    /* a value she typed and then typed back is not a change */
+    var moved = Object.keys(d.patch).some(function (k) { return String(d.patch[k]) !== String(d.before[k]); });
+    d.at = Date.now();
+    d.label = rowLabel(table, id);
+    if (moved) draft.rows[ref] = d; else delete draft.rows[ref];
+    saveDraft(); markWaiting();
+    if (!quiet) say("Kept in your draft");
+  }
+
+  /* put one change back the way it was, without touching her live site */
+  function undoOne(kind, ref) {
+    if (kind === "setting") {
+      var e = draft.settings[ref];
+      if (!e) return;
+      data.settings[ref] = e.before;
+      delete draft.settings[ref];
+      tell({ type: "set", key: ref, value: e.before });
+    } else if (kind === "row") {
+      var d = draft.rows[ref];
+      if (!d) return;
+      var row = findRow(d.table, d.id);
+      Object.keys(d.before).forEach(function (k) {
+        if (row) row[k] = d.before[k];
+        tell({ type: "setRow", scope: d.table + ":" + d.id, key: k, value: d.before[k] });
+      });
+      delete draft.rows[ref];
+    } else if (kind === "gone") {
+      var g = draft.gone[ref];
+      if (!g) return;
+      var pool = POOL[g.table];
+      if (pool && !findRow(g.table, g.id)) data[pool].push(g.row);
+      delete draft.gone[ref];
+    }
+    saveDraft(); markWaiting(); paint(); repaintFrame();
+    say("Put back");
+  }
+
+  function discardDraft() {
+    Object.keys(draft.settings).forEach(function (k) { data.settings[k] = draft.settings[k].before; });
+    Object.keys(draft.rows).forEach(function (ref) {
+      var d = draft.rows[ref], row = findRow(d.table, d.id);
+      if (row) Object.keys(d.before).forEach(function (k) { row[k] = d.before[k]; });
+    });
+    Object.keys(draft.gone).forEach(function (ref) {
+      var g = draft.gone[ref], pool = POOL[g.table];
+      if (pool && !findRow(g.table, g.id)) data[pool].push(g.row);
+    });
+    draft = { settings: {}, rows: {}, gone: {} };
+    saveDraft(); markWaiting(); paint(); repaintFrame();
+    say("Everything is back to how your site looks now");
+  }
+
+  /* the one button that moves her live site */
+  function goLive() {
+    var n = waiting();
+    if (!n) { say("Nothing is waiting."); return; }
+    var btn = $("#liveBtn");
+    if (btn) { btn.disabled = true; btn.textContent = "Going live…"; }
+    say("Making it live…");
+
+    var jobs = [];
+    Object.keys(draft.settings).forEach(function (k) {
+      jobs.push(function () {
+        return rest("cherry_settings?on_conflict=key", {
+          method: "POST", headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
+          body: [{ key: k, value: draft.settings[k].value }]
+        }).then(function () { delete draft.settings[k]; });
+      });
+    });
+    Object.keys(draft.rows).forEach(function (ref) {
+      var d = draft.rows[ref];
+      jobs.push(function () {
+        return rest(d.table + "?id=eq." + d.id, { method: "PATCH",
+          headers: { Prefer: "return=minimal" }, body: d.patch })
+          .then(function () { delete draft.rows[ref]; });
+      });
+    });
+    Object.keys(draft.gone).forEach(function (ref) {
+      var g = draft.gone[ref];
+      jobs.push(function () {
+        return rest(g.table + "?id=eq." + g.id, { method: "DELETE",
+          headers: { Prefer: "return=minimal" } })
+          .then(function () { delete draft.gone[ref]; });
+      });
+    });
+
+    /* one at a time, and anything that fails simply stays in the draft */
+    jobs.reduce(function (chain, job) {
+      return chain.then(job);
+    }, Promise.resolve()).then(function () {
+      saveDraft(); markWaiting(); paint();
+      if (btn) { btn.disabled = false; }
+      say("Your site is live. " + n + (n === 1 ? " change is" : " changes are") + " out in the world.");
+    }).catch(function (e) {
+      saveDraft(); markWaiting(); paint();
+      if (btn) { btn.disabled = false; btn.textContent = "Make it live"; }
+      say(humanise(e) + " Nothing was lost, it is still waiting.", "bad");
+    });
   }
 
   /* ---------- the trash: nothing says "permanently" ---------- */
@@ -214,29 +418,43 @@
     trash.unshift({ table: table, row: row, at: Date.now() });
     trash = trash.slice(0, 20);
     var blob = JSON.stringify(trash);
-    data.settings.desk_trash = blob;
+    saveSetting("desk_trash", blob);
 
-    rest("cherry_settings?on_conflict=key", {
-      method: "POST", headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
-      body: [{ key: "desk_trash", value: blob }]
-    }).then(function () {
-      return rest(table + "?id=eq." + id, { method: "DELETE", headers: { Prefer: "return=minimal" } });
-    }).then(function () {
-      var pool = POOL[table];
-      data[pool] = data[pool].filter(function (r) { return String(r.id) !== String(id); });
-      paint(); repaintFrame();
-      say("Removed", "ok", function () { putBack(table, row); });
-    }).catch(function (e) { say(humanise(e), "bad"); });
+    /* it leaves her desk now and leaves her live site when she says so */
+    var ref = table + ":" + id;
+    draft.gone[ref] = { table: table, id: id, row: row, at: Date.now(),
+                        label: row.title || row.name || "something" };
+    var pool = POOL[table];
+    data[pool] = data[pool].filter(function (r) { return String(r.id) !== String(id); });
+    saveDraft(); markWaiting(); paint(); repaintFrame();
+    say("Removed from your draft", "ok", function () { undoOne("gone", ref); });
   }
   function putBack(table, row) {
+    /* if it is still only removed in her draft, the row never left the
+       archive: cancelling the removal is the whole job */
+    var ref = table + ":" + row.id;
+    if (draft.gone[ref]) { undoOne("gone", ref); return; }
     var body = {};
     Object.keys(row).forEach(function (k) {
       if (k !== "created_at" && k !== "updated_at") body[k] = row[k];
     });
     rest(table, { method: "POST", headers: { Prefer: "return=representation" }, body: body })
       .then(function () { return loadAll(); })
-      .then(function () { paint(); repaintFrame(); say("Put back"); })
+      .then(function () { applyDraft(); paint(); repaintFrame(); say("Put back"); })
       .catch(function (e) { say(humanise(e), "bad"); });
+  }
+
+  /* after any reload from the archive, her unpublished work goes back on top */
+  function applyDraft() {
+    Object.keys(draft.settings).forEach(function (k) { data.settings[k] = draft.settings[k].value; });
+    Object.keys(draft.rows).forEach(function (ref) {
+      var d = draft.rows[ref], row = findRow(d.table, d.id);
+      if (row) Object.keys(d.patch).forEach(function (k) { row[k] = d.patch[k]; });
+    });
+    Object.keys(draft.gone).forEach(function (ref) {
+      var g = draft.gone[ref], pool = POOL[g.table];
+      if (pool) data[pool] = data[pool].filter(function (r) { return String(r.id) !== String(g.id); });
+    });
   }
 
   /* ---------- adding ---------- */
@@ -256,6 +474,7 @@
     return rest(spec.table, { method: "POST", headers: { Prefer: "return=representation" }, body: body })
       .then(function () { return loadAll(); })
       .then(function () {
+        applyDraft();
         if (quiet) return;
         paint(); say("Added. Only you can see it, switch it on when you are ready.");
       });
@@ -932,6 +1151,24 @@
       return;
     }
 
+    if (e.target.closest("#liveBtn") || e.target.closest("#liveBtn2")) { goLive(); return; }
+    if (e.target.closest("#discardBtn")) {
+      var db = e.target.closest("#discardBtn");
+      if (db.dataset.confirm) { discardDraft(); return; }
+      db.dataset.confirm = "1";
+      db.textContent = "Really? Everything waiting is lost";
+      setTimeout(function () { delete db.dataset.confirm; db.textContent = "Undo everything"; }, 4000);
+      return;
+    }
+    if (e.target.closest("#pendingBtn")) {
+      var pane = $("#pending");
+      pane.hidden = !pane.hidden;
+      if (!pane.hidden) paintPending();
+      return;
+    }
+    var un = e.target.closest("[data-undo]");
+    if (un) { undoOne(un.dataset.undo, un.dataset.ref); return; }
+
     var qrb = e.target.closest("[data-qr]");
     if (qrb) { downloadQR(qrb.dataset.qr, qrb.dataset.book || ""); return; }
 
@@ -1239,6 +1476,9 @@
 
   say("All saved");
   loadAll().then(function () {
+    loadDraft();
+    applyDraft();
+    markWaiting();
     paint();
     var sec = SCHEMA.filter(function (s) { return s.id === here; })[0];
     openPage(sec ? sec.page : "index.html");

@@ -340,7 +340,10 @@
   paintCodes();                 /* the address it falls back to needs no archive */
 
   var page = document.body.dataset.archive || "";
-  var jobs = [api("cherry_settings?select=key,value&key=neq.desk_trash")];
+  /* desk_trash holds what she removed and desk_draft holds what she has not
+     published yet. Neither is hers to show a visitor, and both would be
+     downloadable if this query did not refuse them. */
+  var jobs = [api("cherry_settings?select=key,value&key=not.in.(desk_trash,desk_draft)")];
   jobs.push(page === "visuals"
     ? api("cherry_works?select=id,title,phase,note,image_url,sort&published=eq.true") : null);
   jobs.push(page === "written"
