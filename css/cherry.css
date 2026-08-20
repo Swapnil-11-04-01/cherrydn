@@ -3431,3 +3431,62 @@ body:has(.herstage) .nav__cta {
 
   }
 }
+
+/* ============================================================
+   SPOKEN WORD, READ AS MUSIC
+   Her words: spoken word is a different form of music, so this should
+   look more like the music page. It does now. The bordered box is gone
+   for the same open hairline list the songs use, each group carries a
+   display-face name the way CHERRY and DN do, and groups sit side by
+   side rather than stacked, so there is a place here and a place here
+   to put her files.
+   ============================================================ */
+.chapters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(330px, 100%), 1fr));
+  gap: clamp(2rem, 4.5vw, 4.2rem) clamp(2rem, 5vw, 5rem);
+  align-items: start;
+}
+
+.chgroup__name {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(1.5rem, 2.8vw, 2.2rem);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink);
+  padding-bottom: 0;
+  border-bottom: 0;
+  margin-bottom: 0;
+}
+.chgroup__name::after {
+  content: "";
+  display: block;
+  width: 34px; height: 2px;
+  margin-top: 0.9rem;
+  background: var(--red);
+  opacity: 0.85;
+  transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.chgroup:hover .chgroup__name::after { width: 58px; }
+
+/* the open list, not a box */
+.chapters .tracklist {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin-top: 1.5rem;
+}
+.chapters .trk {
+  align-items: baseline;
+  padding: 1rem 0.2rem;
+  border-bottom: 1px solid var(--line);
+  transition: color 0.3s, background 0.3s, padding-left 0.35s;
+}
+.chapters .trk:last-child { border-bottom: 1px solid var(--line); }
+.chapters .trk:hover {
+  color: var(--ink);
+  background: rgba(231, 222, 212, 0.02);
+  padding-left: 0.6rem;
+}
+.chapters .trk__no { color: var(--red-t); }
+.chapters .trk.is-current { box-shadow: inset 2px 0 0 var(--red); }
