@@ -121,9 +121,9 @@ window.CHERRY_SCHEMA = [
     ])
   },
   {
-    id: "gift", name: "The QR-code page", page: "gift.html",
+    id: "gift", name: "Your books & their codes", page: "gift.html",
     tool: "qr",
-    blurb: "What the code inside the printed book opens: the book, read aloud, chapter by chapter.",
+    blurb: "Every book you print gets its own code and its own page of chapters.",
     fields: [
       { k: "gift_intro", label: "The opening paragraph", type: "long", enter: true, em: true },
       { k: "gift_panel_title", label: "The box on this page: its heading" },
@@ -238,8 +238,12 @@ window.CHERRY_LISTS = {
   chapters: {
     table: "cherry_tracks", one: "chapter", add: "Add a chapter",
     accept: "audio/*", media: "audio_url", where: { voice: "chapter" },
-    groups: true, groupKey: "chapter_groups", loose: "The chapters",
-    newGroup: "Name it, for instance The Audiobook",
+    /* Each block here is one of her books, and every book carries the code
+       that opens it. A book keeps a fixed id of its own so she can rename it
+       whenever she likes without breaking a code already printed. */
+    groups: true, books: true, loose: "Not in any book yet",
+    newGroup: "The name of the book",
+    which: "Which book is this a chapter of?",
     fields: [
       { k: "title", label: "Its name" },
       { k: "length", label: "How long it is", hint: "Read from the recording, change it if you like." },

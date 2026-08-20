@@ -3490,3 +3490,17 @@ body:has(.herstage) .nav__cta {
 }
 .chapters .trk__no { color: var(--red-t); }
 .chapters .trk.is-current { box-shadow: inset 2px 0 0 var(--red); }
+
+/* ============================================================
+   ONE GIFT PAGE, ANY BOOK
+   The code inside a cover carries the book it belongs to, so the
+   page can say which book it just opened.
+   ============================================================ */
+.page__book {
+  font-family: var(--poetic);
+  font-style: italic;
+  font-size: clamp(1.15rem, 2.2vw, 1.6rem);
+  color: var(--red-t);
+  margin-top: 0.5rem;
+  letter-spacing: 0.01em;
+}

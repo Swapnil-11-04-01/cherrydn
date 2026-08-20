@@ -464,6 +464,40 @@
   function groupKey(listId) {
     return (LISTS[listId] && LISTS[listId].groupKey) || "spoken_groups";
   }
+
+  /* ---------- her books ----------
+     A book is a name over a fixed id. The id is what a printed code carries,
+     so it is made once and never changes: she can retitle a book the day
+     before it goes to press and every copy already in the world still opens
+     the right page. Kept in her settings rather than a table of its own, so
+     adding a book costs her nothing but typing. */
+  function booksList() {
+    try {
+      var a = JSON.parse(data.settings.cherry_books || "[]");
+      return Array.isArray(a) ? a.filter(function (b) { return b && b.id; }) : [];
+    } catch (e) { return []; }
+  }
+  function saveBooks(list) {
+    saveSetting("cherry_books", JSON.stringify(list));
+  }
+  function newBookId(taken) {
+    var tries = 0, id;
+    do {
+      id = Math.random().toString(36).slice(2, 9);
+      tries++;
+    } while (tries < 50 && taken.some(function (b) { return b.id === id; }));
+    return id;
+  }
+
+  /* One shape for both kinds of block: a plain group is its own label, a book
+     is a label with an id underneath. Everything downstream reads {key,label}
+     and never has to know which it is looking at. */
+  function groupSpecs(listId) {
+    if (LISTS[listId] && LISTS[listId].books) {
+      return booksList().map(function (b) { return { key: b.id, label: b.title || "Untitled book", book: true }; });
+    }
+    return groupNames(listId).map(function (n) { return { key: n, label: n }; });
+  }
   function groupNames(listId) {
     try {
       var a = JSON.parse(data.settings[groupKey(listId)] || "[]");
@@ -475,16 +509,19 @@
   }
 
   function sectionChooser(row, listId) {
-    var names = groupNames(listId);
-    if (!names.length) return "";
-    return '<div class="fld"><span class="lab">Which part of the page?</span>' +
+    var specs = groupSpecs(listId);
+    if (!specs.length) return "";
+    var known = specs.some(function (g) { return g.key === row.section; });
+    var spec = LISTS[listId] || {};
+    return '<div class="fld"><span class="lab">' +
+      esc(spec.which || "Which part of the page?") + "</span>" +
       '<div class="rooms" data-k="section" data-scope="' + row._scope + '">' +
-      names.map(function (g) {
-        return '<button type="button" class="room' + (g === row.section ? " on" : "") +
-          '" data-v="' + esc(g) + '"><strong>' + esc(g) + "</strong></button>";
+      specs.map(function (g) {
+        return '<button type="button" class="room' + (g.key === row.section ? " on" : "") +
+          '" data-v="' + esc(g.key) + '"><strong>' + esc(g.label) + "</strong></button>";
       }).join("") +
-      '<button type="button" class="room' + (names.indexOf(row.section) < 0 ? " on" : "") +
-        '" data-v=""><strong>No group</strong></button>' +
+      '<button type="button" class="room' + (known ? "" : " on") +
+        '" data-v=""><strong>' + (spec.books ? "No book yet" : "No group") + "</strong></button>" +
       "</div></div>";
   }
 
@@ -495,38 +532,60 @@
   }
 
   function groupsHTML(listId) {
-    var spec = LISTS[listId], names = groupNames(listId), rows = rowsFor(listId);
-    var out = names.map(function (g) {
-      var mine = rows.filter(function (r) { return r.section === g; });
-      return '<section class="block" data-groupblock="' + esc(g) + '" data-glist="' + listId + '">' +
-        '<h3 class="block__name"><input class="gname" type="text" value="' + esc(g) + '" ' +
-          'aria-label="The name of this group" /> ' + countLine(mine) +
+    var spec = LISTS[listId], specs = groupSpecs(listId), rows = rowsFor(listId);
+    var keys = specs.map(function (g) { return g.key; });
+
+    var out = specs.map(function (g) {
+      var mine = rows.filter(function (r) { return r.section === g.key; });
+      return '<section class="block" data-groupblock="' + esc(g.key) + '" data-glist="' + listId + '">' +
+        '<h3 class="block__name"><input class="gname" type="text" value="' + esc(g.label) + '" ' +
+          'aria-label="The name of this ' + (g.book ? "book" : "group") + '" /> ' + countLine(mine) +
         '<span class="gmove"><button class="mini" type="button" data-gmove="up">Move up</button>' +
         '<button class="mini" type="button" data-gmove="down">Move down</button>' +
-        '<button class="mini mini--red" type="button" data-gdrop="1">Remove the group</button></span></h3>' +
+        '<button class="mini mini--red" type="button" data-gdrop="1">Remove the ' +
+          (g.book ? "book" : "group") + "</button></span></h3>" +
+        (g.book ? bookCodeHTML(g.key, g.label) : "") +
         (mine.length ? mine.map(function (r) { return cardHTML(listId, r); }).join("")
-                     : '<p class="none">Nothing in this group yet.</p>') +
-        '<button class="add" type="button" data-add="' + listId + '" data-group="' + esc(g) + '">' +
+                     : '<p class="none">Nothing in this ' + (g.book ? "book" : "group") + ' yet.</p>') +
+        '<button class="add" type="button" data-add="' + listId + '" data-group="' + esc(g.key) + '">' +
           esc(spec.add) + "</button>" +
         "</section>";
     }).join("");
 
-    var loose = rows.filter(function (r) { return names.indexOf(r.section) < 0; });
-    if (loose.length || !names.length) {
+    var loose = rows.filter(function (r) { return keys.indexOf(r.section) < 0; });
+    if (loose.length || !specs.length) {
       out += '<section class="block">' +
-        '<h3 class="block__name">' + (names.length ? "Not in any group" : (spec.loose || "Everything here")) +
+        '<h3 class="block__name">' + (specs.length ? esc(spec.loose || "Not in any group")
+                                                   : esc(spec.loose || "Everything here")) +
           " " + countLine(loose) + "</h3>" +
+        (spec.books && specs.length
+          ? '<p class="none">These belong to whichever book comes first until you say otherwise. ' +
+            'Open one and choose its book.</p>' : "") +
         (loose.length ? loose.map(function (r) { return cardHTML(listId, r); }).join("")
                       : '<p class="none">Nothing here yet.</p>') +
         '<button class="add" type="button" data-add="' + listId + '" data-group="">' +
           esc(spec.add) + "</button></section>";
     }
 
-    out += '<section class="block"><h3 class="block__name">A new group</h3>' +
+    out += '<section class="block"><h3 class="block__name">' +
+      (spec.books ? "Another book" : "A new group") + "</h3>" +
       '<div class="gnew"><input class="gnewbox" type="text" placeholder="' + esc(spec.newGroup || "Name it") + '" />' +
-      '<button class="add" id="gnewBtn" type="button" data-list="' + listId + '">Make the group</button></div>' +
+      '<button class="add" id="gnewBtn" type="button" data-list="' + listId + '">' +
+        (spec.books ? "Add the book" : "Make the group") + "</button></div>" +
       "</section>";
     return out;
+  }
+
+  /* the code for one book, drawn under its name */
+  function bookCodeHTML(id, title) {
+    return '<div class="qr qr--book" data-book="' + esc(id) + '">' +
+      '<div class="qr__paper" data-qrbox="' + esc(id) + '"></div>' +
+      '<div class="qr__side">' +
+      '<p class="qr__addr">' + esc(bookAddress(id)) + "</p>" +
+      '<p class="qr__note" data-qrnote="' + esc(id) + '"></p>' +
+      '<button class="add" type="button" data-qr="svg" data-book="' + esc(id) + '">Download for printing</button>' +
+      '<button class="add" type="button" data-qr="png" data-book="' + esc(id) + '">Download as a picture</button>' +
+      "</div></div>";
   }
 
   function roomChooser(row) {
@@ -628,49 +687,66 @@
       (back || '<p class="none">Nothing removed.</p>') + "</section>";
   }
 
-  /* ---------- the code that goes inside the printed book ---------- */
+  /* ---------- the code that goes inside each printed book ---------- */
   /* Made here, in her browser, from the address she types. Nothing is sent
      anywhere to draw it, which matters for a picture that gets printed into
-     a book and has to keep working long after any free QR site has gone. */
-  function qrAddress() {
+     a book and has to keep working long after any free QR site has gone.
+     Every book gets its own code, and a code carries the book's fixed id, so
+     retitling a book never orphans a copy already printed. */
+  function qrBase() {
     var saved = String(data.settings.gift_qr_url || "").trim();
     if (saved) return saved;
     try { return new URL("gift.html", location.href).href; } catch (e) { return "gift.html"; }
   }
+  function bookAddress(id) {
+    var base = qrBase();
+    if (!id) return base;
+    try {
+      var u = new URL(base, location.href);
+      u.searchParams.set("b", id);
+      return u.href;
+    } catch (e) {
+      return base + (base.indexOf("?") < 0 ? "?" : "&") + "b=" + encodeURIComponent(id);
+    }
+  }
+  function fileName(title) {
+    var slug = String(title || "book").toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40);
+    return "cherry-dn-qr-" + (slug || "book");
+  }
 
   function qrHTML() {
     return '<section class="block">' +
-      '<h3 class="block__name">The code for the printed book</h3>' +
-      '<p class="qr__lead">This is the picture that goes inside the cover. Anyone who scans it ' +
-      'arrives on this page, where the book is read aloud.</p>' +
-      '<label class="fld"><span class="lab">Where it should send them</span>' +
+      '<h3 class="block__name">Where the codes point</h3>' +
+      '<p class="qr__lead">Every book below gets its own square to print inside the cover. ' +
+      'They all start from this address, and each one adds its own book to the end.</p>' +
+      '<label class="fld"><span class="lab">Your gift page</span>' +
       '<input id="qrurl" type="text" spellcheck="false" data-k="gift_qr_url" data-scope="setting" value="' +
-        esc(qrAddress()) + '" />' +
-      '<em class="hint">Once this is printed it cannot be changed, so use the address you mean to keep.</em>' +
-      "</label>" +
-      '<div class="qr"><div class="qr__paper" id="qrbox"></div>' +
-      '<div class="qr__side"><p class="qr__note" id="qrnote"></p>' +
-      '<button class="add" type="button" data-qr="svg">Download for printing</button>' +
-      '<button class="add" type="button" data-qr="png">Download as a picture</button>' +
-      '<p class="qr__test">Point your phone at the square on the left before you send anything ' +
-      'to the printer. If it opens the right page, the code is good.</p>' +
-      "</div></div></section>";
+        esc(qrBase()) + '" />' +
+      '<em class="hint">Once a code is printed it cannot be changed, so use the address you mean to keep. ' +
+      'Changing this changes every code that has not been printed yet.</em>' +
+      "</label></section>";
   }
 
+  /* draw every code on the shelf, each from its own book */
   function drawQR() {
-    var box = $("#qrbox"), note = $("#qrnote");
-    if (!box || !window.CherryQR) return;
-    try {
-      var code = window.CherryQR.encode(qrAddress(), { ecc: "H" });
-      box.innerHTML = window.CherryQR.toSVG(code, { quiet: 4 });
-      note.className = "qr__note";
-      note.textContent = code.size + " squares across, with the strongest error correction, " +
-        "so it still reads when the ink smudges. Print it about 3 cm wide, never under 2 cm.";
-    } catch (e) {
-      box.innerHTML = "";
-      note.className = "qr__note qr__note--bad";
-      note.textContent = e.message;
-    }
+    if (!window.CherryQR) return;
+    $$("[data-qrbox]").forEach(function (box) {
+      var id = box.dataset.qrbox;
+      var note = $('[data-qrnote="' + id + '"]');
+      try {
+        var code = window.CherryQR.encode(bookAddress(id), { ecc: "H" });
+        box.innerHTML = window.CherryQR.toSVG(code, { quiet: 4 });
+        if (note) {
+          note.className = "qr__note";
+          note.textContent = code.size + " squares across, at the strongest error correction. " +
+            "Print it about 3 cm wide, never under 2 cm.";
+        }
+      } catch (e) {
+        box.innerHTML = "";
+        if (note) { note.className = "qr__note qr__note--bad"; note.textContent = e.message; }
+      }
+    });
   }
 
   function keep(blob, name) {
@@ -681,19 +757,21 @@
     say("Saved to your downloads");
   }
 
-  function downloadQR(kind) {
+  function downloadQR(kind, id) {
+    var book = booksList().filter(function (b) { return b.id === id; })[0];
     var code;
-    try { code = window.CherryQR.encode(qrAddress(), { ecc: "H" }); }
+    try { code = window.CherryQR.encode(bookAddress(id), { ecc: "H" }); }
     catch (e) { say(e.message, "bad"); return; }
+    var name = fileName(book && book.title);
     if (kind === "svg") {
       keep(new Blob([window.CherryQR.toSVG(code, { quiet: 4 })], { type: "image/svg+xml" }),
-           "cherry-dn-qr.svg");
+           name + ".svg");
       return;
     }
     /* big enough that a printer never has to guess at an edge */
     var span = code.size + 8;
     var cv = window.CherryQR.toCanvas(code, { quiet: 4, scale: Math.max(8, Math.round(2400 / span)) });
-    if (cv.toBlob) cv.toBlob(function (b) { keep(b, "cherry-dn-qr.png"); }, "image/png");
+    if (cv.toBlob) cv.toBlob(function (b) { keep(b, name + ".png"); }, "image/png");
     else say("This browser cannot save the picture. Use the printing file instead.", "bad");
   }
 
@@ -855,13 +933,25 @@
     }
 
     var qrb = e.target.closest("[data-qr]");
-    if (qrb) { downloadQR(qrb.dataset.qr); return; }
+    if (qrb) { downloadQR(qrb.dataset.qr, qrb.dataset.book || ""); return; }
 
     /* making a group is just naming it */
     var gnew = e.target.closest("#gnewBtn");
     if (gnew) {
       var glist = gnew.dataset.list;
       var box = gnew.parentNode.querySelector(".gnewbox"), name = box.value.trim();
+      if (LISTS[glist] && LISTS[glist].books) {
+        if (!name) { box.focus(); say("Give the book its name first."); return; }
+        var books = booksList();
+        if (books.some(function (b) { return b.title === name; })) {
+          say("You already have a book called that."); return;
+        }
+        books.push({ id: newBookId(books), title: name });
+        saveBooks(books);
+        paint();
+        say("Added. Its code is ready to print whenever you are.");
+        return;
+      }
       if (!name) { box.focus(); say("Give the group a name first."); return; }
       var all = groupNames(glist);
       if (all.indexOf(name) >= 0) { say("You already have a group called that."); return; }
@@ -876,6 +966,16 @@
     if (gm) {
       var gblock = gm.closest("[data-groupblock]");
       var here2 = gblock.dataset.groupblock, gl = gblock.dataset.glist;
+      if (LISTS[gl] && LISTS[gl].books) {
+        var bl = booksList(), bat = -1;
+        bl.forEach(function (b, i) { if (b.id === here2) bat = i; });
+        var bto = gm.dataset.gmove === "up" ? bat - 1 : bat + 1;
+        if (bat < 0 || bto < 0 || bto >= bl.length) return;
+        bl.splice(bto, 0, bl.splice(bat, 1)[0]);
+        saveBooks(bl);
+        paint(); repaintRows(); say("Moved");
+        return;
+      }
       var list = groupNames(gl), at = list.indexOf(here2);
       var to = gm.dataset.gmove === "up" ? at - 1 : at + 1;
       if (at < 0 || to < 0 || to >= list.length) return;
@@ -889,15 +989,25 @@
     if (gd) {
       var gdb = gd.closest("[data-groupblock]");
       var gone = gdb.dataset.groupblock, gdl = gdb.dataset.glist;
+      var isBook = !!(LISTS[gdl] && LISTS[gdl].books);
       if (gd.dataset.confirm) {
-        /* only the heading goes: the recordings fall out of it, whole */
-        saveGroups(gdl, groupNames(gdl).filter(function (n) { return n !== gone; }));
-        paint(); repaintRows();
-        say("The group is gone. Nothing inside it was removed.");
+        if (isBook) {
+          saveBooks(booksList().filter(function (b) { return b.id !== gone; }));
+          paint(); repaintRows();
+          say("The book is gone. Its chapters were kept, but any code already printed for it now opens nothing.");
+        } else {
+          /* only the heading goes: the recordings fall out of it, whole */
+          saveGroups(gdl, groupNames(gdl).filter(function (n) { return n !== gone; }));
+          paint(); repaintRows();
+          say("The group is gone. Nothing inside it was removed.");
+        }
       } else {
         gd.dataset.confirm = "1";
-        gd.textContent = "Really remove the group?";
-        setTimeout(function () { delete gd.dataset.confirm; gd.textContent = "Remove the group"; }, 4000);
+        gd.textContent = isBook ? "Really? Printed codes will stop working" : "Really remove the group?";
+        setTimeout(function () {
+          delete gd.dataset.confirm;
+          gd.textContent = isBook ? "Remove the book" : "Remove the group";
+        }, 4000);
       }
       return;
     }
@@ -992,6 +1102,19 @@
     if (i.classList && i.classList.contains("gname")) {
       var rblock = i.closest("[data-groupblock]");
       var was = rblock.dataset.groupblock, rl = rblock.dataset.glist, now = i.value.trim();
+      if (LISTS[rl] && LISTS[rl].books) {
+        /* the id underneath never moves, so a printed code survives this */
+        var bks = booksList(), me = bks.filter(function (b) { return b.id === was; })[0];
+        if (!me) return;
+        if (!now || now === me.title) { i.value = me.title; return; }
+        if (bks.some(function (b) { return b.id !== was && b.title === now; })) {
+          i.value = me.title; say("You already have a book called that."); return;
+        }
+        me.title = now;
+        saveBooks(bks);
+        say("Renamed. Codes already printed still open it.");
+        return;
+      }
       if (!now || now === was) { i.value = was; return; }
       var all = groupNames(rl);
       if (all.indexOf(now) >= 0) { i.value = was; say("You already have a group called that."); return; }

@@ -145,14 +145,38 @@
      built from the same address her Studio prints onto the book so the two
      can never drift apart. */
   var codeAddress = null;
+  /* One gift page serves every book she prints. The code inside a cover
+     carries ?b=<the book's fixed id>, so a reader lands on that book's own
+     chapters. No id, or an id she has since removed, falls back to her first
+     book, which is also what happens before she has named any books at all. */
+  var books = [], theBook = null;
+  function pickBook() {
+    var want = "";
+    try { want = new URLSearchParams(location.search).get("b") || ""; } catch (e) {}
+    var found = books.filter(function (b) { return b.id === want; })[0];
+    theBook = found || books[0] || null;
+    return theBook;
+  }
+  function bookAddress(id) {
+    var base = codeAddress;
+    if (!base) {
+      try { base = new URL("gift.html", location.href).href; } catch (e) { return ""; }
+    }
+    if (!id) return base;
+    try {
+      var u = new URL(base, location.href);
+      u.searchParams.set("b", id);
+      return u.href;
+    } catch (e) {
+      return base + (base.indexOf("?") < 0 ? "?" : "&") + "b=" + encodeURIComponent(id);
+    }
+  }
   function paintCodes() {
     if (!window.CherryQR) return 0;
     var slots = document.querySelectorAll(".giftpanel__qr");
     if (!slots.length) return 0;
-    var want = codeAddress;
-    if (!want) {
-      try { want = new URL("gift.html", location.href).href; } catch (e) { return 0; }
-    }
+    var want = bookAddress(theBook ? theBook.id : "");
+    if (!want) return 0;
     var svg;
     try {
       /* her own two colours, so the square sits in the panel the way the
@@ -205,6 +229,18 @@
     document.querySelectorAll(".chapters").forEach(function (box) {
       var voice = box.dataset.voice || "spoken";
       var mine = bySort(all.filter(function (t) { return t.voice === voice; }));
+
+      /* A chapter belongs to a book through the section it carries. Chapters
+         she has not filed yet show under her first book, so the page is never
+         empty just because she has not got round to sorting them. */
+      if (voice === "chapter" && theBook) {
+        var known = books.map(function (b) { return b.id; });
+        var first = books[0] && books[0].id === theBook.id;
+        mine = mine.filter(function (t) {
+          var at = String(t.section || "");
+          return at === theBook.id || (first && known.indexOf(at) < 0);
+        });
+      }
       /* Nothing in the archive for this list leaves whatever the page was
          written with, the same way every other list here behaves. Blanking
          it instead would empty the gift page the moment the archive answers
@@ -324,7 +360,20 @@
         if (s.key === "gift_qr_url" && String(s.value || "").trim()) {
           codeAddress = String(s.value).trim();
         }
+        if (s.key === "cherry_books") {
+          try {
+            var a = JSON.parse(s.value);
+            if (Array.isArray(a)) books = a.filter(function (b) { return b && b.id; });
+          } catch (e) { /* an unreadable list is simply no books */ }
+        }
       });
+      pickBook();
+      if (theBook) {
+        document.querySelectorAll("[data-book-title]").forEach(function (n) {
+          n.textContent = theBook.title || "";
+          n.hidden = !theBook.title;
+        });
+      }
       paintCodes();
       /* the order she has put each set of groups in, kept apart by list */
       var groups = { spoken: [], chapter: [] };
