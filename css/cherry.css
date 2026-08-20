@@ -3276,8 +3276,8 @@ body:has(.herstage) .nav__cta {
 
 .herstage__read {
   position: relative; z-index: 2;
-  width: min(58ch, 36vw);
-  margin: 0 clamp(1.2rem, 5vw, 5.5rem) 0 auto;
+  width: min(50ch, 30vw);
+  margin: 0 clamp(1.2rem, 4.5vw, 5rem) 0 auto;
   padding-bottom: 5rem;
 }
 .herstage__lines p {
@@ -3300,18 +3300,6 @@ body:has(.herstage) .nav__cta {
   line-height: 1;
 }
 
-/* the frame closes into the page, so what follows is not a slab of dark
-   below a hard horizontal edge */
-.herstage + .page {
-  margin-top: 0;
-  padding-top: 0;
-}
-.herstage + .page .about-tags {
-  margin-top: 0;
-  padding-top: 2.2rem;
-  border-top: 0;
-}
-
 @media (max-width: 820px) {
   .herstage__read { width: auto; margin: 0 1.4rem; }
   .herstage__lines { text-align: left; }
@@ -3325,11 +3313,12 @@ body:has(.herstage) .nav__cta {
      is not enough for both without them touching, so the frame stands down
      and the page reads in ordinary flow instead. The same judgement as the
      stacked layout: better a plain page than a crowded one. */
-  @media (prefers-reduced-motion: no-preference) and (min-height: 780px) {
+  @media (prefers-reduced-motion: no-preference) and (min-height: 820px) {
     .herstage {
-      /* two and a half screens: enough for the name to travel and the
-         archive to arrive, and no dead scrolling after they have */
-      height: 250svh;
+      /* three and a bit screens. The travel is deliberately unhurried and
+         needs the scroll to spend it in; what is left after everything
+         has arrived is time to read, not dead space. */
+      height: 330svh;
       view-timeline: --her block;
     }
     .herstage__pin {
@@ -3363,18 +3352,18 @@ body:has(.herstage) .nav__cta {
       min-height: 0;
       padding: 0;
       transform: translate(-50%, -50%);
-      animation: her-name cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation: her-name cubic-bezier(0.5, 0, 0.18, 1) both;
       animation-timeline: --her;
-      animation-range: contain 4% contain 46%;
+      animation-range: contain 5% contain 58%;
     }
     @keyframes her-name {
       from { transform: translate(-50%, -50%); }
-      to   { transform: translate(-46vw, calc(43svh - 100%)); }
+      to   { transform: translate(-46vw, calc(46svh - 100%)); }
     }
     .herstage__sub {
       animation: her-sub linear both;
       animation-timeline: --her;
-      animation-range: contain 4% contain 26%;
+      animation-range: contain 5% contain 30%;
     }
     @keyframes her-sub {
       from { opacity: 1; transform: none; }
@@ -3393,17 +3382,34 @@ body:has(.herstage) .nav__cta {
     .herstage__read {
       position: absolute;
       right: 0; left: auto; top: 14svh;
-      margin-right: clamp(1.4rem, 6vw, 7rem);
+      margin-right: clamp(1.4rem, 5vw, 6rem);
       margin-left: 0;
       padding: 0;
-      animation: her-rise cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation: her-rise cubic-bezier(0.16, 1, 0.3, 1) both;
       animation-timeline: --her;
-      animation-range: contain 6% contain 42%;
+      animation-range: contain 10% contain 64%;
     }
     @keyframes her-rise {
-      from { transform: translateY(46svh); opacity: 0; }
-      22%  { opacity: 1; }
-      to   { transform: translateY(0); opacity: 1; }
+      from { transform: translateY(34svh); }
+      to   { transform: translateY(0); }
+    }
+
+    /* Her paragraphs arrive one after another rather than as a block, each
+       a little behind the last, so the archive assembles itself as you
+       come down instead of sliding in whole. */
+    .herstage__lines p {
+      animation: her-line cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-timeline: --her;
+    }
+    .herstage__lines p:nth-child(1) { animation-range: contain 12% contain 34%; }
+    .herstage__lines p:nth-child(2) { animation-range: contain 17% contain 39%; }
+    .herstage__lines p:nth-child(3) { animation-range: contain 22% contain 44%; }
+    .herstage__lines p:nth-child(4) { animation-range: contain 27% contain 49%; }
+    .herstage__lines p:nth-child(5) { animation-range: contain 32% contain 54%; }
+    .herstage__lines p:nth-child(6) { animation-range: contain 37% contain 62%; }
+    @keyframes her-line {
+      from { opacity: 0; transform: translateY(2.2rem); filter: blur(3px); }
+      to   { opacity: 1; transform: none; filter: blur(0); }
     }
 
   }
