@@ -138,6 +138,41 @@
     return touched;
   }
 
+  /* ---------- the code inside the printed cover ---------- */
+  /* The panels used to carry a drawn square that looked like a QR code and
+     scanned as nothing, which is a small lie told to anyone who points a
+     phone at it. Where the generator is loaded, the real code replaces it,
+     built from the same address her Studio prints onto the book so the two
+     can never drift apart. */
+  var codeAddress = null;
+  function paintCodes() {
+    if (!window.CherryQR) return 0;
+    var slots = document.querySelectorAll(".giftpanel__qr");
+    if (!slots.length) return 0;
+    var want = codeAddress;
+    if (!want) {
+      try { want = new URL("gift.html", location.href).href; } catch (e) { return 0; }
+    }
+    var svg;
+    try {
+      /* her own two colours, so the square sits in the panel the way the
+         drawing did. The file she sends to a printer stays black on white:
+         that one is made in the Studio, not here. */
+      var ink = getComputedStyle(document.documentElement);
+      svg = window.CherryQR.toSVG(window.CherryQR.encode(want, { ecc: "H" }), {
+        quiet: 2,
+        light: (ink.getPropertyValue("--ink") || "#E7DED4").trim(),
+        dark: (ink.getPropertyValue("--bg") || "#0C1718").trim()
+      });
+    } catch (e) { return 0; }        /* an address too long to encode: keep the drawing */
+    slots.forEach(function (slot) {
+      if (slot.dataset.code === want) return;
+      slot.innerHTML = svg;
+      slot.dataset.code = want;
+    });
+    return 1;
+  }
+
   /* ---------- her voice: tracks and chapters ---------- */
   function trackRow(t, mirrored) {
     var len = '<span class="trk__len">' + clean(t.length || "--:--") + "</span>";
@@ -170,7 +205,11 @@
     document.querySelectorAll(".chapters").forEach(function (box) {
       var voice = box.dataset.voice || "spoken";
       var mine = bySort(all.filter(function (t) { return t.voice === voice; }));
-      if (!mine.length) { box.innerHTML = ""; return; }
+      /* Nothing in the archive for this list leaves whatever the page was
+         written with, the same way every other list here behaves. Blanking
+         it instead would empty the gift page the moment the archive answers
+         about songs but not about chapters. */
+      if (!mine.length) return;
       mine.forEach(function (t, i) { t._n = i + 1; });
 
       var groups = groupsBy[voice] || [];
@@ -262,6 +301,8 @@
   }
 
   /* ---------- ask once, apply what belongs to this page ---------- */
+  paintCodes();                 /* the address it falls back to needs no archive */
+
   var page = document.body.dataset.archive || "";
   var jobs = [api("cherry_settings?select=key,value&key=neq.desk_trash")];
   jobs.push(page === "visuals"
@@ -279,6 +320,12 @@
     .then(function (res) {
       var touched = 0;
       if (res[0] && res[0].length) applySettings(res[0]);
+      (res[0] || []).forEach(function (s) {
+        if (s.key === "gift_qr_url" && String(s.value || "").trim()) {
+          codeAddress = String(s.value).trim();
+        }
+      });
+      paintCodes();
       /* the order she has put each set of groups in, kept apart by list */
       var groups = { spoken: [], chapter: [] };
       (res[0] || []).forEach(function (s) {
