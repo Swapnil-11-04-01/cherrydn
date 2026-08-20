@@ -2407,6 +2407,16 @@ body[data-persona] .mist--merge { opacity: 0.55; }
 .landing .portals { grid-template-columns: repeat(6, 1fr); }
 .landing .portal:nth-child(-n+3) { grid-column: span 2; }
 .landing .portal:nth-child(n+4) { grid-column: span 3; aspect-ratio: 16 / 9; }
+/* The narrow rule for these lives a thousand lines further up, and a media
+   query adds no specificity, so this unconditional rule was quietly winning
+   and phones were being handed six columns: five of her worlds at 44 by 30
+   pixels each. The correction belongs next to the rule it corrects. */
+@media (max-width: 780px) {
+  .landing .portals { grid-template-columns: 1fr; }
+  .landing .portal:nth-child(-n+3),
+  .landing .portal:nth-child(n+4) { grid-column: auto; }
+  .landing .portal:nth-child(n+4) { aspect-ratio: 16 / 10; }
+}
 @media (max-width: 1240px) and (min-width: 1081px) {
   .nav__links { gap: 1.25rem; }
   .landing .nav__links a { font-size: 0.76rem; letter-spacing: 0.16em; }

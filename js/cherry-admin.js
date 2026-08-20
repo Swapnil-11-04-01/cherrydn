@@ -1178,6 +1178,51 @@
         "<em>this colour becomes the water</em></button></div>";
   }
 
+  /* ---------- seeing it the way a visitor will ---------- */
+  /* The frame is given the real width and height of a screen, so her page
+     lays itself out exactly as it would there, and then the whole thing is
+     scaled down to fit whatever room the desk has. She is looking at a true
+     phone layout, not a squeezed one. The frame is never reloaded, only
+     resized, so she keeps her place on the page. */
+  var SIZES = {
+    "390":  { w: 390,  h: 844,  say: "Phone" },
+    "820":  { w: 820,  h: 1180, say: "Tablet" },
+    "1280": { w: 1280, h: 800,  say: "Laptop" },
+    "1680": { w: 1680, h: 1050, say: "Big screen" }
+  };
+  var sizeNow = "fill";
+
+  function fitFrame() {
+    var pane = $("#pane"), f = $("#frame"), tag = $("#sizesNow");
+    if (!pane || !f) return;
+    if (sizeNow === "fill" || !SIZES[sizeNow]) {
+      pane.classList.remove("is-sized");
+      f.style.width = "100%"; f.style.height = "100%";
+      f.style.transform = ""; f.style.marginBottom = "";
+      if (tag) tag.textContent = Math.round(pane.clientWidth) + " across";
+      return;
+    }
+    var s2 = SIZES[sizeNow];
+    pane.classList.add("is-sized");
+    f.style.width = s2.w + "px";
+    f.style.height = s2.h + "px";
+    /* leave a little air, and never blow a small screen up bigger than life */
+    var k = Math.min((pane.clientWidth - 24) / s2.w, (pane.clientHeight - 24) / s2.h, 1);
+    k = Math.max(k, 0.2);
+    f.style.transform = "scale(" + k.toFixed(4) + ")";
+    /* a scaled element still reserves its unscaled height, so give the
+       scrolling pane back the difference or it scrolls into empty space */
+    f.style.marginBottom = Math.round(-s2.h * (1 - k)) + "px";
+    if (tag) tag.textContent = s2.w + " × " + s2.h + (k < 0.999 ? "  ·  shown at " + Math.round(k * 100) + "%" : "");
+  }
+
+  function setSize(key) {
+    sizeNow = key;
+    try { localStorage.setItem("cherry.size", key); } catch (e) {}
+    $$("#sizes button").forEach(function (b) { b.classList.toggle("on", b.dataset.size === key); });
+    fitFrame();
+  }
+
   /* ---------- painting the shelf ---------- */
   function paint(keepOpen) {
     var open = keepOpen || $$(".card__body:not([hidden])").map(function (b) {
@@ -1336,6 +1381,9 @@
       if (item) putBack(item.table, item.row);
       return;
     }
+
+    var sz = e.target.closest("[data-size]");
+    if (sz) { setSize(sz.dataset.size); return; }
 
     var pk = e.target.closest("[data-pic]");
     if (pk) { openPicture(+pk.dataset.pic); return; }
@@ -1729,6 +1777,14 @@
   }
   frame.addEventListener("load", dressFrame);
   dressFrame();   // in case the first page finished before we got here
+
+  try {
+    var lastSize = localStorage.getItem("cherry.size");
+    if (lastSize && (lastSize === "fill" || SIZES[lastSize])) sizeNow = lastSize;
+  } catch (e) {}
+  $$("#sizes button").forEach(function (b) { b.classList.toggle("on", b.dataset.size === sizeNow); });
+  fitFrame();
+  window.addEventListener("resize", fitFrame);
 
   say("All saved");
   loadAll().then(function () {
