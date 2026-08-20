@@ -106,6 +106,29 @@
     .gname:hover { border-bottom-color:var(--line); }
     .gname:focus { border-bottom-color:var(--red-t); outline:none; }
     .gmove { display:flex; gap:.4rem; flex-wrap:wrap; margin-left:auto; }
+    .axis { margin:0 0 1.5rem; }
+    .axis .lab { display:block; margin-bottom:.45rem; }
+    .axis__slide { width:100%; -webkit-appearance:none; appearance:none; height:3px;
+                   border-radius:3px; background:var(--line,#2a3a3c); outline:none; }
+    .axis__slide::-webkit-slider-thumb { -webkit-appearance:none; width:20px; height:20px;
+                   border-radius:50%; background:var(--ink,#E7DED4); cursor:grab;
+                   box-shadow:0 2px 10px rgba(0,0,0,.5); }
+    .axis__slide::-moz-range-thumb { width:20px; height:20px; border:0; border-radius:50%;
+                   background:var(--ink,#E7DED4); cursor:grab; }
+    .axis__ends { display:flex; justify-content:space-between; margin-top:.4rem; gap:1rem; }
+    .axis__ends i { font-style:normal; font-size:.74rem; color:var(--muted); opacity:.85; }
+    .axis__grp { margin:1.6rem 0 1rem; letter-spacing:.14em; font-size:.76rem; }
+    .axis__grp em { font-style:italic; letter-spacing:0; text-transform:none;
+                    color:var(--muted); font-size:.82rem; margin-left:.5rem; }
+    .moods { display:grid; grid-template-columns:repeat(auto-fit,minmax(88px,1fr)); gap:.6rem; }
+    .mood { position:relative; aspect-ratio:1; border:1px solid; border-radius:8px;
+            cursor:pointer; overflow:hidden; display:flex; align-items:flex-end;
+            justify-content:center; padding:.5rem; }
+    .mood:hover { filter:brightness(1.18); }
+    .mood__fire { position:absolute; top:26%; left:50%; width:34%; height:34%;
+                  transform:translateX(-50%); border-radius:50%; filter:blur(7px); opacity:.95; }
+    .mood__ink { position:relative; font-size:.66rem; letter-spacing:.14em;
+                 text-transform:uppercase; }
     .waiting { font-size:.8rem; color:#E0B24C; white-space:nowrap; }
     .live { background:var(--red,#8E1F2D); color:#fff; border:0; border-radius:6px;
             padding:.5rem 1rem; font:inherit; font-size:.85rem; cursor:pointer; white-space:nowrap; }
@@ -263,8 +286,10 @@
   <input id="picker" type="file" hidden />
 
   <script src="js/cherry-config.js?v=2"></script>
+  <script src="js/cherry-mood.js?v=1"></script>
+  <script src="js/cherry-solve.js?v=1"></script>
   <script src="js/cherry-qr.js?v=1"></script>
-  <script src="js/cherry-schema.js?v=9"></script>
-  <script src="js/cherry-admin.js?v=16"></script>
+  <script src="js/cherry-schema.js?v=10"></script>
+  <script src="js/cherry-admin.js?v=17"></script>
 </body>
 </html>

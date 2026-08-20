@@ -106,6 +106,8 @@
       }
     }
 
+    /* her palette, while she is still moving the slider */
+    if (m.type === "mood" && window.CherryMood) { window.CherryMood.apply(m.vars); return; }
     if (m.type === "setRow") paintRow(m.scope, m.key, m.value);
 
     if (m.type === "reveal") {

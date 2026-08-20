@@ -135,6 +135,12 @@ window.CHERRY_SCHEMA = [
     groups: "chapters"
   },
   {
+    id: "light", name: "The light in the rooms", page: "index.html",
+    tool: "mood",
+    blurb: "The colour of the whole site. Nothing here can make your words hard to read.",
+    fields: []
+  },
+  {
     id: "everywhere", name: "The bottom of every page", page: "index.html",
     blurb: "Lines that show on all nine pages.",
     fields: [

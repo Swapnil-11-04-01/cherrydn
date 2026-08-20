@@ -994,6 +994,96 @@
     else say("This browser cannot save the picture. Use the printing file instead.", "bad");
   }
 
+  /* ---------- the light in the rooms ---------- */
+  /* Seven sliders, her words on all of them, and not one number shown.
+     The solver turns them into the whole palette; she never meets a hex
+     code, a ratio or the word contrast. Every position on every slider is
+     safe, so there is nothing here to warn her about and no way to be
+     wrong. Her changes wait in the draft with everything else. */
+  var AXES = [
+    { grp: "THE WATER", note: "the dark you are inside", k: "d",
+      label: "How deep you are", lo: "shallow, almost morning", hi: "far down, almost nothing" },
+    { k: "hg", label: "What the water is made of", wrap: true,
+      lo: "take it all the way round and come back", hi: "" },
+    { grp: "THE FIRE", note: "the one colour that is not the dark", k: "t",
+      label: "How hot it burns", lo: "ash", hi: "a wound" },
+    { k: "f", label: "What it burns", lo: "oxblood", hi: "brass" },
+    { grp: "THE LIGHT", note: "your words, and everything they touch", k: "w",
+      label: "How warm the light is", lo: "moonlight on water", hi: "candle on paper",
+      under: "Your words stay exactly as bright. This only changes their colour of light." },
+    { grp: "THE AIR", note: "how much room the light has to travel", k: "a",
+      label: "How much mist", lo: "the glass is clean", hi: "you are looking through weather" },
+    { k: "gr", label: "How much dust in the light", lo: "nothing", hi: "an old print" }
+  ];
+
+  var MOODS = {
+    submerged: { d: 0.530, hg: 203.1, t: 0.835, f: 0.470, w: 0.557, a: 0.550, gr: 0.310 },
+    ember:     { d: 0.400, hg: 28,    t: 1.000, f: 0.620, w: 0.850, a: 0.620, gr: 0.450 },
+    ash:       { d: 0.660, hg: 210,   t: 0.250, f: 0.400, w: 0.350, a: 0.400, gr: 0.550 },
+    tidepool:  { d: 0.620, hg: 168,   t: 0.550, f: 0.300, w: 0.300, a: 0.700, gr: 0.200 },
+    nocturne:  { d: 0.880, hg: 276,   t: 0.700, f: 0.150, w: 0.400, a: 0.450, gr: 0.350 },
+    salt:      { d: 0.300, hg: 195,   t: 0.450, f: 0.520, w: 0.200, a: 0.300, gr: 0.150 }
+  };
+
+  function seedsNow() {
+    var s = {};
+    try { s = JSON.parse(data.settings.mood_seeds || "null") || {}; } catch (e) { s = {}; }
+    var out = {};
+    Object.keys(window.CherrySolve.DEFAULTS).forEach(function (k) {
+      out[k] = typeof s[k] === "number" ? s[k] : window.CherrySolve.DEFAULTS[k];
+    });
+    return out;
+  }
+
+  function moodHTML() {
+    var s = seedsNow();
+    var html = '<section class="block"><h3 class="block__name">Six moods to start from</h3>' +
+      '<div class="moods">' + Object.keys(MOODS).map(function (n) {
+        var v = window.CherrySolve.generate(MOODS[n]);
+        return '<button class="mood" type="button" data-mood="' + n + '" ' +
+          'style="background:' + v["--bg"] + ';border-color:' + v["--line"] + '">' +
+          '<span class="mood__fire" style="background:' + v["--red-t"] + '"></span>' +
+          '<span class="mood__ink" style="color:' + v["--ink"] + '">' + n + "</span></button>";
+      }).join("") + "</div>" +
+      '<p class="qr__lead">Tap one and every slider moves there. Then take it anywhere you like.</p></section>';
+
+    html += '<section class="block">';
+    AXES.forEach(function (ax) {
+      if (ax.grp) html += '<h3 class="block__name axis__grp">' + ax.grp +
+        ' <em>' + esc(ax.note) + "</em></h3>";
+      var max = ax.wrap ? 360 : 1, step = ax.wrap ? 1 : 0.005;
+      html += '<div class="axis"><span class="lab">' + esc(ax.label) + "</span>" +
+        '<input class="axis__slide" type="range" data-axis="' + ax.k + '" min="0" max="' + max +
+          '" step="' + step + '" value="' + s[ax.k] + '" aria-label="' + esc(ax.label) + '" />' +
+        '<span class="axis__ends"><i>' + esc(ax.lo) + "</i><i>" + esc(ax.hi || "") + "</i></span>" +
+        (ax.under ? '<em class="hint">' + esc(ax.under) + "</em>" : "") +
+        "</div>";
+    });
+    html += "</section>";
+
+    html += '<section class="block"><h3 class="block__name">If you change your mind</h3>' +
+      '<button class="add" type="button" id="moodReset">Put it back the way it came</button>' +
+      '<p class="qr__lead">This returns every slider to the colours the site was made with.</p>' +
+      "</section>";
+    return html;
+  }
+
+  /* solve, show it beside her, and let it wait in the draft like everything else */
+  var moodTimer;
+  function moodChanged(live) {
+    var s = {};
+    $$("[data-axis]").forEach(function (i) { s[i.dataset.axis] = parseFloat(i.value); });
+    var vars = window.CherrySolve.generate(s);
+    delete vars.__meta;
+    tell({ type: "mood", vars: vars });          /* instant, every frame she drags */
+    if (!live) return;
+    clearTimeout(moodTimer);
+    moodTimer = setTimeout(function () {
+      saveSetting("mood_seeds", JSON.stringify(s));
+      saveSetting("mood", JSON.stringify(vars));
+    }, 260);
+  }
+
   /* ---------- painting the shelf ---------- */
   function paint(keepOpen) {
     var open = keepOpen || $$(".card__body:not([hidden])").map(function (b) {
@@ -1010,12 +1100,14 @@
       if (sec.fields) html += '<section class="block">' +
         sec.fields.map(function (f) { return fieldHTML(f, data.settings[f.k], "setting"); }).join("") + "</section>";
       if (sec.tool === "qr") html += qrHTML();
+      if (sec.tool === "mood") html += moodHTML();
       if (sec.rooms) html += roomsHTML(sec.rooms);
       if (sec.groups) html += groupsHTML(sec.groups);
       (sec.lists || []).forEach(function (l) { html += listHTML(l.id, l.title); });
     }
     $("#shelf").innerHTML = html;
     if (sec.tool === "qr") drawQR();
+    if (sec.tool === "mood") moodChanged(false);
     open.forEach(function (scope) {
       var card = $('.card[data-scope="' + scope + '"]');
       if (card) { $(".card__body", card).hidden = false; card.classList.add("open"); }
@@ -1151,6 +1243,20 @@
       return;
     }
 
+    var md = e.target.closest("[data-mood]");
+    if (md) {
+      var pick = MOODS[md.dataset.mood];
+      $$("[data-axis]").forEach(function (i) { i.value = pick[i.dataset.axis]; });
+      moodChanged(true);
+      say("Moved to " + md.dataset.mood + ". Every slider is still yours.");
+      return;
+    }
+    if (e.target.closest("#moodReset")) {
+      $$("[data-axis]").forEach(function (i) { i.value = window.CherrySolve.DEFAULTS[i.dataset.axis]; });
+      moodChanged(true);
+      say("Back to the colours the site was made with.");
+      return;
+    }
     if (e.target.closest("#liveBtn") || e.target.closest("#liveBtn2")) { goLive(); return; }
     if (e.target.closest("#discardBtn")) {
       var db = e.target.closest("#discardBtn");
@@ -1300,6 +1406,7 @@
 
   document.addEventListener("input", function (e) {
     var i = e.target;
+    if (i && i.dataset && i.dataset.axis) { moodChanged(true); return; }
     if (i && i.id === "qrurl") drawQR();
     if (!i.dataset || !i.dataset.k || !i.dataset.scope) return;
     var raw = i.value;
@@ -1466,7 +1573,7 @@
       var doc = frame.contentDocument;
       if (!doc || !doc.body || doc.querySelector("script[data-glass]")) return;
       var s = doc.createElement("script");
-      s.src = "js/cherry-preview.js?v=5";
+      s.src = "js/cherry-preview.js?v=6";
       s.setAttribute("data-glass", "1");
       doc.body.appendChild(s);
     } catch (err) { console.error(err); }
