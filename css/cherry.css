@@ -3260,7 +3260,7 @@ body:has(.herstage) .nav__cta {
 .herstage__name {
   font-family: var(--display);
   font-weight: 400;
-  font-size: clamp(2rem, min(7vw, 9.5svh), 5rem);
+  font-size: clamp(1.9rem, min(6.4vw, 7.2svh), 4.6rem);
   letter-spacing: 0.12em;
   line-height: 1.05;
   color: var(--ink);
@@ -3276,7 +3276,7 @@ body:has(.herstage) .nav__cta {
 
 .herstage__read {
   position: relative; z-index: 2;
-  width: min(60ch, 48vw);
+  width: min(58ch, 36vw);
   margin: 0 clamp(1.2rem, 5vw, 5.5rem) 0 auto;
   padding-bottom: 5rem;
 }
