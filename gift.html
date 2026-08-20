@@ -63,13 +63,35 @@
         Chapters appear on this page as they are finished, beginning with the Prologue.
         Your code does not expire: come back and whatever has been recorded since
         will be waiting.</p>
-        <ul class="tracklist gift-list">
-          <li class="trk" data-src="assets/audio/spoken-01.mp3" data-title="Prologue: The Ember Key">
-            <span class="trk__no">01</span><span class="trk__name">Prologue: The Ember Key</span><span class="trk__len">--:--</span>
-          </li>
-        </ul>
       </div>
     </div>
+
+    <!-- what the code in the cover opens: the same chapters the Spoken Word
+         page holds, in the same groups she names for them. The archive
+         overwrites this list the moment it answers. Only a chapter that has
+         been recorded carries a data-src, so nothing here is probed for a
+         file that was never made. -->
+    <div class="chapters">
+    <ul class="tracklist" data-r>
+        <li class="trk" data-src="https://rpmpztmktfcobxiofvce.supabase.co/storage/v1/object/public/cherry-media/1786788777339-monologue.paradise.mp3" data-title="Monologue. Paradise.">
+          <span class="trk__no">01</span><span class="trk__name">Monologue. Paradise.</span><span class="trk__len">2:46</span>
+        </li>
+        <li class="trk" data-title="I. Water">
+          <span class="trk__no">02</span><span class="trk__name">I. Water</span><span class="trk__len">--:--</span>
+        </li>
+        <li class="trk" data-title="II. Fire">
+          <span class="trk__no">03</span><span class="trk__name">II. Fire</span><span class="trk__len">--:--</span>
+        </li>
+        <li class="trk" data-title="III. Earth">
+          <span class="trk__no">04</span><span class="trk__name">III. Earth</span><span class="trk__len">--:--</span>
+        </li>
+        <li class="trk" data-title="IV. Air">
+          <span class="trk__no">05</span><span class="trk__name">IV. Air</span><span class="trk__len">--:--</span>
+        </li>
+    </ul>
+    </div>
+
+    <p data-cms="gift_note" class="spoken-note" data-media-note hidden>The recordings are being made. The first voice arrives soon.</p>
 
     <p data-cms="gift_endline" class="endline" data-r>Some things are meant to find you.</p>
     </div>
@@ -85,6 +107,6 @@
 
   <script src="js/cherry.js?v=35"></script>
 
-  <script src="js/cherry-data.js?v=8"></script>
+  <script src="js/cherry-data.js?v=9"></script>
 </body>
 </html>

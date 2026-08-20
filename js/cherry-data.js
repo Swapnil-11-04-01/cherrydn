@@ -259,7 +259,7 @@
     ? api("cherry_works?select=id,title,phase,note,image_url,sort&published=eq.true") : null);
   jobs.push(page === "written"
     ? api("cherry_pieces?select=id,title,kind,phase,excerpt,body,sort&published=eq.true") : null);
-  jobs.push(document.querySelector(".dlist--cherry, .tracklist")
+  jobs.push(document.querySelector(".dlist--cherry, .tracklist, .chapters")
     ? api("cherry_tracks?select=id,title,voice,length,audio_url,lyrics,section,sort&published=eq.true") : null);
   jobs.push(document.querySelector(".portals")
     ? api("cherry_portals?select=id,name,blurb,href,image_url,kind,sort&published=eq.true") : null);
