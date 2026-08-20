@@ -458,18 +458,24 @@
   }
 
   /* ---------- the groups she names for herself ---------- */
-  function groupNames() {
+  /* Two lists carry groups now, the chapters and her spoken word, and they
+     must not share names: a group called "Live" on one page has nothing to
+     do with the other. Each list keeps its own setting. */
+  function groupKey(listId) {
+    return (LISTS[listId] && LISTS[listId].groupKey) || "spoken_groups";
+  }
+  function groupNames(listId) {
     try {
-      var a = JSON.parse(data.settings.spoken_groups || "[]");
+      var a = JSON.parse(data.settings[groupKey(listId)] || "[]");
       return Array.isArray(a) ? a : [];
     } catch (e) { return []; }
   }
-  function saveGroups(list) {
-    saveSetting("spoken_groups", JSON.stringify(list));
+  function saveGroups(listId, list) {
+    saveSetting(groupKey(listId), JSON.stringify(list));
   }
 
-  function sectionChooser(row) {
-    var names = groupNames();
+  function sectionChooser(row, listId) {
+    var names = groupNames(listId);
     if (!names.length) return "";
     return '<div class="fld"><span class="lab">Which part of the page?</span>' +
       '<div class="rooms" data-k="section" data-scope="' + row._scope + '">' +
@@ -489,10 +495,10 @@
   }
 
   function groupsHTML(listId) {
-    var spec = LISTS[listId], names = groupNames(), rows = rowsFor(listId);
+    var spec = LISTS[listId], names = groupNames(listId), rows = rowsFor(listId);
     var out = names.map(function (g) {
       var mine = rows.filter(function (r) { return r.section === g; });
-      return '<section class="block" data-groupblock="' + esc(g) + '">' +
+      return '<section class="block" data-groupblock="' + esc(g) + '" data-glist="' + listId + '">' +
         '<h3 class="block__name"><input class="gname" type="text" value="' + esc(g) + '" ' +
           'aria-label="The name of this group" /> ' + countLine(mine) +
         '<span class="gmove"><button class="mini" type="button" data-gmove="up">Move up</button>' +
@@ -508,7 +514,7 @@
     var loose = rows.filter(function (r) { return names.indexOf(r.section) < 0; });
     if (loose.length || !names.length) {
       out += '<section class="block">' +
-        '<h3 class="block__name">' + (names.length ? "Not in any group" : "The chapters") +
+        '<h3 class="block__name">' + (names.length ? "Not in any group" : (spec.loose || "Everything here")) +
           " " + countLine(loose) + "</h3>" +
         (loose.length ? loose.map(function (r) { return cardHTML(listId, r); }).join("")
                       : '<p class="none">Nothing here yet.</p>') +
@@ -517,7 +523,7 @@
     }
 
     out += '<section class="block"><h3 class="block__name">A new group</h3>' +
-      '<div class="gnew"><input id="gnew" type="text" placeholder="' + esc(spec.newGroup || "Name it") + '" />' +
+      '<div class="gnew"><input class="gnewbox" type="text" placeholder="' + esc(spec.newGroup || "Name it") + '" />' +
       '<button class="add" id="gnewBtn" type="button" data-list="' + listId + '">Make the group</button></div>' +
       "</section>";
     return out;
@@ -549,7 +555,7 @@
       '<div class="card__body" hidden>' +
       spec.fields.map(function (f) { return fieldHTML(f, row[f.k], scope); }).join("") +
       (spec.room ? roomChooser(row) : "") +
-      (spec.groups ? sectionChooser(row) : "") +
+      (spec.groups ? sectionChooser(row, listId) : "") +
       '<div class="card__foot">' +
       '<label class="onoff"><input type="checkbox" data-k="published" data-scope="' + scope + '"' +
         (row.published ? " checked" : "") + ' /><span>' +
@@ -780,12 +786,13 @@
     /* making a group is just naming it */
     var gnew = e.target.closest("#gnewBtn");
     if (gnew) {
-      var box = $("#gnew"), name = box.value.trim();
+      var glist = gnew.dataset.list;
+      var box = gnew.parentNode.querySelector(".gnewbox"), name = box.value.trim();
       if (!name) { box.focus(); say("Give the group a name first."); return; }
-      var all = groupNames();
+      var all = groupNames(glist);
       if (all.indexOf(name) >= 0) { say("You already have a group called that."); return; }
       all.push(name);
-      saveGroups(all);
+      saveGroups(glist, all);
       paint();
       say("Made. Put your recordings into it whenever you like.");
       return;
@@ -793,22 +800,24 @@
 
     var gm = e.target.closest("[data-gmove]");
     if (gm) {
-      var here2 = gm.closest("[data-groupblock]").dataset.groupblock;
-      var list = groupNames(), at = list.indexOf(here2);
+      var gblock = gm.closest("[data-groupblock]");
+      var here2 = gblock.dataset.groupblock, gl = gblock.dataset.glist;
+      var list = groupNames(gl), at = list.indexOf(here2);
       var to = gm.dataset.gmove === "up" ? at - 1 : at + 1;
       if (at < 0 || to < 0 || to >= list.length) return;
       list.splice(to, 0, list.splice(at, 1)[0]);
-      saveGroups(list);
+      saveGroups(gl, list);
       paint(); repaintRows(); say("Moved");
       return;
     }
 
     var gd = e.target.closest("[data-gdrop]");
     if (gd) {
-      var gone = gd.closest("[data-groupblock]").dataset.groupblock;
+      var gdb = gd.closest("[data-groupblock]");
+      var gone = gdb.dataset.groupblock, gdl = gdb.dataset.glist;
       if (gd.dataset.confirm) {
         /* only the heading goes: the recordings fall out of it, whole */
-        saveGroups(groupNames().filter(function (n) { return n !== gone; }));
+        saveGroups(gdl, groupNames(gdl).filter(function (n) { return n !== gone; }));
         paint(); repaintRows();
         say("The group is gone. Nothing inside it was removed.");
       } else {
@@ -906,13 +915,14 @@
 
     /* renaming a group carries everything inside it along */
     if (i.classList && i.classList.contains("gname")) {
-      var was = i.closest("[data-groupblock]").dataset.groupblock, now = i.value.trim();
+      var rblock = i.closest("[data-groupblock]");
+      var was = rblock.dataset.groupblock, rl = rblock.dataset.glist, now = i.value.trim();
       if (!now || now === was) { i.value = was; return; }
-      var all = groupNames();
+      var all = groupNames(rl);
       if (all.indexOf(now) >= 0) { i.value = was; say("You already have a group called that."); return; }
       all[all.indexOf(was)] = now;
-      saveGroups(all);
-      rowsFor("spoken").forEach(function (r) {
+      saveGroups(rl, all);
+      rowsFor(rl).forEach(function (r) {
         if (r.section === was) saveRow("cherry_tracks", r.id, { section: now }, true);
       });
       setTimeout(function () { paint(); }, 800);

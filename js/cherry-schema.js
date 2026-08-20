@@ -68,11 +68,11 @@ window.CHERRY_SCHEMA = [
   },
   {
     id: "spoken", name: "Spoken Word", page: "spoken-word.html",
-    blurb: "The book, read aloud.",
+    blurb: "Your spoken word, as a playlist. The book read aloud lives on the QR-code page.",
     fields: TOP("sw").concat([
       { k: "sw_intro", label: "The opening paragraph", type: "long", enter: true, em: true },
       { k: "sw_note", label: "What to show until the recordings are ready",
-        hint: "This disappears on its own once you add your first chapter." },
+        hint: "This disappears on its own once you add your first piece." },
       { k: "sw_gift_title", label: "The gift box: its heading" },
       { k: "sw_gift_text", label: "The gift box: the words inside", type: "long", enter: true, em: true }
     ]),
@@ -122,13 +122,16 @@ window.CHERRY_SCHEMA = [
   },
   {
     id: "gift", name: "The QR-code page", page: "gift.html",
-    blurb: "What the code inside the printed book opens.",
+    blurb: "What the code inside the printed book opens: the book, read aloud, chapter by chapter.",
     fields: [
       { k: "gift_intro", label: "The opening paragraph", type: "long", enter: true, em: true },
       { k: "gift_panel_title", label: "The box on this page: its heading" },
       { k: "gift_panel_text", label: "The box on this page: the words inside", type: "long", enter: true },
+      { k: "gift_note", label: "What to show until the recordings are ready",
+        hint: "This disappears on its own once you add your first chapter." },
       { k: "gift_endline", label: "The last line on this page" }
-    ]
+    ],
+    groups: "chapters"
   },
   {
     id: "everywhere", name: "The bottom of every page", page: "index.html",
@@ -229,14 +232,34 @@ window.CHERRY_LISTS = {
         hint: "Write them as they should look. Leave it empty and no one is offered them." }
     ]
   },
-  spoken: {
+  /* The book read aloud. These are the chapters the code inside the printed
+     cover opens, so they live on the QR-code page and nowhere else. */
+  chapters: {
     table: "cherry_tracks", one: "chapter", add: "Add a chapter",
-    accept: "audio/*", media: "audio_url", where: { voice: "spoken" },
-    groups: true, newGroup: "Name it, for instance The Audiobook",
+    accept: "audio/*", media: "audio_url", where: { voice: "chapter" },
+    groups: true, groupKey: "chapter_groups", loose: "The chapters",
+    newGroup: "Name it, for instance The Audiobook",
     fields: [
       { k: "title", label: "Its name" },
       { k: "length", label: "How long it is", hint: "Read from the recording, change it if you like." },
-      { k: "audio_url", label: "The recording", type: "audio" }
+      { k: "audio_url", label: "The recording", type: "audio" },
+      { k: "lyrics", label: "The words of this chapter", type: "long", rows: 12, enter: true,
+        hint: "Write them as they should look. Leave it empty and no one is offered them." }
+    ]
+  },
+  /* Her spoken word: narrated, not sung, and not the book. A playlist on the
+     Spoken Word page, filled the same way the songs are. */
+  spoken: {
+    table: "cherry_tracks", one: "piece", add: "Add a spoken word piece",
+    accept: "audio/*", media: "audio_url", where: { voice: "spoken" },
+    groups: true, groupKey: "spoken_groups", loose: "Your spoken word",
+    newGroup: "Name it, for instance Live",
+    fields: [
+      { k: "title", label: "Its name" },
+      { k: "length", label: "How long it is", hint: "Read from the recording, change it if you like." },
+      { k: "audio_url", label: "The recording", type: "audio" },
+      { k: "lyrics", label: "The words of this piece", type: "long", rows: 12, enter: true,
+        hint: "Write them as they should look. Leave it empty and no one is offered them." }
     ]
   }
 };

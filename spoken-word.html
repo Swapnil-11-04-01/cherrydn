@@ -52,38 +52,20 @@
       </header>
       <div class="astage__rings" aria-hidden="true"><i></i><i></i><i></i></div>
       <div class="astage__body">
-        <h1 data-cms="sw_display" class="astage__display">THE VIEW FROM ABOVE</h1>
-        <p data-cms="sw_sub" class="astage__sub">the audiobook, read in Cherry&rsquo;s own voice.</p>
+        <h1 data-cms="sw_display" class="astage__display">SPOKEN WORD</h1>
+        <p data-cms="sw_sub" class="astage__sub">narrated, not sung.</p>
       </div>
   </section>
 
     <div class="page">
-    <p data-cms="sw_intro" class="spoken-intro" data-r>Poems and pages read aloud: the audiobook of <em>The View From Above</em>, chapter by chapter, in Cherry&rsquo;s own voice.</p>
+    <p data-cms="sw_intro" class="spoken-intro" data-r>Words spoken rather than sung. Not quite music, not quite reading: somewhere in between, where Cherry does most of her living.</p>
 
-    <!-- one list until she makes groups of her own; then one list per group -->
-    <div class="chapters">
-    <!-- Her chapters as they stand. Only the recorded one carries a
-         data-src: a chapter with no recording must not be probed, or the
-         page spends five failed requests asking for files that were never
-         made. The archive overwrites this list the moment it answers. -->
-    <ul class="tracklist" data-r>
-        <li class="trk" data-src="https://rpmpztmktfcobxiofvce.supabase.co/storage/v1/object/public/cherry-media/1786788777339-monologue.paradise.mp3" data-title="Monologue. Paradise.">
-          <span class="trk__no">01</span><span class="trk__name">Monologue. Paradise.</span><span class="trk__len">2:46</span>
-        </li>
-        <li class="trk" data-title="I. Water">
-          <span class="trk__no">02</span><span class="trk__name">I. Water</span><span class="trk__len">--:--</span>
-        </li>
-        <li class="trk" data-title="II. Fire">
-          <span class="trk__no">03</span><span class="trk__name">II. Fire</span><span class="trk__len">--:--</span>
-        </li>
-        <li class="trk" data-title="III. Earth">
-          <span class="trk__no">04</span><span class="trk__name">III. Earth</span><span class="trk__len">--:--</span>
-        </li>
-        <li class="trk" data-title="IV. Air">
-          <span class="trk__no">05</span><span class="trk__name">IV. Air</span><span class="trk__len">--:--</span>
-        </li>
-    </ul>
-    </div>
+    <!-- Her spoken word, filled from the Studio the way the songs are: one
+         list until she names groups for it, then one list per group. The
+         book read aloud is NOT here, it is the gift the printed copy opens,
+         and it lives on gift.html. Empty until she imports her first piece,
+         and the note below stands in while it is. -->
+    <div class="chapters" data-voice="spoken"></div>
 
     <!-- shown only while nothing here plays: the moment one chapter is
          live this stands down, which is what her Studio promises -->
@@ -94,9 +76,9 @@
       <div>
         <h2 data-cms="sw_gift_title" class="giftpanel__title">The hidden gift</h2>
         <p data-cms="sw_gift_text" class="giftpanel__text">Every printed copy of <em>The View From Above</em> carries a QR code
-        inside the cover. Scan it and this page opens, the book read aloud in Cherry&rsquo;s
-        own voice. Chapters are added as they are recorded, beginning with the Prologue,
-        and the code in your copy keeps working as each new one arrives.</p>
+        inside the cover. Scan it and the book opens, read aloud in Cherry&rsquo;s own voice,
+        chapter by chapter. Chapters are added as they are recorded, and the code in your
+        copy keeps working as each new one arrives.</p>
         <a class="rlink" href="gift.html">visit the gift page &rarr;</a>
       </div>
     </div>
@@ -113,6 +95,6 @@
 
   <script src="js/cherry.js?v=35"></script>
 
-  <script src="js/cherry-data.js?v=9"></script>
+  <script src="js/cherry-data.js?v=10"></script>
 </body>
 </html>

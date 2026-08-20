@@ -156,30 +156,43 @@
       ' data-title="' + plain(t.title).replace(/"/g, "&quot;") + '">' +
       (mirrored ? len + name + no : no + name + len) + words + "</li>";
   }
-  /* The chapters can be one plain list, or the groups she has named for
-     herself. Groups win only when she has made them; a recording that
-     belongs to no group is never dropped, it just keeps its own place at
-     the end under no heading. */
-  function renderChapters(mine, groups) {
-    var box = document.querySelector(".chapters");
-    if (!box) return 0;
-    var named = groups.filter(function (g) {
-      return mine.some(function (t) { return t.section === g; });
+  /* Two lists are drawn this way and they are not the same list: the book
+     read aloud, which only the code inside the printed cover opens, and her
+     spoken word, which is its own work. Each .chapters box says on itself
+     which one it wants.
+
+     Either can be one plain list or the groups she has named for it. Groups
+     win only when she has made them; a recording that belongs to no group is
+     never dropped, it just keeps its place at the end under no heading. An
+     empty answer leaves the page's own list alone rather than blanking it. */
+  function renderChapters(all, groupsBy) {
+    var drawn = 0;
+    document.querySelectorAll(".chapters").forEach(function (box) {
+      var voice = box.dataset.voice || "spoken";
+      var mine = bySort(all.filter(function (t) { return t.voice === voice; }));
+      if (!mine.length) { box.innerHTML = ""; return; }
+      mine.forEach(function (t, i) { t._n = i + 1; });
+
+      var groups = groupsBy[voice] || [];
+      var named = groups.filter(function (g) {
+        return mine.some(function (t) { return t.section === g; });
+      });
+      var loose = mine.filter(function (t) { return named.indexOf(t.section) < 0; });
+
+      function listOf(rows) {
+        return '<ul class="tracklist" data-r>' +
+          rows.map(function (t) { return trackRow(t, false); }).join("") + "</ul>";
+      }
+      var html = named.map(function (g) {
+        return '<section class="chgroup" data-r><h2 class="chgroup__name">' + clean(g) + "</h2>" +
+          listOf(mine.filter(function (t) { return t.section === g; })) + "</section>";
+      }).join("");
+      if (loose.length) html += listOf(loose);
+
+      box.innerHTML = html;
+      drawn++;
     });
-    var loose = mine.filter(function (t) { return named.indexOf(t.section) < 0; });
-
-    function listOf(rows) {
-      return '<ul class="tracklist" data-r>' +
-        rows.map(function (t) { return trackRow(t, false); }).join("") + "</ul>";
-    }
-    var html = named.map(function (g) {
-      return '<section class="chgroup" data-r><h2 class="chgroup__name">' + clean(g) + "</h2>" +
-        listOf(mine.filter(function (t) { return t.section === g; })) + "</section>";
-    }).join("");
-    if (loose.length) html += listOf(loose);
-
-    box.innerHTML = html;
-    return 1;
+    return drawn;
   }
 
   function renderTracks(rows, groups) {
@@ -193,11 +206,7 @@
       touched++;
     });
 
-    var spoken = bySort(rows.filter(function (r) { return r.voice === "spoken"; }));
-    if (spoken.length) {
-      spoken.forEach(function (t, i) { t._n = i + 1; });
-      touched += renderChapters(spoken, groups || []);
-    }
+    touched += renderChapters(rows, groups || {});
     return touched;
   }
 
@@ -270,11 +279,16 @@
     .then(function (res) {
       var touched = 0;
       if (res[0] && res[0].length) applySettings(res[0]);
-      /* the order she has put her chapter groups in */
-      var groups = [];
+      /* the order she has put each set of groups in, kept apart by list */
+      var groups = { spoken: [], chapter: [] };
       (res[0] || []).forEach(function (s) {
-        if (s.key !== "spoken_groups") return;
-        try { groups = JSON.parse(s.value) || []; } catch (e) { groups = []; }
+        var to = s.key === "spoken_groups" ? "spoken"
+               : s.key === "chapter_groups" ? "chapter" : "";
+        if (!to) return;
+        try {
+          var a = JSON.parse(s.value);
+          if (Array.isArray(a)) groups[to] = a;
+        } catch (e) { /* a group list that will not parse is simply no groups */ }
       });
       if (res[1] && res[1].length) touched += renderWorks(res[1]);
       if (res[2] && res[2].length) touched += renderPieces(res[2]);
