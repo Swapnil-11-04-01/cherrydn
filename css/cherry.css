@@ -2547,7 +2547,9 @@ body[data-persona] .mist--merge { opacity: 0.55; }
   z-index: 90;
   display: grid;
   grid-template-columns: auto 1fr auto;
-  align-items: center;
+  /* stretch, not centre: the stage needs a definite height of its own so
+     the picture can be told to give way to her words */
+  align-items: stretch;
   gap: 1rem;
   padding: clamp(1rem, 4vw, 3rem);
   background: rgba(8, 13, 14, 0.93);
@@ -2562,18 +2564,33 @@ body[data-persona] .mist--merge { opacity: 0.55; }
   align-items: center; justify-content: center;
   gap: 1.4rem;
   min-width: 0;
+  min-height: 0;
+  max-height: 100%;
   transform: scale(0.985);
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .lbox.is-open .lbox__stage { transform: scale(1); }
+/* What she writes about a picture is never cut off. The picture used to
+   hold 72svh whatever the note said, so a long one ran off the bottom of a
+   fixed overlay with no way to reach it. The picture yields instead: it
+   takes what it can up to 72svh and gives the rest back to her words. */
 .lbox__img {
+  flex: 0 1 auto;
+  min-height: 0;
   max-width: 100%;
   max-height: 72svh;
   object-fit: contain;
   border: 1px solid rgba(231, 222, 212, 0.14);
   box-shadow: 0 40px 90px rgba(0, 0, 0, 0.6);
 }
-.lbox__meta { max-width: 58ch; text-align: center; }
+.lbox__meta {
+  flex: none;                 /* her words are never the thing that shrinks */
+  max-width: 58ch;
+  text-align: center;
+  max-height: 62svh;
+  overflow-y: auto;           /* only reachable if a note runs truly long */
+  overscroll-behavior: contain;
+}
 .lbox__title {
   font-family: var(--display);
   font-size: 1.4rem;
