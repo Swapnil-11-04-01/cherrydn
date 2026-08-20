@@ -14,7 +14,7 @@
   --red-display: #B03846;    /* display-size red — clears 3:1 on the dark ground */
   --ink: #E7DED4;
   --muted: #B9AEA3;
-  --line: rgba(185, 174, 163, 0.16);
+  --line: color-mix(in srgb, var(--muted) 16%, transparent);
   --display: "Bodoni Moda", "Didot", serif;
   --ui: "Inter", "Helvetica Neue", sans-serif;
   --poetic: "Cormorant Garamond", Georgia, serif;
@@ -151,9 +151,9 @@ body::after {
   overflow: hidden;
   /* parchment fallback until assets/hero.jpg arrives */
   background:
-    radial-gradient(ellipse at 30% 20%, rgba(142, 31, 45, 0.35), transparent 40%),
+    radial-gradient(ellipse at 30% 20%, color-mix(in srgb, var(--red) 35%, transparent), transparent 40%),
     radial-gradient(ellipse at 72% 14%, rgba(90, 16, 26, 0.5), transparent 34%),
-    radial-gradient(ellipse at 55% 45%, rgba(142, 31, 45, 0.22), transparent 45%),
+    radial-gradient(ellipse at 55% 45%, color-mix(in srgb, var(--red) 22%, transparent), transparent 45%),
     linear-gradient(180deg, #cfc2ad 0%, #b3a48c 55%, #8a7c66 78%, #6f6350 100%);
 }
 .hero__img {
@@ -164,7 +164,7 @@ body::after {
 .hero__veil {
   position: absolute; inset: 0;
   background:
-    linear-gradient(180deg, rgba(12, 23, 24, 0.42), transparent 30%, transparent 55%, var(--bg) 98%);
+    linear-gradient(180deg, color-mix(in srgb, var(--bg) 42%, transparent), transparent 30%, transparent 55%, var(--bg) 98%);
 }
 .hero__body { position: relative; z-index: 1; padding: 6rem 1.5rem 7rem; }
 .hero__title {
@@ -173,7 +173,7 @@ body::after {
   font-size: clamp(2.8rem, 9vw, 6.5rem);
   letter-spacing: 0.16em;
   color: #F2EAD9;
-  text-shadow: 0 2px 30px rgba(12, 23, 24, 0.5);
+  text-shadow: 0 2px 30px color-mix(in srgb, var(--bg) 50%, transparent);
 }
 .hero__roles {
   margin-top: 1rem;
@@ -182,7 +182,7 @@ body::after {
   letter-spacing: 0.6em;
   text-transform: uppercase;
   color: #EFE6D4;
-  text-shadow: 0 1px 14px rgba(12, 23, 24, 0.6);
+  text-shadow: 0 1px 14px color-mix(in srgb, var(--bg) 60%, transparent);
 }
 .hero__roles i { font-style: normal; color: var(--red-t); }
 .hero__welcome {
@@ -193,7 +193,7 @@ body::after {
   font-size: clamp(1.05rem, 2.4vw, 1.3rem);
   letter-spacing: 0.14em;
   color: #EFE7D6;
-  text-shadow: 0 1px 14px rgba(12, 23, 24, 0.65);
+  text-shadow: 0 1px 14px color-mix(in srgb, var(--bg) 65%, transparent);
 }
 .hero__row { margin-top: 2.6rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
 
@@ -207,11 +207,11 @@ body::after {
   text-transform: uppercase;
   color: #F2EAD9;
   border: 1px solid rgba(242, 234, 217, 0.55);
-  background: rgba(12, 23, 24, 0.35);
+  background: color-mix(in srgb, var(--bg) 35%, transparent);
   backdrop-filter: blur(3px);
   transition: background 0.3s, border-color 0.3s;
 }
-.btn-line:hover { background: rgba(12, 23, 24, 0.6); }
+.btn-line:hover { background: color-mix(in srgb, var(--bg) 60%, transparent); }
 .btn-line--red { border-color: var(--red); }
 .btn-line--red:hover { background: var(--red); }
 
@@ -241,13 +241,13 @@ body::after {
 .portal:hover img { transform: scale(1.04); filter: saturate(1) brightness(1); }
 .portal__fallback { position: absolute; inset: 0; }
 .portal--word .portal__fallback {
-  background: radial-gradient(ellipse at 30% 70%, rgba(142, 31, 45, 0.3), transparent 55%), linear-gradient(165deg, #131d1e, #0a1213);
+  background: radial-gradient(ellipse at 30% 70%, color-mix(in srgb, var(--red) 30%, transparent), transparent 55%), linear-gradient(165deg, #131d1e, #0a1213);
 }
 .portal--music .portal__fallback {
   background: radial-gradient(ellipse at 60% 30%, rgba(46, 90, 96, 0.4), transparent 55%), linear-gradient(165deg, #0e1c1e, #091112);
 }
 .portal--visuals .portal__fallback {
-  background: radial-gradient(ellipse at 75% 75%, rgba(142, 31, 45, 0.4), transparent 50%), linear-gradient(165deg, #171719, #0b0e0f);
+  background: radial-gradient(ellipse at 75% 75%, color-mix(in srgb, var(--red) 40%, transparent), transparent 50%), linear-gradient(165deg, #171719, #0b0e0f);
 }
 .portal__veil {
   position: absolute; inset: 0;
@@ -453,7 +453,7 @@ body::after {
   aspect-ratio: 4 / 3;
   border: 1px solid var(--line);
   overflow: hidden;
-  background: radial-gradient(ellipse at 40% 60%, rgba(142, 31, 45, 0.45), transparent 60%), linear-gradient(160deg, #16090c, #0b0708);
+  background: radial-gradient(ellipse at 40% 60%, color-mix(in srgb, var(--red) 45%, transparent), transparent 60%), linear-gradient(160deg, #16090c, #0b0708);
 }
 .melodies__art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .melodies__title {
@@ -489,7 +489,7 @@ body::after {
   aspect-ratio: 4 / 3;
   border: 1px solid var(--line);
   overflow: hidden;
-  background: radial-gradient(ellipse at 45% 55%, rgba(142, 31, 45, 0.4), transparent 60%), linear-gradient(160deg, #141013, #0b090b);
+  background: radial-gradient(ellipse at 45% 55%, color-mix(in srgb, var(--red) 40%, transparent), transparent 60%), linear-gradient(160deg, #141013, #0b090b);
 }
 .wl__thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .wl__title {
@@ -588,11 +588,11 @@ body::after {
   transition: opacity 0.5s;
 }
 .vitem:hover .vitem__cap, .vitem.is-empty .vitem__cap { opacity: 1; }
-.vg1 { background: radial-gradient(ellipse at 30% 30%, rgba(142, 31, 45, 0.5), transparent 60%), linear-gradient(160deg, #171114, #0b090b); }
+.vg1 { background: radial-gradient(ellipse at 30% 30%, color-mix(in srgb, var(--red) 50%, transparent), transparent 60%), linear-gradient(160deg, #171114, #0b090b); }
 .vg2 { background: radial-gradient(ellipse at 70% 60%, rgba(46, 90, 96, 0.45), transparent 60%), linear-gradient(160deg, #0e191b, #091112); }
-.vg3 { background: radial-gradient(ellipse at 50% 80%, rgba(142, 31, 45, 0.35), transparent 55%), linear-gradient(160deg, #141618, #0a0d0e); }
-.vg4 { background: radial-gradient(ellipse at 25% 70%, rgba(185, 174, 163, 0.18), transparent 55%), linear-gradient(160deg, #131315, #0a0b0c); }
-.vg5 { background: radial-gradient(ellipse at 65% 25%, rgba(142, 31, 45, 0.42), transparent 50%), linear-gradient(160deg, #120e12, #0a080a); }
+.vg3 { background: radial-gradient(ellipse at 50% 80%, color-mix(in srgb, var(--red) 35%, transparent), transparent 55%), linear-gradient(160deg, #141618, #0a0d0e); }
+.vg4 { background: radial-gradient(ellipse at 25% 70%, color-mix(in srgb, var(--muted) 18%, transparent), transparent 55%), linear-gradient(160deg, #131315, #0a0b0c); }
+.vg5 { background: radial-gradient(ellipse at 65% 25%, color-mix(in srgb, var(--red) 42%, transparent), transparent 50%), linear-gradient(160deg, #120e12, #0a080a); }
 
 /* ============================================================
    FILM
@@ -605,14 +605,14 @@ body::after {
   margin-bottom: 1.6rem;
   display: flex; align-items: center; justify-content: center;
   background:
-    radial-gradient(ellipse at 50% 70%, rgba(142, 31, 45, 0.4), transparent 55%),
+    radial-gradient(ellipse at 50% 70%, color-mix(in srgb, var(--red) 40%, transparent), transparent 55%),
     linear-gradient(170deg, #101a1c, #0a1112);
 }
 .filmbox img, .filmbox video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .filmbox__play {
   position: relative; z-index: 1;
   width: 68px; height: 68px;
-  border: 1px solid rgba(231, 222, 212, 0.6);
+  border: 1px solid color-mix(in srgb, var(--ink) 60%, transparent);
   border-radius: 50%;
   backdrop-filter: blur(4px);
 }
@@ -661,7 +661,7 @@ body::after {
   overflow: hidden;
   background:
     radial-gradient(ellipse at 60% 30%, rgba(203, 178, 140, 0.25), transparent 60%),
-    radial-gradient(ellipse at 30% 80%, rgba(142, 31, 45, 0.3), transparent 55%),
+    radial-gradient(ellipse at 30% 80%, color-mix(in srgb, var(--red) 30%, transparent), transparent 55%),
     linear-gradient(165deg, #1a1512, #0d0b0a);
 }
 .about-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
@@ -1033,7 +1033,7 @@ html.js .page__head[data-r] { opacity: 1; transform: none; transition: none; }
 .btn-line::before {
   content: "";
   position: absolute; inset: 0;
-  background: rgba(142, 31, 45, 0.9);
+  background: color-mix(in srgb, var(--red) 90%, transparent);
   transform: translateY(101%);
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: -1;
@@ -1053,8 +1053,8 @@ html.js .page__head[data-r] { opacity: 1; transform: none; transition: none; }
 
 .player__btn.is-playing { border-color: var(--red); animation: pulse-red 2.2s ease-in-out infinite; }
 @keyframes pulse-red {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(142, 31, 45, 0.35); }
-  50%      { box-shadow: 0 0 0 9px rgba(142, 31, 45, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--red) 35%, transparent); }
+  50%      { box-shadow: 0 0 0 9px transparent; }
 }
 @media (prefers-reduced-motion: reduce) { .player__btn.is-playing { animation: none; } }
 
@@ -1068,7 +1068,7 @@ html.js .page__head[data-r] { opacity: 1; transform: none; transition: none; }
   transform: scale(1);
   pointer-events: none;
 }
-.vitem:hover::after { border-color: rgba(142, 31, 45, 0.55); transform: scale(0.955); }
+.vitem:hover::after { border-color: color-mix(in srgb, var(--red) 55%, transparent); transform: scale(0.955); }
 
 .wl__thumb img { transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1); }
 .wl:hover .wl__thumb img { transform: scale(1.05); }
@@ -1100,7 +1100,7 @@ html.js .page__head[data-r] { opacity: 1; transform: none; transition: none; }
 }
 .filmbox.show-note .filmbox__note { opacity: 1; transform: none; }
 .filmbox { cursor: pointer; }
-.filmbox:hover .filmbox__play { border-color: var(--red); box-shadow: 0 0 30px rgba(142, 31, 45, 0.35); }
+.filmbox:hover .filmbox__play { border-color: var(--red); box-shadow: 0 0 30px color-mix(in srgb, var(--red) 35%, transparent); }
 .filmbox__play { transition: border-color 0.4s, box-shadow 0.4s, transform 0.4s; }
 .filmbox:hover .filmbox__play { transform: scale(1.06); }
 
@@ -1320,7 +1320,7 @@ html.js .page__head[data-r] { opacity: 1; transform: none; transition: none; }
 body[data-persona] .duality__half { transition: opacity 1.2s, filter 1.2s, border-color 1.2s, background 1.2s; }
 body[data-persona="cherry"] .duality__half--dn,
 body[data-persona="dn"] .duality__half--cherry { opacity: 0.5; filter: saturate(0.55); }
-body[data-persona="cherry"] .player { border-color: rgba(142, 31, 45, 0.55); }
+body[data-persona="cherry"] .player { border-color: color-mix(in srgb, var(--red) 55%, transparent); }
 body[data-persona="cherry"] .player__btn { border-color: var(--red); }
 body[data-persona="dn"] .player { border-color: rgba(94, 116, 118, 0.65); }
 body[data-persona="dn"] .player__btn { border-color: #5E7476; }
@@ -1359,7 +1359,7 @@ body[data-persona="dn"] .player__btn.is-playing { animation: pulse-steel 2.2s ea
   left: 50%; top: 0; bottom: 0;
   width: 1px;
   background: linear-gradient(to bottom,
-    var(--line), rgba(142, 31, 45, 0.5) 38%, var(--line) 75%, transparent);
+    var(--line), color-mix(in srgb, var(--red) 50%, transparent) 38%, var(--line) 75%, transparent);
   transform: translateX(-0.5px);
 }
 .dstage__half {
@@ -1372,7 +1372,7 @@ body[data-persona="dn"] .player__btn.is-playing { animation: pulse-steel 2.2s ea
   justify-content: flex-end;
   text-align: right;
   background:
-    radial-gradient(ellipse at 82% 10%, rgba(142, 31, 45, 0.17), transparent 52%),
+    radial-gradient(ellipse at 82% 10%, color-mix(in srgb, var(--red) 17%, transparent), transparent 52%),
     radial-gradient(ellipse at 15% 88%, rgba(203, 178, 140, 0.06), transparent 50%),
     linear-gradient(115deg, #150d10 0%, #0e1315 85%);
 }
@@ -1448,12 +1448,12 @@ body[data-persona="dn"] .player__btn.is-playing { animation: pulse-steel 2.2s ea
   cursor: pointer;
   transition: color 0.3s, background 0.3s;
 }
-.dlist .trk:hover { color: var(--ink); background: rgba(231, 222, 212, 0.02); padding-left: 0.2rem; }
+.dlist .trk:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 2%, transparent); padding-left: 0.2rem; }
 .dlist .trk__name { flex: 1; }
 .dlist--cherry .trk__name { text-align: right; }
 .dlist--cherry .trk__no { color: var(--red-t); }
 .dlist--dn .trk__no { color: #7E9496; }
-.dlist--cherry .trk.is-current { box-shadow: inset -2px 0 0 var(--red); background: rgba(142, 31, 45, 0.06); }
+.dlist--cherry .trk.is-current { box-shadow: inset -2px 0 0 var(--red); background: color-mix(in srgb, var(--red) 6%, transparent); }
 .dlist--dn .trk.is-current { box-shadow: inset 2px 0 0 #5E7476; background: rgba(94, 116, 118, 0.07); }
 .dlist .trk.is-ghost { opacity: 0.55; cursor: default; }
 .dlist .trk.is-ghost:hover { color: var(--muted); background: transparent; }
@@ -1567,7 +1567,7 @@ body[data-persona="dn"] .dstage__half--cherry {
 .dstage--hero .dstage__inner { margin: auto 0; }
 .dstage--hero .dstage__half--cherry {
   background:
-    radial-gradient(ellipse at 70% 8%, rgba(142, 31, 45, 0.14), transparent 55%),
+    radial-gradient(ellipse at 70% 8%, color-mix(in srgb, var(--red) 14%, transparent), transparent 55%),
     linear-gradient(115deg, #150d10 0%, #0d1214 100%);
 }
 .dstage--hero .dstage__half--dn {
@@ -1636,7 +1636,7 @@ body[data-persona="dn"] .dstage__half--cherry {
 .mist--cherry { left: -4%; }
 .mist--cherry::before {
   background:
-    radial-gradient(46% 38% at 70% 32%, rgba(142, 31, 45, 0.34), transparent 72%),
+    radial-gradient(46% 38% at 70% 32%, color-mix(in srgb, var(--red) 34%, transparent), transparent 72%),
     radial-gradient(38% 30% at 58% 72%, rgba(203, 178, 140, 0.1), transparent 70%);
 }
 .mist--dn { right: -4%; }
@@ -1708,7 +1708,7 @@ body[data-persona="dn"] .mist--cherry {
   background: none;
   font-size: 2.7rem;
   top: 47%;
-  text-shadow: 0 0 26px rgba(12, 23, 24, 0.9);
+  text-shadow: 0 0 26px color-mix(in srgb, var(--bg) 90%, transparent);
 }
 
 /* entrance */
@@ -1757,7 +1757,7 @@ body[data-persona="dn"] .mist--cherry {
 }
 .mist--merge::before {
   background:
-    radial-gradient(40% 32% at 36% 28%, rgba(142, 31, 45, 0.2), transparent 70%),
+    radial-gradient(40% 32% at 36% 28%, color-mix(in srgb, var(--red) 20%, transparent), transparent 70%),
     radial-gradient(44% 36% at 64% 66%, rgba(74, 118, 124, 0.24), transparent 70%),
     radial-gradient(30% 24% at 50% 46%, rgba(150, 110, 105, 0.1), transparent 68%);
   filter: blur(84px);
@@ -1786,7 +1786,7 @@ body[data-persona] .mist--merge {
 .mist { width: 60%; opacity: 0.85; }
 .mist--cherry::before {
   background:
-    radial-gradient(72% 62% at 28% 46%, rgba(142, 31, 45, 0.52), rgba(130, 28, 42, 0.26) 56%, transparent 80%),
+    radial-gradient(72% 62% at 28% 46%, color-mix(in srgb, var(--red) 52%, transparent), rgba(130, 28, 42, 0.26) 56%, transparent 80%),
     radial-gradient(48% 40% at 60% 74%, rgba(118, 24, 36, 0.34), transparent 72%);
   filter: blur(54px);
   transition: background 1.6s ease, filter 1.6s ease;
@@ -1812,7 +1812,7 @@ body[data-persona] .mist--merge {
   right: -22%;
   background:
     radial-gradient(30% 15% at 66% 24%, rgba(148, 34, 48, 0.44), transparent 70%),
-    radial-gradient(34% 13% at 76% 52%, rgba(142, 31, 45, 0.38), transparent 70%),
+    radial-gradient(34% 13% at 76% 52%, color-mix(in srgb, var(--red) 38%, transparent), transparent 70%),
     radial-gradient(26% 12% at 62% 79%, rgba(126, 28, 40, 0.32), transparent 70%);
 }
 .mist--dn::after {
@@ -1901,7 +1901,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
 .dstage[data-attend="cherry"] .dstage__half--cherry .dstage__name--cherry {
   letter-spacing: 0.19em;
   margin-right: -0.19em;
-  text-shadow: 0 0 42px rgba(176, 56, 70, 0.5), 0 0 14px rgba(176, 56, 70, 0.28);
+  text-shadow: 0 0 42px color-mix(in srgb, var(--red-display) 50%, transparent), 0 0 14px color-mix(in srgb, var(--red-display) 28%, transparent);
 }
 .dstage[data-attend="dn"] .dstage__half--dn .dstage__name--dn {
   letter-spacing: 0.38em;
@@ -2019,7 +2019,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
   /* eased S-curve: the rivers keep their color, then commit to dark quickly.
      z-index 0 — the veil dissolves the water, never the words: it paints
      after the mist in tree order but under the halves' text (z-index 1). */
-  background: linear-gradient(to bottom, transparent, rgba(12, 23, 24, 0.10) 24%, rgba(12, 23, 24, 0.32) 46%, rgba(12, 23, 24, 0.62) 64%, rgba(12, 23, 24, 0.88) 78%, var(--bg) 90%);
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--bg) 10%, transparent) 24%, color-mix(in srgb, var(--bg) 32%, transparent) 46%, color-mix(in srgb, var(--bg) 62%, transparent) 64%, color-mix(in srgb, var(--bg) 88%, transparent) 78%, var(--bg) 90%);
   z-index: 0;
   pointer-events: none;
 }
@@ -2125,7 +2125,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
 }
 .landing .portal {
   aspect-ratio: 6 / 5;
-  border: 1px solid rgba(231, 222, 212, 0.14);
+  border: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
 }
 .landing .portal img { filter: saturate(0.72) brightness(0.5) contrast(1.08); }
 .landing .portal:hover img { filter: saturate(0.9) brightness(0.66) contrast(1.08); }
@@ -2158,7 +2158,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
   position: absolute;
   left: 0; right: 0; bottom: 0;
   height: 22svh;
-  background: linear-gradient(to bottom, transparent, rgba(12, 23, 24, 0.12) 26%, rgba(12, 23, 24, 0.34) 48%, rgba(12, 23, 24, 0.64) 66%, rgba(12, 23, 24, 0.88) 80%, var(--bg) 92%);
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--bg) 12%, transparent) 26%, color-mix(in srgb, var(--bg) 34%, transparent) 48%, color-mix(in srgb, var(--bg) 64%, transparent) 66%, color-mix(in srgb, var(--bg) 88%, transparent) 80%, var(--bg) 92%);
   /* the veil dissolves the weather, never the words: it must sit under
      .astage__body, which is z-index 1 */
   z-index: 0;
@@ -2200,7 +2200,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
 /* --- 02 · written word: her lines surface and sink like memory --- */
 .astage--words {
   background:
-    radial-gradient(46% 38% at 22% 30%, rgba(142, 31, 45, 0.15), transparent 70%),
+    radial-gradient(46% 38% at 22% 30%, color-mix(in srgb, var(--red) 15%, transparent), transparent 70%),
     radial-gradient(42% 36% at 78% 66%, rgba(86, 122, 128, 0.13), transparent 70%),
     radial-gradient(ellipse 90% 50% at 50% 0%, #10161a 0%, transparent 65%),
     linear-gradient(180deg, #0e1315 0%, #0c1214 68%, var(--bg) 94%);
@@ -2242,7 +2242,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
   width: 9px; height: 9px;
   border-radius: 50%;
   background: var(--red-display);
-  box-shadow: 0 0 42px 14px rgba(142, 31, 45, 0.5);
+  box-shadow: 0 0 42px 14px color-mix(in srgb, var(--red) 50%, transparent);
 }
 /* the voice rises from beneath the words, not through them */
 .astage--voice .astage__rings { inset: 18% 0 -18% 0; }
@@ -2250,7 +2250,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
   position: absolute;
   width: 26vmin; height: 26vmin;
   border-radius: 50%;
-  border: 1px solid rgba(192, 82, 99, 0.32);
+  border: 1px solid color-mix(in srgb, var(--red-t) 32%, transparent);
   transform: scale(0.7);
   opacity: 0.16;
 }
@@ -2285,8 +2285,8 @@ body[data-persona] .mist--merge { opacity: 0.55; }
   content: "";
   position: absolute; inset: 0;
   background:
-    linear-gradient(180deg, rgba(12, 23, 24, 0.66), transparent 32%),
-    radial-gradient(ellipse 74% 62% at 50% 46%, rgba(12, 23, 24, 0.22), rgba(12, 23, 24, 0.78) 96%);
+    linear-gradient(180deg, color-mix(in srgb, var(--bg) 66%, transparent), transparent 32%),
+    radial-gradient(ellipse 74% 62% at 50% 46%, color-mix(in srgb, var(--bg) 22%, transparent), color-mix(in srgb, var(--bg) 78%, transparent) 96%);
 }
 .astage__proj img:first-child { opacity: 0.85; }
 @media (prefers-reduced-motion: no-preference) {
@@ -2310,7 +2310,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
   width: 120vmin; height: 76%;
   transform: translateX(-50%);
   clip-path: polygon(46.5% 0, 53.5% 0, 97% 100%, 3% 100%);
-  background: linear-gradient(180deg, rgba(231, 222, 212, 0.11), rgba(231, 222, 212, 0.04) 55%, transparent 92%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--ink) 11%, transparent), color-mix(in srgb, var(--ink) 4%, transparent) 55%, transparent 92%);
   filter: blur(7px);
   z-index: 0;
   pointer-events: none;
@@ -2324,7 +2324,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
   aspect-ratio: 2.39 / 1;
   border: 1px solid var(--line);
   background:
-    radial-gradient(ellipse 80% 95% at 50% 46%, rgba(231, 222, 212, 0.085), rgba(12, 23, 24, 0.35) 80%),
+    radial-gradient(ellipse 80% 95% at 50% 46%, color-mix(in srgb, var(--ink) 8.5%, transparent), color-mix(in srgb, var(--bg) 35%, transparent) 80%),
     linear-gradient(160deg, #101718, #0b0f10);
   box-shadow: 0 34px 90px rgba(0, 0, 0, 0.55);
   display: grid;
@@ -2346,7 +2346,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
   content: "";
   position: absolute; inset: 0;
   background:
-    linear-gradient(180deg, rgba(12, 23, 24, 0.78), rgba(12, 23, 24, 0.3) 22%, transparent 40%),
+    linear-gradient(180deg, color-mix(in srgb, var(--bg) 78%, transparent), color-mix(in srgb, var(--bg) 30%, transparent) 22%, transparent 40%),
     radial-gradient(ellipse 82% 72% at 50% 40%, transparent 30%, rgba(10, 16, 17, 0.82) 100%);
 }
 @media (prefers-reduced-motion: no-preference) {
@@ -2365,7 +2365,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
   width: 46vmin; height: 46vmin;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(142, 31, 45, 0.32), rgba(142, 31, 45, 0.08) 46%, transparent 70%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--red) 32%, transparent), color-mix(in srgb, var(--red) 8%, transparent) 46%, transparent 70%);
   filter: blur(22px);
   z-index: 0;
   pointer-events: none;
@@ -2383,7 +2383,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
 }
 
 /* panel-confirmed guards: type must survive any ground */
-.dstage__crown { text-shadow: 0 1px 12px rgba(12, 23, 24, 0.75), 0 0 30px rgba(12, 23, 24, 0.5); }
+.dstage__crown { text-shadow: 0 1px 12px color-mix(in srgb, var(--bg) 75%, transparent), 0 0 30px color-mix(in srgb, var(--bg) 50%, transparent); }
 .astage--her .astage__display, .astage--her .astage__sub,
 .astage--gaze .astage__display, .astage--gaze .astage__sub {
   text-shadow: 0 2px 30px rgba(10, 16, 17, 0.95), 0 1px 6px rgba(10, 16, 17, 0.65);
@@ -2420,7 +2420,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
   width: 58vmin; height: 58vmin;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(142, 31, 45, 0.26), rgba(142, 31, 45, 0.06) 48%, transparent 72%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--red) 26%, transparent), color-mix(in srgb, var(--red) 6%, transparent) 48%, transparent 72%);
   filter: blur(30px);
   z-index: 0;
   pointer-events: none;
@@ -2433,9 +2433,9 @@ body[data-persona] .mist--merge { opacity: 0.55; }
   width: min(268px, 56vw);
   aspect-ratio: 2 / 3;
   margin: 0 auto 2.6rem;
-  border: 1px solid rgba(231, 222, 212, 0.18);
+  border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent);
   background:
-    radial-gradient(ellipse 90% 60% at 50% 18%, rgba(142, 31, 45, 0.3), transparent 62%),
+    radial-gradient(ellipse 90% 60% at 50% 18%, color-mix(in srgb, var(--red) 30%, transparent), transparent 62%),
     linear-gradient(155deg, #17090d 0%, #0e1315 72%);
   box-shadow: 0 42px 90px rgba(0, 0, 0, 0.62);
   display: grid; place-items: center;
@@ -2580,7 +2580,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
   max-width: 100%;
   max-height: 72svh;
   object-fit: contain;
-  border: 1px solid rgba(231, 222, 212, 0.14);
+  border: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
   box-shadow: 0 40px 90px rgba(0, 0, 0, 0.6);
 }
 .lbox__meta {
@@ -2767,7 +2767,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
   width: 2px;
   z-index: 45;
   pointer-events: none;
-  background: linear-gradient(to bottom, rgba(185, 174, 163, 0.1), rgba(185, 174, 163, 0.02));
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--muted) 10%, transparent), color-mix(in srgb, var(--muted) 2%, transparent));
 }
 .gauge__fill {
   position: absolute;
@@ -2852,7 +2852,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
     aspect-ratio: 2.39 / 1;
     border: 1px solid var(--line);
     background:
-      radial-gradient(ellipse 80% 95% at 50% 46%, rgba(231, 222, 212, 0.085), rgba(12, 23, 24, 0.35) 80%),
+      radial-gradient(ellipse 80% 95% at 50% 46%, color-mix(in srgb, var(--ink) 8.5%, transparent), color-mix(in srgb, var(--bg) 35%, transparent) 80%),
       linear-gradient(160deg, #101718, #0b0f10);
     box-shadow: 0 34px 90px rgba(0, 0, 0, 0.55);
     display: grid;
@@ -2935,7 +2935,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
     padding: calc(var(--nav-h, 5.4rem) + 1rem) 0 1.4rem;
     margin-bottom: 0.6rem;
     background: linear-gradient(to bottom,
-      var(--bg) 0 78%, rgba(12, 23, 24, 0.96) 90%, rgba(12, 23, 24, 0.75) 96%, transparent);
+      var(--bg) 0 78%, color-mix(in srgb, var(--bg) 96%, transparent) 90%, color-mix(in srgb, var(--bg) 75%, transparent) 96%, transparent);
     animation: plate-settle linear both;
     animation-timeline: view();
     animation-range: entry 60% contain 12%;
@@ -3090,7 +3090,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
   border: 1px solid var(--line);
   overflow: hidden;
   background:
-    radial-gradient(ellipse at 50% 70%, rgba(142, 31, 45, 0.34), transparent 58%),
+    radial-gradient(ellipse at 50% 70%, color-mix(in srgb, var(--red) 34%, transparent), transparent 58%),
     linear-gradient(170deg, #101a1c, #0a1112);
 }
 .film__poster {
@@ -3114,7 +3114,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
 .film__play::before {
   content: "";
   width: clamp(62px, 9vw, 86px); height: clamp(62px, 9vw, 86px);
-  border: 1px solid rgba(231, 222, 212, 0.6);
+  border: 1px solid color-mix(in srgb, var(--ink) 60%, transparent);
   border-radius: 50%;
   background: rgba(10, 17, 18, 0.28);
   backdrop-filter: blur(4px);
@@ -3131,7 +3131,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
 .film:hover .film__play::before,
 .film__play:focus-visible::before {
   border-color: var(--red);
-  box-shadow: 0 0 34px rgba(142, 31, 45, 0.38);
+  box-shadow: 0 0 34px color-mix(in srgb, var(--red) 38%, transparent);
   transform: scale(1.06);
 }
 .film__play[disabled] { cursor: default; opacity: 0.35; }
@@ -3139,7 +3139,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
 .film__player { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #000; display: block; }
 .film__frame.is-playing .film__play,
 .film__frame.is-playing .film__poster { display: none; }
-.film__frame.is-empty .film__play::before { border-color: rgba(231, 222, 212, 0.2); }
+.film__frame.is-empty .film__play::before { border-color: color-mix(in srgb, var(--ink) 20%, transparent); }
 
 .film__title {
   font-family: var(--display);
@@ -3236,8 +3236,8 @@ body[data-persona] .mist--merge { opacity: 0.55; }
     radial-gradient(90% 78% at 96% 34%, rgba(9, 18, 19, 0.82) 0%, rgba(9, 18, 19, 0.45) 46%, transparent 78%),
     linear-gradient(to left,
       rgba(9, 18, 19, 0.94) 0%, rgba(9, 18, 19, 0.9) 18%, rgba(9, 18, 19, 0.74) 34%,
-      rgba(9, 18, 19, 0.42) 52%, rgba(12, 23, 24, 0.12) 72%, rgba(12, 23, 24, 0.44) 100%),
-    linear-gradient(to bottom, transparent 0%, transparent 52%, rgba(12, 23, 24, 0.72) 84%, var(--bg) 100%);
+      rgba(9, 18, 19, 0.42) 52%, color-mix(in srgb, var(--bg) 12%, transparent) 72%, color-mix(in srgb, var(--bg) 44%, transparent) 100%),
+    linear-gradient(to bottom, transparent 0%, transparent 52%, color-mix(in srgb, var(--bg) 72%, transparent) 84%, var(--bg) 100%);
 }
 
 body:has(.herstage) .nav.is-scrolled {
@@ -3249,7 +3249,7 @@ body:has(.herstage) .nav.is-scrolled {
 body:has(.herstage) .nav__logo,
 body:has(.herstage) .nav__links a,
 body:has(.herstage) .nav__cta {
-  text-shadow: 0 1px 3px rgba(12, 23, 24, 0.9), 0 2px 16px rgba(12, 23, 24, 0.85);
+  text-shadow: 0 1px 3px color-mix(in srgb, var(--bg) 90%, transparent), 0 2px 16px color-mix(in srgb, var(--bg) 85%, transparent);
 }
 
 .herstage__crown {
@@ -3261,7 +3261,7 @@ body:has(.herstage) .nav__cta {
    legibility rather than borrowing it from a scrim over the nav */
 .herstage__crown .crown__num,
 .herstage__crown .crown__tag {
-  text-shadow: 0 1px 3px rgba(12, 23, 24, 0.95), 0 2px 18px rgba(12, 23, 24, 0.9);
+  text-shadow: 0 1px 3px color-mix(in srgb, var(--bg) 95%, transparent), 0 2px 18px color-mix(in srgb, var(--bg) 90%, transparent);
 }
 
 .herstage__title {
@@ -3281,7 +3281,7 @@ body:has(.herstage) .nav__cta {
   letter-spacing: 0.12em;
   line-height: 1.05;
   color: var(--ink);
-  text-shadow: 0 2px 40px rgba(12, 23, 24, 0.8);
+  text-shadow: 0 2px 40px color-mix(in srgb, var(--bg) 80%, transparent);
 }
 .herstage__sub {
   margin-top: 1.1rem;
@@ -3303,7 +3303,7 @@ body:has(.herstage) .nav__cta {
   line-height: 1.72;
   color: var(--ink);
   margin-bottom: 1.05rem;
-  text-shadow: 0 1px 3px rgba(12, 23, 24, 0.95), 0 1px 22px rgba(12, 23, 24, 0.9);
+  text-shadow: 0 1px 3px color-mix(in srgb, var(--bg) 95%, transparent), 0 1px 22px color-mix(in srgb, var(--bg) 90%, transparent);
 }
 .herstage__lines .about-duality {
   font-style: italic;
@@ -3485,7 +3485,7 @@ body:has(.herstage) .nav__cta {
 .chapters .trk:last-child { border-bottom: 1px solid var(--line); }
 .chapters .trk:hover {
   color: var(--ink);
-  background: rgba(231, 222, 212, 0.02);
+  background: color-mix(in srgb, var(--ink) 2%, transparent);
   padding-left: 0.6rem;
 }
 .chapters .trk__no { color: var(--red-t); }
