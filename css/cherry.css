@@ -3207,7 +3207,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
   object-fit: cover;
   /* her face sits to the right of centre, clear of the column of words
      that rises on the left */
-  object-position: 82% 26%;
+  object-position: 26% 26%;
   filter: saturate(0.82) contrast(1.04);
 }
 .herstage__veil {
@@ -3216,7 +3216,7 @@ body[data-persona] .mist--merge { opacity: 0.55; }
      where her name lands. Nothing across the top: the nav has its own
      ground and should look here exactly as it looks everywhere else. */
   background:
-    linear-gradient(to right, rgba(12, 23, 24, 0.88) 0%, rgba(12, 23, 24, 0.62) 34%, rgba(12, 23, 24, 0.16) 66%, rgba(12, 23, 24, 0.4) 100%),
+    linear-gradient(to left, rgba(12, 23, 24, 0.88) 0%, rgba(12, 23, 24, 0.62) 34%, rgba(12, 23, 24, 0.16) 66%, rgba(12, 23, 24, 0.4) 100%),
     linear-gradient(to bottom, transparent 0%, transparent 58%, rgba(12, 23, 24, 0.86) 100%);
 }
 
@@ -3274,7 +3274,7 @@ body:has(.herstage) .nav__cta {
 .herstage__read {
   position: relative; z-index: 2;
   width: min(46ch, 82vw);
-  margin: 0 0 0 clamp(1.4rem, 7vw, 8rem);
+  margin: 0 clamp(1.4rem, 7vw, 8rem) 0 auto;
   padding-bottom: 5rem;
 }
 .herstage__lines p {
@@ -3299,6 +3299,7 @@ body:has(.herstage) .nav__cta {
 
 @media (max-width: 820px) {
   .herstage__read { width: auto; margin: 0 1.4rem; }
+  .herstage__lines { text-align: left; }
   .herstage__ground img { object-position: 50% 22%; }
 }
 
@@ -3334,15 +3335,20 @@ body:has(.herstage) .nav__cta {
     /* her name leaves the middle and settles into the bottom left corner */
     .herstage__title {
       position: absolute;
-      inset: 0;
+      inset: auto;
+      left: 50%; top: 50%;
+      width: max-content;
+      max-width: 92vw;
       min-height: 0;
+      padding: 0;
+      transform: translate(-50%, -50%);
       animation: her-name cubic-bezier(0.22, 1, 0.36, 1) both;
       animation-timeline: --her;
       animation-range: contain 4% contain 46%;
     }
     @keyframes her-name {
-      from { transform: none; opacity: 1; }
-      to   { transform: translate(-34vw, 43svh) scale(0.34); opacity: 0.9; }
+      from { transform: translate(-50%, -50%); }
+      to   { transform: translate(-46vw, calc(40svh - 100%)); }
     }
     .herstage__sub {
       animation: her-sub linear both;
@@ -3362,9 +3368,10 @@ body:has(.herstage) .nav__cta {
        and dissolve rather than being cut off by nothing. */
     .herstage__read {
       position: absolute;
-      left: 0; top: 9svh;
+      right: 0; left: auto; top: 9svh;
       height: 64svh;
-      margin-left: clamp(1.4rem, 7vw, 8rem);
+      margin-right: clamp(1.4rem, 7vw, 8rem);
+      margin-left: 0;
       padding-bottom: 0;
       overflow: hidden;
       -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 13%, #000 84%, transparent 100%);
