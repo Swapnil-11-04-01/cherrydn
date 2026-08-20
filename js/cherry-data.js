@@ -359,6 +359,15 @@
     .then(function (res) {
       var touched = 0;
       if (res[0] && res[0].length) applySettings(res[0]);
+      /* her palette, straight onto the page, and remembered so the next
+         visit is already wearing it before the first paint */
+      (res[0] || []).forEach(function (s) {
+        if (s.key !== "mood" || !window.CherryMood) return;
+        try {
+          var mood = JSON.parse(s.value || "null");
+          if (mood) { window.CherryMood.apply(mood); window.CherryMood.remember(mood); }
+        } catch (e) { /* an unreadable palette is simply the built-in one */ }
+      });
       (res[0] || []).forEach(function (s) {
         if (s.key === "gift_qr_url" && String(s.value || "").trim()) {
           codeAddress = String(s.value).trim();
