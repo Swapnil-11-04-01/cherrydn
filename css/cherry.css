@@ -3521,3 +3521,117 @@ body:has(.herstage) .nav__cta {
   margin-top: 0.5rem;
   letter-spacing: 0.01em;
 }
+
+/* ============================================================
+   THE READING DESK
+   A bar for the long recordings. It only exists on pages that
+   carry chapters, and only once something is playing.
+   ============================================================ */
+body.has-adesk { padding-bottom: 5.6rem; }
+
+.adesk {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 60;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(14px);
+  border-top: 1px solid var(--line);
+  animation: adesk-rise 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes adesk-rise { from { transform: translateY(100%); } to { transform: none; } }
+
+.adesk__in {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0.85rem 1.4rem;
+}
+.adesk__b {
+  flex: none;
+  width: 2.3rem; height: 2.3rem;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  display: grid; place-items: center;
+  position: relative;
+  font: inherit;
+  transition: border-color 0.2s, color 0.2s;
+}
+.adesk__b:hover { border-color: var(--red-t); color: var(--red-t); }
+.adesk__b span { font-size: 0.56rem; letter-spacing: 0.02em; }
+
+/* the two skips carry a curved arrow drawn in CSS, and their number inside */
+.adesk__back::before, .adesk__fwd::before {
+  content: ""; position: absolute; inset: 0.32rem;
+  border: 1px solid currentColor; border-radius: 50%;
+  border-top-color: transparent;
+  opacity: 0.55;
+}
+.adesk__fwd::before { transform: scaleX(-1); }
+
+.adesk__play { width: 2.9rem; height: 2.9rem; border-color: var(--red); }
+.adesk__play::before {
+  content: ""; width: 0; height: 0;
+  border-left: 0.62rem solid currentColor;
+  border-top: 0.4rem solid transparent;
+  border-bottom: 0.4rem solid transparent;
+  margin-left: 0.18rem;
+}
+.adesk.is-playing .adesk__play::before {
+  width: 0.62rem; height: 0.72rem; border: 0;
+  margin-left: 0;
+  background: linear-gradient(to right,
+    currentColor 0 34%, transparent 34% 66%, currentColor 66% 100%);
+}
+
+.adesk__mid { flex: 1; min-width: 0; }
+.adesk__now {
+  font-family: var(--display);
+  font-size: 0.86rem;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  margin: 0 0 0.4rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.adesk__line {
+  height: 14px;                 /* a thumb-sized target around a hairline */
+  display: flex; align-items: center;
+  cursor: pointer;
+  touch-action: none;
+}
+.adesk__line::before {
+  content: ""; position: absolute; left: 0; right: 0;
+  height: 2px; background: var(--line);
+}
+.adesk__line { position: relative; }
+.adesk__fill {
+  position: absolute; left: 0;
+  height: 2px; width: 0;
+  background: var(--red-t);
+}
+.adesk__fill::after {
+  content: ""; position: absolute; right: -4px; top: 50%;
+  width: 9px; height: 9px; margin-top: -4.5px;
+  border-radius: 50%; background: var(--red-t);
+}
+.adesk__line:focus-visible { outline: 1px solid var(--red-t); outline-offset: 4px; }
+
+.adesk__t {
+  flex: none; margin: 0;
+  font-size: 0.72rem; color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  display: flex; gap: 0.4rem;
+}
+.adesk__t span + span::before { content: "/ "; opacity: 0.5; }
+.adesk__shut { font-size: 1.1rem; line-height: 1; border-color: transparent; color: var(--muted); }
+
+@media (max-width: 720px) {
+  .adesk__in { gap: 0.55rem; padding: 0.7rem 0.9rem; flex-wrap: wrap; }
+  .adesk__mid { order: -1; flex-basis: 100%; }
+  .adesk__t { margin-left: auto; }
+  body.has-adesk { padding-bottom: 8rem; }
+}

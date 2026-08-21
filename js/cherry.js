@@ -135,8 +135,160 @@
     var m = Math.floor(s / 60), r = Math.floor(s % 60);
     return (m < 10 ? "0" + m : m) + ":" + (r < 10 ? "0" + r : r);
   }
+
+  /* ---------- the reading desk ----------
+     A chapter of an audiobook is twelve minutes long. Starting it and
+     having nowhere to pause, no idea how far in you are and no way back
+     to the sentence you missed is not a player, it is a light switch.
+
+     So where a page carries chapters, a bar comes up from the bottom the
+     moment something plays: what is playing, how far in, a line you can
+     drag, back fifteen and on thirty, and the next chapter when this one
+     ends. Where you stopped is remembered per recording, so closing the
+     tab in the middle of Water and coming back tomorrow puts you back in
+     the middle of Water rather than at the beginning.
+
+     Not built on the music page. The transport bar there was killed at
+     Cherry's word and it can stay dead; this is for the long-form pages. */
+  var desk = null, deskSeek = null, deskFill = null, deskNow = null,
+      deskAt = null, deskEnd = null, deskPlay = null, scrubbing = false;
+
+  function heardKey(src) { return "cherry.heard:" + String(src).slice(-60); }
+  function rememberWhere() {
+    if (!audio.src || !isFinite(audio.currentTime)) return;
+    try {
+      /* finished, or as good as: forget it so it starts clean next time */
+      if (audio.duration && audio.currentTime > audio.duration - 12) {
+        localStorage.removeItem(heardKey(audio.src));
+      } else if (audio.currentTime > 20) {
+        localStorage.setItem(heardKey(audio.src), String(Math.floor(audio.currentTime)));
+      }
+    } catch (e) {}
+  }
+  function whereWeWere(src) {
+    try { return parseInt(localStorage.getItem(heardKey(src)) || "0", 10) || 0; } catch (e) { return 0; }
+  }
+
+  function buildDesk() {
+    if (desk || !document.querySelector(".chapters")) return;
+    desk = document.createElement("div");
+    desk.className = "adesk";
+    desk.hidden = true;
+    desk.innerHTML =
+      '<div class="adesk__in">' +
+      '<button class="adesk__b adesk__back" type="button" aria-label="Back fifteen seconds"><span>15</span></button>' +
+      '<button class="adesk__b adesk__play" type="button" aria-label="Pause"></button>' +
+      '<button class="adesk__b adesk__fwd" type="button" aria-label="On thirty seconds"><span>30</span></button>' +
+      '<div class="adesk__mid">' +
+        '<p class="adesk__now"></p>' +
+        '<div class="adesk__line" role="slider" tabindex="0" aria-label="How far through">' +
+          '<i class="adesk__fill"></i></div>' +
+      "</div>" +
+      '<p class="adesk__t"><span class="adesk__at">00:00</span>' +
+        '<span class="adesk__end">00:00</span></p>' +
+      '<button class="adesk__b adesk__shut" type="button" aria-label="Close">&times;</button>' +
+      "</div>";
+    document.body.appendChild(desk);
+    deskSeek = desk.querySelector(".adesk__line");
+    deskFill = desk.querySelector(".adesk__fill");
+    deskNow  = desk.querySelector(".adesk__now");
+    deskAt   = desk.querySelector(".adesk__at");
+    deskEnd  = desk.querySelector(".adesk__end");
+    deskPlay = desk.querySelector(".adesk__play");
+
+    deskPlay.addEventListener("click", function () {
+      if (audio.paused) { audio.play(); } else { audio.pause(); }
+    });
+    desk.querySelector(".adesk__back").addEventListener("click", function () {
+      audio.currentTime = Math.max(0, audio.currentTime - 15);
+    });
+    desk.querySelector(".adesk__fwd").addEventListener("click", function () {
+      audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 30);
+    });
+    desk.querySelector(".adesk__shut").addEventListener("click", function () {
+      rememberWhere(); stopAll();
+    });
+
+    /* Paint from inside the drag as well. The timeupdate handler is held off
+       while she is scrubbing so the bar does not fight her thumb, and a
+       paused recording sends no timeupdate at all, so without this the line
+       would sit still under her finger and the seek would look broken when
+       it had in fact worked. */
+    function seekTo(e) {
+      var r = deskSeek.getBoundingClientRect();
+      if (!r.width || !audio.duration) return;
+      var x = ((e.touches ? e.touches[0].clientX : e.clientX) - r.left) / r.width;
+      audio.currentTime = Math.max(0, Math.min(1, x)) * audio.duration;
+      paintDesk();
+    }
+    deskSeek.addEventListener("pointerdown", function (e) {
+      scrubbing = true;
+      seekTo(e);
+      try { deskSeek.setPointerCapture(e.pointerId); } catch (err) { /* not a live pointer */ }
+    });
+    deskSeek.addEventListener("pointermove", function (e) { if (scrubbing) seekTo(e); });
+    deskSeek.addEventListener("pointerup", function () { scrubbing = false; rememberWhere(); paintDesk(); });
+    deskSeek.addEventListener("pointercancel", function () { scrubbing = false; paintDesk(); });
+    deskSeek.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowLeft") { audio.currentTime = Math.max(0, audio.currentTime - 15); e.preventDefault(); }
+      if (e.key === "ArrowRight") { audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 30); e.preventDefault(); }
+    });
+  }
+
+  function paintDesk() {
+    if (!desk) return;
+    var d = audio.duration, t = audio.currentTime;
+    deskAt.textContent = fmt(t);
+    deskEnd.textContent = isFinite(d) ? fmt(d) : "--:--";
+    deskFill.style.width = (isFinite(d) && d ? (t / d) * 100 : 0).toFixed(2) + "%";
+    deskSeek.setAttribute("aria-valuetext", fmt(t) + " of " + (isFinite(d) ? fmt(d) : "unknown"));
+    desk.classList.toggle("is-playing", !audio.paused);
+    deskPlay.setAttribute("aria-label", audio.paused ? "Play" : "Pause");
+  }
+
+  audio.addEventListener("timeupdate", function () { if (!scrubbing) paintDesk(); });
+  audio.addEventListener("seeked", paintDesk);
+  audio.addEventListener("play", paintDesk);
+  audio.addEventListener("pause", function () { paintDesk(); rememberWhere(); });
+  audio.addEventListener("loadedmetadata", function () {
+    var back = whereWeWere(audio.src);
+    if (back > 20 && audio.duration && back < audio.duration - 12) audio.currentTime = back;
+    paintDesk();
+  });
+  window.addEventListener("pagehide", rememberWhere);
+
+  /* when a chapter ends, the next one begins, the way a book does */
+  audio.addEventListener("ended", function () {
+    try { localStorage.removeItem(heardKey(audio.src)); } catch (e) {}
+    var here = currentRow;
+    stopAll();
+    if (!here) return;
+    var all = [].slice.call(document.querySelectorAll(".chapters .trk[data-src]"));
+    var i = all.indexOf(here);
+    if (i > -1 && all[i + 1] && !all[i + 1].classList.contains("is-ghost")) {
+      var go = all[i + 1].querySelector(".trk__go");
+      if (go) go.click();
+    }
+  });
+
+  function showDesk(row) {
+    buildDesk();
+    if (!desk) return;
+    desk.hidden = false;
+    document.body.classList.add("has-adesk");
+    deskNow.textContent = row.dataset.title || row.textContent.trim();
+    paintDesk();
+  }
+  function hideDesk() {
+    if (!desk) return;
+    desk.hidden = true;
+    document.body.classList.remove("has-adesk");
+  }
+
   function stopAll() {
+    rememberWhere();
     audio.pause();
+    hideDesk();
     if (currentRow) currentRow.classList.remove("is-current");
     if (playerBtn) playerBtn.classList.remove("is-playing");
     currentRow = null;
@@ -226,6 +378,7 @@
         }
         if (playerBtn) playerBtn.classList.add("is-playing");
         if (playerNow) playerNow.textContent = row.dataset.title || row.textContent.trim();
+        if (row.closest(".chapters")) showDesk(row);
       }).catch(function (err) {
         if (err && err.name === "AbortError") return;
         row.classList.add("is-ghost");
