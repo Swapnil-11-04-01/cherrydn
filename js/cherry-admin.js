@@ -944,7 +944,14 @@
         esc(qrBase()) + '" />' +
       '<em class="hint">Once a code is printed it cannot be changed, so use the address you mean to keep. ' +
       'Changing this changes every code that has not been printed yet.</em>' +
-      "</label></section>";
+      "</label>" +
+      /* Codes hang off books, so with no book named there is nothing to draw.
+         Say that plainly, rather than leaving her looking at an address and
+         no square and concluding the codes were never built. */
+      (booksList().length ? "" :
+        '<p class="qr__lead qr__none">You have not named a book yet, so there is no code to print. ' +
+        'Go down to <b>Another book</b>, type its name, and its code appears with it.</p>') +
+      "</section>";
   }
 
   /* draw every code on the shelf, each from its own book */
