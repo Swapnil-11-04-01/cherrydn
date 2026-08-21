@@ -934,6 +934,26 @@
     return "cherry-dn-qr-" + (slug || "book");
   }
 
+  /* the title the site already uses for her book, stripped of any line break
+     she put in the cover art */
+  function knownBookTitle() {
+    var t = data.settings.book_display || data.settings.book_cover_title || "";
+    t = String(t).replace(/<br\s*\/?>/gi, " ").replace(/\s+/g, " ").trim();
+    return t || "My book";
+  }
+  function firstBookHTML() {
+    var t = knownBookTitle();
+    var waiting = rowsFor("chapters").length;
+    return '<div class="firstbook">' +
+      '<p class="qr__lead">There is no code yet, because a code belongs to a book and you ' +
+      'have not named one.' + (waiting ? " Your " + waiting + " recordings are waiting for one." : "") +
+      "</p>" +
+      '<button class="add" type="button" id="firstBook">Make &ldquo;' + esc(t) +
+        '&rdquo; a book and give it a code</button>' +
+      '<p class="qr__lead qr__quiet">You can rename it whenever you like afterwards. ' +
+      'The code will still open it.</p></div>';
+  }
+
   function qrHTML() {
     return '<section class="block">' +
       '<h3 class="block__name">Where the codes point</h3>' +
@@ -945,12 +965,12 @@
       '<em class="hint">Once a code is printed it cannot be changed, so use the address you mean to keep. ' +
       'Changing this changes every code that has not been printed yet.</em>' +
       "</label>" +
-      /* Codes hang off books, so with no book named there is nothing to draw.
-         Say that plainly, rather than leaving her looking at an address and
-         no square and concluding the codes were never built. */
-      (booksList().length ? "" :
-        '<p class="qr__lead qr__none">You have not named a book yet, so there is no code to print. ' +
-        'Go down to <b>Another book</b>, type its name, and its code appears with it.</p>') +
+      /* Codes hang off books, and until she names one there is nothing to
+         draw. Telling her to go and type a title is the lazy answer: the
+         site already knows what her book is called, and the chapters are
+         already sitting there waiting to belong to it. So offer to do it,
+         in one press, and put her recordings inside it while we are at it. */
+      (booksList().length ? "" : firstBookHTML()) +
       "</section>";
   }
 
@@ -1386,6 +1406,25 @@
       try { trash = JSON.parse(data.settings.desk_trash || "[]"); } catch (err) {}
       var item = trash[+res.dataset.restore];
       if (item) putBack(item.table, item.row);
+      return;
+    }
+
+    if (e.target.closest("#firstBook")) {
+      var books = booksList();
+      var made = { id: newBookId(books), title: knownBookTitle() };
+      books.push(made);
+      saveBooks(books);
+      /* the recordings that belonged to no book now belong to this one */
+      var adopted = 0;
+      rowsFor("chapters").forEach(function (r) {
+        if (!String(r.section || "").trim()) {
+          saveRow("cherry_tracks", r.id, { section: made.id }, true);
+          adopted++;
+        }
+      });
+      paint();
+      say(adopted ? "Made, with your " + adopted + " recordings inside it. Its code is ready."
+                  : "Made. Its code is ready to print.");
       return;
     }
 
